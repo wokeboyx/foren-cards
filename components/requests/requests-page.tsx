@@ -466,7 +466,7 @@ function EmergencyRequestModal({ open, onOpenChange }: { open: boolean; onOpenCh
           </ForenButton>
           <ForenButton
             size="sm"
-            disabled={req.pending}
+            disabled={req.pending || !merchant || !((parseAmount(amount, currency)?.minor ?? 0) > 0) || !note.trim()}
             onClick={async () => {
               const e: Record<string, string> = {};
               const amt = parseAmount(amount, currency);

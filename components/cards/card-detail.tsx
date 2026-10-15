@@ -277,7 +277,7 @@ function EditLimitModal({ card, onClose }: { card: Card; onClose: () => void }) 
           </ForenButton>
           <ForenButton
             size="sm"
-            disabled={!changed || save.pending}
+            disabled={!changed || !parsed || parsed.minor <= 0 || save.pending}
             onClick={async () => {
               const max = POLICY.maxLimitMajor[cur];
               if (!parsed) return setError("Enter an amount using numbers only, like 2,500.00.");

@@ -130,7 +130,7 @@ export function TestCharge({ cardId }: { cardId: string }) {
               ))}
             </select>
           </div>
-          <ForenButton type="submit" className="sm:mt-[29px]" leadingIcon={<RiFlaskLine />}>
+          <ForenButton type="submit" className="sm:mt-[29px]" disabled={!merchant || !((parseAmount(amount, currency)?.minor ?? 0) > 0)} leadingIcon={<RiFlaskLine />}>
             Run test
           </ForenButton>
         </form>

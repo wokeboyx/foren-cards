@@ -388,7 +388,7 @@ function GoalEditor({ open, onOpenChange, initialType }: { open: boolean; onOpen
             <ForenButton variant="ghost" size="sm" onClick={() => setType(null)}>
               Change goal type
             </ForenButton>
-            <ForenButton size="sm" onClick={submit} disabled={save.pending}>
+            <ForenButton size="sm" onClick={submit} disabled={save.pending || !draft}>
               {save.pending ? "Saving…" : "Save goal"}
             </ForenButton>
           </div>

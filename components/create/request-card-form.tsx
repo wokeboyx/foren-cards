@@ -77,6 +77,14 @@ export function RequestCardForm() {
     return Object.keys(e).length === 0;
   };
 
+  // The primary action stays disabled until this step is complete.
+  const ready =
+    step === 0
+      ? nickname.trim().length > 0 && nickname.trim().length <= 40
+      : step === 2
+        ? !!amount && amount.minor > 0 && amount.minor <= POLICY.maxLimitMajor[currency] * 100
+        : true;
+
   const submit = async () => {
     if (!check(step)) return;
     if (step < STEPS.length - 1) {
@@ -114,7 +122,7 @@ export function RequestCardForm() {
 
   return (
     <div className="flex min-h-dvh flex-col lg:flex-row">
-      <div className={cn("flex min-w-0 flex-col lg:flex-1", pane === "form" && "flex-1")}>
+      <div className={cn("flex min-w-0 flex-col overflow-x-clip lg:flex-1", pane === "form" && "flex-1")}>
         <header className="flex h-16 items-center justify-between px-5 sm:px-8">
           <div className="flex items-center gap-2.5 text-[14px] font-medium text-fg">
             <Image src={asset("/foren-logo.svg")} alt="" width={22} height={22} />
@@ -200,26 +208,27 @@ export function RequestCardForm() {
             )}
           </div>
 
-          <div className="mt-auto pt-6 pb-10">
+          {/* Floating action bar (Figma "Floating button"): pinned to the bottom so the actions are always in view. */}
+          <div className="sticky bottom-0 z-20 mt-auto py-3 before:absolute before:inset-y-0 before:-right-[100vw] before:-left-[100vw] before:-z-10 before:border-t before:border-line before:bg-surface sm:min-h-[84px] sm:py-5">
             {send.error && <p role="alert" className="mb-3 rounded-[14px] bg-error-subtle px-4 py-2.5 text-[13px] text-error">We couldn’t send your request. Nothing was sent. Try again.</p>}
-            <div className="flex items-center justify-between gap-2">
-              {step > 0 ? (
-                <ForenButton type="button" variant="secondary" leadingIcon={<RiArrowLeftLine />} onClick={() => { setErrors({}); setStep(step - 1); }}>
-                  Back
-                </ForenButton>
-              ) : (
-                <Link href="/cards" className="px-3 text-[14px] font-semibold text-fg-2 hover:text-fg">
-                  Cancel
-                </Link>
-              )}
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               {step < STEPS.length - 1 ? (
-                <ForenButton type="submit" trailingIcon={<RiArrowRightLine />}>
+                <ForenButton type="submit" className="w-full sm:order-last sm:w-auto" disabled={!ready} trailingIcon={<RiArrowRightLine />}>
                   Continue
                 </ForenButton>
               ) : (
-                <ForenButton type="submit" disabled={send.pending}>
+                <ForenButton type="submit" className="w-full sm:order-last sm:w-auto" disabled={send.pending || !ready}>
                   {send.pending ? "Sending…" : send.error ? "Try again" : "Send request"}
                 </ForenButton>
+              )}
+              {step > 0 ? (
+                <ForenButton type="button" variant="secondary" className="w-full sm:w-auto" leadingIcon={<RiArrowLeftLine />} onClick={() => { setErrors({}); setStep(step - 1); }}>
+                  Back
+                </ForenButton>
+              ) : (
+                <Link href="/cards" className="px-3 py-2 text-center text-[14px] font-semibold text-fg-2 hover:text-fg">
+                  Cancel
+                </Link>
               )}
             </div>
           </div>

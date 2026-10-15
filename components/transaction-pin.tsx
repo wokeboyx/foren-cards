@@ -105,7 +105,7 @@ function PinForm({ action, onCancel, onConfirm }: { action: string; onCancel: ()
         <ForenButton type="button" variant="secondary" size="sm" onClick={onCancel} disabled={busy}>
           Cancel
         </ForenButton>
-        <ForenButton type="submit" size="sm" disabled={busy}>
+        <ForenButton type="submit" size="sm" disabled={busy || pin.length < LENGTH}>
           {busy ? "Approving…" : action}
         </ForenButton>
       </div>

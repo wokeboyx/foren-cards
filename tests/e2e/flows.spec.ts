@@ -14,9 +14,10 @@ test("create first card with safe defaults", async ({ page }) => {
   // Step 1: who it's for (validated before moving on), with one progress bar
   await expect(page.getByRole("heading", { name: "Who’s this card for?" })).toBeVisible();
   await expect(page.getByRole("progressbar", { name: "Create card progress" })).toHaveAttribute("aria-valuenow", "1");
+  // Continue stays disabled until the step is complete
+  await expect(page.getByRole("button", { name: "Continue" })).toBeDisabled();
   await page.getByRole("textbox", { name: "Nickname" }).fill("Team travel");
-  await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page.getByText("Choose who will use this card, or add someone who isn’t on Foren.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Continue" })).toBeDisabled();
   await page.getByRole("combobox", { name: "Who will use it?" }).click();
   await page.getByRole("option", { name: /Tunde Bello/ }).click();
   await expect(page.getByRole("combobox", { name: "Who will use it?" })).toContainText("Tunde Bello");

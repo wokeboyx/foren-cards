@@ -136,7 +136,7 @@ function InviteSomeone({ onAdded, onClose }: { onAdded: (p: Person) => void; onC
         <ForenButton
           type="button"
           size="xs"
-          disabled={invite.pending}
+          disabled={invite.pending || name.trim().split(/\s+/).length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())}
           onClick={async () => {
             const e: typeof err = {};
             if (name.trim().split(/\s+/).length < 2) e.name = "Enter their first and last name.";

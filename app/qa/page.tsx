@@ -21,7 +21,7 @@ const MATRIX: { area: string; states: [string, string, string?][] }[] = [
     states: [
       ["Default form", "", "/cards/new"],
       ["Steps with one progress bar", "Continue through each step", "/cards/new"],
-      ["Validation errors", "Press Continue on step 1 with nothing filled in", "/cards/new"],
+      ["Continue disabled until the step is complete", "Step 1 with nothing filled in", "/cards/new"],
       ["Company card + who can manage it", "Who’s it for? → The company", "/cards/new"],
       ["Add someone who isn’t on Foren", "Add someone who isn’t on Foren", "/cards/new"],
       ["One merchant vs many merchants", "Spend controls", "/cards/new"],
