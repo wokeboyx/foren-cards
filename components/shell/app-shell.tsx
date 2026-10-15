@@ -63,7 +63,8 @@ function Shell({ children }: { children: React.ReactNode }) {
   const role = useStore((s) => s.role);
   const now = useNow(5000);
   const [navOpen, setNavOpen] = React.useState(false);
-  const pathname = usePathname();
+  // The GitHub Pages build uses trailingSlash (/cards/new/); route checks below expect no trailing slash.
+  const pathname = usePathname().replace(/(.)\/+$/, "$1");
 
   // Temporary limit changes restore themselves when their period ends (prototype clock).
   React.useEffect(() => restoreExpiredLimits(now), [now]);
