@@ -226,7 +226,7 @@ export function RequestCardForm() {
         </form>
       </div>
 
-      <aside aria-label="Request summary" className={cn("flex-1 bg-subtle lg:sticky lg:block lg:flex-none lg:top-0 lg:h-dvh lg:w-[44%] lg:max-w-[600px] lg:border-l", pane === "preview" ? "block" : "hidden")}>
+      <aside aria-label="Request summary" className={cn("mx-5 mt-2 mb-5 flex-1 rounded-[20px] bg-subtle sm:mx-8 lg:sticky lg:top-2 lg:m-2 lg:block lg:h-[calc(100dvh-16px)] lg:w-[44%] lg:max-w-[600px] lg:flex-none lg:overflow-y-auto", pane === "preview" ? "block" : "hidden")}>
         <div className="hidden h-16 items-center justify-end px-6 lg:flex">
           <Link href="/cards" aria-label="Close" className="grid size-9 place-items-center rounded-full text-fg-2 outline-none hover:bg-surface focus-visible:ring-2 focus-visible:ring-focus">
             <RiCloseLine className="size-5" aria-hidden />
