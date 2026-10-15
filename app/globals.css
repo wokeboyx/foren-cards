@@ -1,0 +1,223 @@
+@import "tailwindcss";
+
+/* Foren Design System tokens — mirrored from foren-docs.vercel.app (@foren/ui/tokens.css). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --color-foren-text-primary: #383633;
+  --color-foren-text-secondary: #5e5c5a;
+  --color-foren-text-tertiary: #95908b;
+  --color-foren-text-disabled: #d8d6d5;
+  --color-foren-text-inverse: #f4f4f3;
+  --color-foren-bg-canvas: #f8f8f8;
+  --color-foren-bg-default: #fff;
+  --color-foren-bg-elevated: #fff;
+  --color-foren-bg-subtle: #f1f1f1;
+  --color-foren-bg-sunken: #f8f8f8;
+  --color-foren-bg-brand: #d8edff;
+  --color-foren-border-muted: #eee;
+  --color-foren-border-default: #d8d6d5;
+  --color-foren-border-strong: #b2b0ad;
+  --color-foren-border-focus: #5f6870;
+  --color-foren-border-disabled: #d3d2d0;
+  --color-foren-success: #166534;
+  --color-foren-warning: #b45309;
+  --color-foren-error: #c62828;
+  --color-foren-error-hover: #a51e1e;
+  --color-foren-info: #4f46e5;
+  --color-foren-bg-button-primary: #1e1711;
+  --color-foren-bg-button-primary-hover: #17120d;
+  --color-foren-bg-button-primary-pressed: #100c09;
+  --color-foren-bg-button-secondary: #f2f2f2;
+  --color-foren-bg-button-secondary-hover: #e3e3e3;
+  --color-foren-bg-button-secondary-active: #ededed;
+  --color-foren-bg-button-disabled: #efeeee;
+  --color-foren-disabled-strong: #b2b0ad;
+  --color-foren-brand-green: #519949;
+  --color-foren-brand-green-hover: #3f7a39;
+  --color-foren-brand-green-pressed: #33632d;
+  --color-foren-bg-success-subtle: #e6f5eb;
+  --color-foren-bg-warning-subtle: #fef3c7;
+  --color-foren-bg-error-subtle: #fee2e2;
+  --color-foren-bg-error-subtle-hover: #fbcfcf;
+  --color-foren-bg-error-subtle-pressed: #f7baba;
+  --color-foren-bg-info-subtle: #ede9fe;
+  --color-foren-bg-primary-subtle: #eaf5ff;
+  --color-foren-bg-indigo-subtle: #ede9fe;
+  --color-foren-bg-orange-subtle: #fef3c7;
+  --color-foren-indigo: #4f46e5;
+  --color-foren-orange: #b45309;
+  --color-foren-primary-dot: #5d4fc9;
+}
+
+/*
+ * Accessibility override (UX doc §4/§11 require ≥ 4.5:1 text contrast).
+ * The design system's Text/Tertiary (#95908b) is ~3.2:1 on white and fails AA for body-size text.
+ * #6e6964 is ≥ 4.57:1 on every surface the prototype uses. Raise with the design-system owners.
+ */
+:root {
+  --color-foren-text-tertiary: #6e6964;
+}
+
+.dark {
+  --color-foren-text-primary: #f0ece6;
+  --color-foren-text-secondary: #b8b3ad;
+  --color-foren-text-tertiary: #8a847e;
+  --color-foren-text-disabled: #4a4644;
+  --color-foren-text-inverse: #1e1711;
+  --color-foren-bg-canvas: #100f0d;
+  --color-foren-bg-default: #161412;
+  --color-foren-bg-elevated: #2f2b28;
+  --color-foren-bg-subtle: #221f1c;
+  --color-foren-bg-sunken: #1c1a18;
+  --color-foren-bg-brand: #1a2838;
+  --color-foren-border-muted: #2a2624;
+  --color-foren-border-default: #3a3633;
+  --color-foren-border-strong: #585350;
+  --color-foren-border-focus: #9b9695;
+  --color-foren-border-disabled: #353331;
+  --color-foren-success: #5cbf73;
+  --color-foren-warning: #d68f3e;
+  --color-foren-error: #ef5350;
+  --color-foren-error-hover: #f06a67;
+  --color-foren-info: #8b80f7;
+  --color-foren-bg-button-primary: #f0ece6;
+  --color-foren-bg-button-primary-hover: #e0dbd5;
+  --color-foren-bg-button-primary-pressed: #cfc9c1;
+  --color-foren-bg-button-secondary: #2a2624;
+  --color-foren-bg-button-secondary-hover: #3a3633;
+  --color-foren-bg-button-secondary-active: #45403d;
+  --color-foren-bg-button-disabled: #221f1c;
+  --color-foren-disabled-strong: #585350;
+  --color-foren-brand-green: #66b958;
+  --color-foren-brand-green-hover: #76c968;
+  --color-foren-brand-green-pressed: #58aa4a;
+  --color-foren-bg-success-subtle: #143020;
+  --color-foren-bg-warning-subtle: #3a2812;
+  --color-foren-bg-error-subtle: #3a1414;
+  --color-foren-bg-error-subtle-hover: #4a1818;
+  --color-foren-bg-error-subtle-pressed: #5a1c1c;
+  --color-foren-bg-info-subtle: #1f1b3a;
+  --color-foren-bg-primary-subtle: #1a2838;
+  --color-foren-bg-indigo-subtle: #1f1b3a;
+  --color-foren-bg-orange-subtle: #3a2812;
+  --color-foren-indigo: #8b80f7;
+  --color-foren-orange: #d68f3e;
+  --color-foren-primary-dot: #8b80f7;
+}
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  /* Foren radius scale */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-3xl: 32px;
+  --shadow-foren-xs: 0 1px 2px 0 #241c150d;
+  --shadow-foren-sm: 0 2px 4px -1px #241c1514;
+  --shadow-foren-md: 0 4px 8px -2px #241c151a;
+  --shadow-foren-lg: 0 8px 16px -4px #241c151f;
+  --shadow-foren-xl: 0 16px 32px -8px #241c1529;
+  /* Short aliases so app code can write text-fg, bg-canvas, border-muted… */
+  --color-fg: var(--color-foren-text-primary);
+  --color-fg-2: var(--color-foren-text-secondary);
+  --color-fg-3: var(--color-foren-text-tertiary);
+  --color-fg-disabled: var(--color-foren-text-disabled);
+  --color-canvas: var(--color-foren-bg-canvas);
+  --color-surface: var(--color-foren-bg-default);
+  --color-subtle: var(--color-foren-bg-subtle);
+  --color-sunken: var(--color-foren-bg-sunken);
+  --color-brand: var(--color-foren-bg-brand);
+  --color-line: var(--color-foren-border-muted);
+  --color-line-2: var(--color-foren-border-default);
+  --color-line-strong: var(--color-foren-border-strong);
+  --color-focus: var(--color-foren-border-focus);
+  --color-success: var(--color-foren-success);
+  --color-success-subtle: var(--color-foren-bg-success-subtle);
+  --color-warning: var(--color-foren-warning);
+  --color-warning-subtle: var(--color-foren-bg-warning-subtle);
+  --color-error: var(--color-foren-error);
+  --color-error-subtle: var(--color-foren-bg-error-subtle);
+  --color-info: var(--color-foren-info);
+  --color-info-subtle: var(--color-foren-bg-info-subtle);
+  --color-sage: var(--color-foren-brand-green);
+  --color-primary-subtle: var(--color-foren-bg-primary-subtle);
+}
+
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
+body {
+  background: var(--color-foren-bg-canvas);
+  color: var(--color-foren-text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Monetary values always use tabular figures. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes sheet-in {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Native dropdowns: one consistent chevron, inset from the right edge, with room for the text.
+   Unlayered so it applies over Tailwind's px-* utilities. */
+select:not([multiple]) {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236e6964' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px 16px;
+  padding-right: 40px !important;
+  text-overflow: ellipsis;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) select:not([multiple]) {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b2b0ad' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  }
+}
+
+/* Tables: no divider under the last row (Figma). Unlayered so it wins over row utilities. */
+tbody > tr:last-child {
+  border-bottom-width: 0;
+}
+
+/* Figma tables sit flush with their panel's 24px padding: no extra inset on the outer columns. */
+.table-flush :is(th, td):first-child:not([scope="colgroup"]) {
+  padding-left: 0;
+}
+.table-flush :is(th, td):last-child:not([scope="colgroup"]) {
+  padding-right: 0;
+}
