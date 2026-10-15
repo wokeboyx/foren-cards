@@ -86,7 +86,8 @@ and a full-screen create view whose live summary doubles as the review step.
 - **Requests and Subscriptions** use the same layout as Cards: tabs, a dense table and a right-hand detail panel (a sheet on phones).
   Request detail follows Revolut: Approve/Decline first, then status + approvals timeline, note and request details.
 - Cards are virtual only. Physical cards, card type and activation were removed.
-- **Make a payment (cardholder) was removed** (15 Oct 2026). Declines are explored with Test a charge (Card controls → Test a charge).
+- **Make a payment (cardholder) was removed** (15 Oct 2026). 
+- **Test a charge was removed** (15 Oct 2026). Declines are shown through declined transactions in the seed data (e.g. Jumia on Marketing ads, Spotify on Lagos office).
 - **The mobile personal track was removed** (15 Oct 2026) at the user's request; the prototype is business only.
 - **Card controls for business cards:** Payments in other currencies and Payments without a security code (the engine declines
   non-NGN charges when the first is off; the second is stored only). Cards without saved controls allow everything.

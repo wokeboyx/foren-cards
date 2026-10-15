@@ -2,14 +2,13 @@
 import { PageHeader } from "@/components/page-header";
 import * as React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { RiDownloadLine, RiFileList3Line, RiFlaskLine, RiForbidLine, RiReceiptLine, RiUploadLine } from "@remixicon/react";
+import { RiDownloadLine, RiFileList3Line, RiForbidLine, RiReceiptLine, RiUploadLine } from "@remixicon/react";
 import { toast } from "sonner";
 import { ForenBadge, type BadgeColor } from "@/components/ui/foren-badge";
 import { ForenTable, ForenTableBody, ForenTableCell, ForenTableHead, ForenTableHeaderCell, ForenTableRow } from "@/components/ui/foren-table";
 import { ForenButton } from "@/components/ui/foren-button";
 import { NotFound } from "@/components/create/route-pages";
 import { FundingLegs } from "@/components/funding-legs";
-import { LinkButton } from "@/components/link-button";
 import { MerchantLogo } from "@/components/merchant-logo";
 import { Money } from "@/components/money";
 import { ConfirmDialog, Sheet } from "@/components/overlay";
@@ -49,14 +48,6 @@ export function TransactionsPage({ cardId }: { cardId: string }) {
       <PageHeader
         title="Transactions"
         description={`${card.nickname} •• ${card.last4}`}
-        actions={
-          can(role, "testCharge", card) &&
-          card.status !== "canceled" && (
-            <LinkButton href={`/cards/${card.id}/test-charge`} variant="outline" size="xxs" leadingIcon={<RiFlaskLine />}>
-              Test a charge
-            </LinkButton>
-          )
-        }
       />
 
       {status === "ready" && txns.length > 0 && <MonthlyStatement card={card} txns={txns} />}

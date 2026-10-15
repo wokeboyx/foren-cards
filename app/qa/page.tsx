@@ -50,7 +50,6 @@ const MATRIX: { area: string; states: [string, string, string?][] }[] = [
       ["Card page (own page, Figma layout)", "Click any card in the list", "/cards/c_ops"],
       ["Card details shown in place", "Card details → Show details", "/cards/c_ops"],
       ["Card controls (switches + Change)", "Card page → Card controls", "/cards/c_ops"],
-      ["Payment declined by a card control", "Card controls → Payments in other currencies off, then Card controls → Test a charge in USD", "/cards/c_ops?tab=controls"],
       ["History (audit log)", "Card controls → History → View", "/cards/c_ops"],
       ["Request a card (team member)", "View as Cardholder → Request card", "/cards/request"],
       ["Limit increase request", "View as Cardholder → Ops travel → Spending limit → Ask for more", "/cards/c_ops"],
@@ -88,13 +87,12 @@ const MATRIX: { area: string; states: [string, string, string?][] }[] = [
       ["FX applied", "Software & tools charges", "/cards/c_sw/transactions"],
       ["Fee avoided", "British Airways £1,240 (GBP from GBP)", "/cards/c_ops/transactions"],
       ["Declined detail", "Netflix on Client entertainment", "/cards/c_ent/transactions"],
-      ["Test a charge", "", "/cards/c_ent/test-charge"],
     ],
   },
   {
     area: "Decline recovery (view as Cardholder)",
     states: [
-      ["Each decline reason", "Test a charge: Netflix on Client entertainment (blocked), BA £400 (per-charge), any on Lagos office (frozen)", "/cards/c_ent/test-charge"],
+      ["Each decline reason", "Declined transactions in the seed data: Jumia on Marketing ads (merchant not allowed), Spotify on Lagos office (frozen)", "/cards/c_mkt/transactions"],
       ["Request pending", "Request one-time approval"],
       ["Owner approval (approvals timeline)", "Switch to Account owner → Requests", "/requests"],
       ["Denied", "Owner → Decline with a note"],

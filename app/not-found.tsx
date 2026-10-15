@@ -3,7 +3,6 @@ import * as React from "react";
 import { CardPage } from "@/components/cards/card-page";
 import { EditCard, NotFound } from "@/components/create/route-pages";
 import { PageFallback } from "@/components/states";
-import { TestCharge } from "@/components/transactions/test-charge";
 import { TransactionsPage } from "@/components/transactions/transactions-page";
 import { BASE_PATH } from "@/lib/base-path";
 
@@ -22,12 +21,12 @@ export default function NotFoundPage() {
   const m = path
     .slice(BASE_PATH.length)
     .replace(/\/$/, "")
-    .match(/^\/cards\/([^/]+)(?:\/(transactions|edit|test-charge))?$/);
+    .match(/^\/cards\/([^/]+)(?:\/(transactions|edit))?$/);
   if (!m) return <NotFound what="page" />;
   const [, cardId, sub] = m;
   return (
     <React.Suspense fallback={<PageFallback />}>
-      {sub === "transactions" ? <TransactionsPage cardId={cardId} /> : sub === "edit" ? <EditCard cardId={cardId} /> : sub === "test-charge" ? <TestCharge cardId={cardId} /> : <CardPage cardId={cardId} />}
+      {sub === "transactions" ? <TransactionsPage cardId={cardId} /> : sub === "edit" ? <EditCard cardId={cardId} /> : <CardPage cardId={cardId} />}
     </React.Suspense>
   );
 }

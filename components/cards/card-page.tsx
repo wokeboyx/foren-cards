@@ -399,9 +399,6 @@ function Controls({ card, onPick }: { card: Card; onPick: (d: DialogKind) => voi
       <ControlGroup title="Manage card">
         <Row title="Nickname" desc={card.nickname} action={canEdit ? <RowButton onClick={() => onPick("nickname")}>Change</RowButton> : null} />
         <Row title="History" desc="Every change, who made it and when." action={<RowButton onClick={() => onPick("history")}>View</RowButton>} />
-        {can(role, "testCharge", card) && (
-          <Row title="Test a charge" desc="Check a payment without charging anything." action={<RowLink href={`/cards/${card.id}/test-charge`}>Test</RowLink>} />
-        )}
         {can(role, "cancel", card) && card.status === "active" && (
           <Row title="Lock card" desc="Only an admin can unlock it." action={<RowButton onClick={() => onPick("lock")}>Lock</RowButton>} />
         )}

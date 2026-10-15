@@ -14,7 +14,6 @@ export type Capability =
   | "approve"
   | "manageSubscriptions"
   | "reminders"
-  | "testCharge"
   | "autofx";
 
 export function can(role: Role, cap: Capability, card?: Card): boolean {
@@ -27,7 +26,6 @@ export function can(role: Role, cap: Capability, card?: Card): boolean {
     case "archive":
     case "unfreeze":
     case "manageSubscriptions":
-    case "testCharge":
       return role === "owner" || (role === "individual" && own);
     case "freeze":
       return role === "owner" || own;

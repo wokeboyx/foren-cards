@@ -336,11 +336,11 @@ const soon = (label: string) => toast(`${label} isn’t part of the cards protot
 function Breadcrumb({ pathname }: { pathname: string }) {
   const cards = useStore((s) => s.cards);
   const crumbs: { label: string; href?: string }[] = [];
-  const m = pathname.match(/^\/cards\/([^/]+)(\/(transactions|test-charge))?$/);
+  const m = pathname.match(/^\/cards\/([^/]+)(\/(transactions))?$/);
   if (m && m[1] !== "check-merchant") {
     const card = cards.find((c) => c.id === m[1]);
     crumbs.push({ label: "Cards", href: "/cards" }, { label: card?.nickname ?? "Card", href: m[2] ? `/cards/${m[1]}` : undefined });
-    if (m[3]) crumbs.push({ label: m[3] === "transactions" ? "Transactions" : "Test a charge" });
+    if (m[3]) crumbs.push({ label: "Transactions" });
   } else {
     const page = PAGE_TITLES.find(([re]) => re.test(pathname));
     if (pathname.startsWith("/global-account")) crumbs.push({ label: "Global accounts" });
