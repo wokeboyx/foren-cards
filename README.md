@@ -10,6 +10,14 @@ npm test             # domain unit tests (authorisation engine, routing, forecas
 npm run test:e2e     # production build + Playwright flows (§13 tasks) + axe accessibility scan
 ```
 
+## Live prototype
+
+**https://wokeboyx.github.io/foren-cards/** — deployed to GitHub Pages by `.github/workflows/deploy-pages.yml` on every push to `main`.
+
+- The Pages build is a static export (`GITHUB_PAGES=true npx next build` → `out/`, served from `/foren-cards`). Local dev, tests and `next start` don't use it.
+- Sample cards have pre-built pages. Cards created in the browser live in localStorage, so `app/not-found.tsx` renders their pages on the client.
+- Files in `public/` are referenced through `asset()` (`lib/base-path.ts`) so they work under the sub-path.
+
 ## Using the prototype
 
 - **Demo panel** (bottom right): switch role (Account owner / Cardholder / Finance lead; also "Viewing as" in the top bar),
