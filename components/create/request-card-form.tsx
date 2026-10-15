@@ -122,7 +122,7 @@ export function RequestCardForm() {
 
   return (
     <div className="flex min-h-dvh flex-col lg:flex-row">
-      <div className={cn("flex min-w-0 flex-col overflow-x-clip lg:flex-1", pane === "form" && "flex-1")}>
+      <div className={cn("flex min-w-0 flex-col lg:flex-1", pane === "form" && "flex-1")}>
         <header className="flex h-16 items-center justify-between px-5 sm:px-8">
           <div className="flex items-center gap-2.5 text-[14px] font-medium text-fg">
             <Image src={asset("/foren-logo.svg")} alt="" width={22} height={22} />
@@ -152,8 +152,9 @@ export function RequestCardForm() {
             e.preventDefault();
             submit();
           }}
-          className={cn("mx-auto w-full max-w-[720px] flex-1 flex-col px-5 sm:px-8 lg:flex", pane === "form" ? "flex" : "hidden")}
+          className={cn("w-full flex-1 flex-col lg:flex", pane === "form" ? "flex" : "hidden")}
         >
+          <div className="mx-auto flex w-full max-w-[720px] flex-1 flex-col px-5 pb-8 sm:px-8">
           <div role="progressbar" aria-label="Request card progress" aria-valuemin={1} aria-valuemax={STEPS.length} aria-valuenow={step + 1} aria-valuetext={`Step ${step + 1} of ${STEPS.length}`} className="mt-2 h-1 overflow-hidden rounded-full bg-line">
             <div className="h-full rounded-full bg-[var(--color-foren-bg-button-primary)] transition-[width] duration-300" style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
           </div>
@@ -208,27 +209,29 @@ export function RequestCardForm() {
             )}
           </div>
 
-          {/* Floating action bar (Figma "Floating button"): pinned to the bottom so the actions are always in view. */}
-          <div className="sticky bottom-0 z-20 mt-auto py-3 before:absolute before:inset-y-0 before:-right-[100vw] before:-left-[100vw] before:-z-10 before:border-t before:border-line before:bg-surface sm:min-h-[84px] sm:py-5">
+          </div>
+
+          {/* Floating action bar (Figma "Floating button"): full content width, pinned to the bottom. */}
+          <div className="sticky bottom-0 z-20 border-t border-line bg-surface px-5 py-3 sm:min-h-[84px] sm:px-8 sm:py-5">
             {send.error && <p role="alert" className="mb-3 rounded-[14px] bg-error-subtle px-4 py-2.5 text-[13px] text-error">We couldn’t send your request. Nothing was sent. Try again.</p>}
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
               {step < STEPS.length - 1 ? (
-                <ForenButton type="submit" className="w-full sm:order-last sm:w-auto" disabled={!ready} trailingIcon={<RiArrowRightLine />}>
+                <ForenButton type="submit" size="sm" className="w-full sm:order-last sm:flex-1" disabled={!ready} trailingIcon={<RiArrowRightLine />}>
                   Continue
                 </ForenButton>
               ) : (
-                <ForenButton type="submit" className="w-full sm:order-last sm:w-auto" disabled={send.pending || !ready}>
+                <ForenButton type="submit" size="sm" className="w-full sm:order-last sm:flex-1" disabled={send.pending || !ready}>
                   {send.pending ? "Sending…" : send.error ? "Try again" : "Send request"}
                 </ForenButton>
               )}
               {step > 0 ? (
-                <ForenButton type="button" variant="secondary" className="w-full sm:w-auto" leadingIcon={<RiArrowLeftLine />} onClick={() => { setErrors({}); setStep(step - 1); }}>
+                <ForenButton type="button" variant="outline" size="sm" className="w-full sm:flex-1" leadingIcon={<RiArrowLeftLine />} onClick={() => { setErrors({}); setStep(step - 1); }}>
                   Back
                 </ForenButton>
               ) : (
-                <Link href="/cards" className="px-3 py-2 text-center text-[14px] font-semibold text-fg-2 hover:text-fg">
+                <LinkButton href="/cards" variant="outline" size="sm" className="w-full sm:flex-1">
                   Cancel
-                </Link>
+                </LinkButton>
               )}
             </div>
           </div>

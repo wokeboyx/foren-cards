@@ -8,6 +8,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { RiAddLine, RiArrowLeftLine, RiArrowRightLine, RiCloseLine, RiDeleteBinLine, RiSave3Line, RiNotification3Line, RiSearchEyeLine } from "@remixicon/react";
 import { toast } from "sonner";
 import { ForenButton } from "@/components/ui/foren-button";
+import { LinkButton } from "@/components/link-button";
 import { ForenSegmentedControl } from "@/components/ui/foren-segmented-control";
 import { ForenInput } from "@/components/ui/foren-input";
 import { ForenToggle } from "@/components/ui/foren-toggle";
@@ -185,7 +186,7 @@ export function CardForm({ mode, initial, prefill, fromDraft }: { mode: "create"
   return (
     <div className="flex min-h-dvh flex-col lg:flex-row">
       {/* Form pane */}
-      <div className={cn("flex min-w-0 flex-col overflow-x-clip lg:flex-1", pane === "form" && "flex-1")}>
+      <div className={cn("flex min-w-0 flex-col lg:flex-1", pane === "form" && "flex-1")}>
         <header className="flex h-16 items-center justify-between px-5 sm:px-8">
           <div className="flex items-center gap-2.5 text-[14px] font-medium text-fg">
             <Image src={asset("/foren-logo.svg")} alt="" width={22} height={22} />
@@ -217,8 +218,9 @@ export function CardForm({ mode, initial, prefill, fromDraft }: { mode: "create"
             if (stepped && step < STEPS.length - 1) next();
             else submit();
           }}
-          className={cn("mx-auto w-full max-w-[720px] flex-1 flex-col px-5 sm:px-8 lg:flex", pane === "form" ? "flex" : "hidden")}
+          className={cn("w-full flex-1 flex-col lg:flex", pane === "form" ? "flex" : "hidden")}
         >
+          <div className="mx-auto flex w-full max-w-[720px] flex-1 flex-col px-5 pb-8 sm:px-8">
           {stepped ? (
             <>
               <StepProgress step={step} />
@@ -417,51 +419,54 @@ export function CardForm({ mode, initial, prefill, fromDraft }: { mode: "create"
             {stepped && <p className="text-[13px] leading-[18px] text-fg-2">Check the summary beside the card. Use Back to change anything before you create it.</p>}
           </Row>}
 
-          {/* Floating action bar (Figma "Floating button"): pinned to the bottom so the actions are always in view. */}
-          <div className="sticky bottom-0 z-20 mt-auto py-3 before:absolute before:inset-y-0 before:-right-[100vw] before:-left-[100vw] before:-z-10 before:border-t before:border-line before:bg-surface sm:min-h-[84px] sm:py-5">
+          </div>
+
+          {/* Floating action bar (Figma "Floating button"): full content width, pinned to the bottom. */}
+          <div className="sticky bottom-0 z-20 border-t border-line bg-surface px-5 py-3 sm:min-h-[84px] sm:px-8 sm:py-5">
             {(issue.error || save.error) && (
               <p role="alert" className="mb-3 rounded-[14px] bg-error-subtle px-4 py-2.5 text-[13px] leading-[18px] text-error">
                 {mode === "create" ? "We couldn’t issue this card. Nothing was created, and your answers are still here. Try again." : COPY.saveFailure}
               </p>
             )}
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
               {stepped && step < STEPS.length - 1 ? (
-                <ForenButton type="submit" className="w-full sm:order-last sm:w-auto" disabled={!ready} trailingIcon={<RiArrowRightLine />}>
+                <ForenButton type="submit" size="sm" className="w-full sm:order-last sm:flex-1" disabled={!ready} trailingIcon={<RiArrowRightLine />}>
                   Continue
                 </ForenButton>
               ) : (
-                <ForenButton type="submit" className="w-full sm:order-last sm:w-auto" disabled={pending || !ready}>
+                <ForenButton type="submit" size="sm" className="w-full sm:order-last sm:flex-1" disabled={pending || !ready}>
                   {mode === "create" ? (issue.pending ? "Creating card…" : issue.error ? "Try again" : COPY.createCard) : save.pending ? "Saving…" : save.error ? "Try again" : "Save changes"}
                 </ForenButton>
               )}
-              <div className="flex items-center justify-between gap-2 sm:contents">
-              {stepped && step > 0 ? (
-                <ForenButton type="button" variant="secondary" leadingIcon={<RiArrowLeftLine />} onClick={() => { setErrors({}); setStep(step - 1); top(); }}>
-                  Back
-                </ForenButton>
-              ) : (
-                <Link href={closeHref} className="px-3 py-2 text-[14px] font-semibold text-fg-2 hover:text-fg">
-                  Cancel
-                </Link>
-              )}
-              {stepped && (
-                <ForenButton
-                  type="button"
-                  variant="ghost"
-                  className="sm:mr-2 sm:ml-auto"
-                  leadingIcon={<RiSave3Line />}
-                  disabled={saveDraft.pending}
-                  onClick={async () => {
-                    const r = await saveDraft.run({ id: draftId, savedAt: new Date().toISOString(), step, card: draft, names: extraNames, amountText, years });
-                    if (r.ok) {
-                      toast("Draft saved. Find it in your card list.");
-                      router.push("/cards");
-                    }
-                  }}
-                >
-                  Save and finish later
-                </ForenButton>
-              )}
+              <div className="flex gap-2 sm:contents">
+                {stepped && step > 0 ? (
+                  <ForenButton type="button" variant="outline" size="sm" className="flex-1" leadingIcon={<RiArrowLeftLine />} onClick={() => { setErrors({}); setStep(step - 1); top(); }}>
+                    Back
+                  </ForenButton>
+                ) : (
+                  <LinkButton href={closeHref} variant="outline" size="sm" className="flex-1">
+                    Cancel
+                  </LinkButton>
+                )}
+                {stepped && (
+                  <ForenButton
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    leadingIcon={<RiSave3Line />}
+                    disabled={saveDraft.pending}
+                    onClick={async () => {
+                      const r = await saveDraft.run({ id: draftId, savedAt: new Date().toISOString(), step, card: draft, names: extraNames, amountText, years });
+                      if (r.ok) {
+                        toast("Draft saved. Find it in your card list.");
+                        router.push("/cards");
+                      }
+                    }}
+                  >
+                    Save and finish later
+                  </ForenButton>
+                )}
               </div>
             </div>
           </div>
