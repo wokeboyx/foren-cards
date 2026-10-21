@@ -26,7 +26,7 @@ npm run test:e2e     # production build + Playwright flows (§13 tasks) + axe ac
 - **Onboarding** starts at **/onboarding** (sign-up) and continues in-app at **/get-started** (activation). Requirements per country and entity type
   come from the compliance doc and live in `domain/onboarding.ts`; the onboarding store is separate (`lib/onboarding-store.ts`).
   The flask on the right edge of sign-up screens jumps to any screen, sets lookup/ID outcomes, or loads review states.
-  Titles use Megafield when it's installed locally (it's licensed, so it isn't in this repo), otherwise Instrument Serif.
+  Titles use Megafield (`app/fonts/`, from the design system's web-font kit).
 - **/qa** lists every state from the UX doc §10 checklist with a link or instructions to reach it.
 - State persists in localStorage, so a usability session survives a refresh. "Reset demo data" restores the seed.
 

@@ -108,7 +108,7 @@
 
 @theme {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Megafield", var(--font-serif-fallback), Georgia, serif;
+  --font-display: var(--font-megafield), Georgia, serif;
   /* Foren radius scale */
   --radius-sm: 4px;
   --radius-md: 8px;
