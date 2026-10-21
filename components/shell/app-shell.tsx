@@ -22,6 +22,7 @@ import {
   RiSendPlaneLine,
   RiSettings4Line,
   RiSettings5Line,
+  RiSparkling2Line,
   RiStarSLine,
   RiTeamLine,
   RiUserSettingsLine,
@@ -35,6 +36,8 @@ import { currentUserId, personById, requestState, useNow, useStore } from "@/lib
 import { cn } from "@/lib/utils";
 import type { Role } from "@/domain/types";
 import { restoreExpiredLimits } from "@/lib/actions";
+import { OnboardingDemoPanel } from "@/components/onboarding/demo-panel";
+import { isOnboarding, useOnboarding } from "@/lib/onboarding-store";
 import { DemoPanel } from "./demo-panel";
 import { GlobalSearch } from "./global-search";
 import { NotificationBell } from "./notifications";
@@ -68,6 +71,16 @@ function Shell({ children }: { children: React.ReactNode }) {
 
   // Temporary limit changes restore themselves when their period ends (prototype clock).
   React.useEffect(() => restoreExpiredLimits(now), [now]);
+
+  // Sign-up has its own layout (rail + inset panel) from the onboarding Figma.
+  if (isOnboardingRoute(pathname))
+    return (
+      <>
+        {children}
+        <OnboardingDemoPanel />
+        <Toaster position="top-center" toastOptions={{ className: "!rounded-[16px] !font-sans" }} />
+      </>
+    );
 
   // Creation and full edit flows take over the screen (Mercury-style focus mode).
   if (isFocusRoute(pathname))
@@ -158,6 +171,8 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
+export const isOnboardingRoute = (p: string) => p === "/onboarding" || p.startsWith("/onboarding/");
+
 export function isFocusRoute(p: string) {
   return p === "/cards/new" || p === "/cards/request" || /^\/cards\/[^/]+\/edit$/.test(p);
 }
@@ -173,6 +188,7 @@ function Sidebar({ pathname, onNavigate }: { pathname: string; onNavigate: () =>
   const requests = useStore((s) => s.requests);
   const now = useNow(5000);
   const pendingCount = role === "owner" ? requests.filter((r) => requestState(r, now) === "pending").length : 0;
+  const onboarding = useOnboarding((s) => isOnboarding(s));
 
   const cards: Item = {
     label: "Cards",
@@ -189,6 +205,8 @@ function Sidebar({ pathname, onNavigate }: { pathname: string; onNavigate: () =>
   const groups: { title?: string; items: Item[] }[] = [
     {
       items: [
+        // Until compliance approves the account, setup tasks live here (Figma "Verify your business").
+        ...(onboarding && role === "owner" ? [{ label: "Get started", icon: <RiSparkling2Line />, href: "/get-started" }] : []),
         { label: "Home", icon: <RiStarSLine /> },
         { label: "Dashboard", icon: <RiDashboardLine /> },
         { label: "Global accounts", icon: <RiEarthLine />, href: can(role, "autofx") ? "/global-account" : undefined },
@@ -239,12 +257,14 @@ function Sidebar({ pathname, onNavigate }: { pathname: string; onNavigate: () =>
 }
 
 function Workspace() {
+  // While a sign-up is being activated, the workspace is the business that just signed up.
+  const name = useOnboarding((s) => (isOnboarding(s) && s.business?.name) || COMPANY.name);
   return (
     <div className="flex h-10 items-center gap-3 rounded-[12px] bg-canvas pr-2.5 pl-3 shadow-[0_1px_1px_rgba(36,28,21,0.05)]">
       <span className="grid size-5 shrink-0 place-items-center overflow-hidden rounded-full bg-surface ring-1 ring-line">
         <Image src={asset("/foren-logo.svg")} alt="" width={12} height={12} />
       </span>
-      <span className="min-w-0 flex-1 truncate text-[14px] font-medium tracking-[0.01em] text-fg-2">{COMPANY.name}</span>
+      <span className="min-w-0 flex-1 truncate text-[14px] font-medium tracking-[0.01em] text-fg-2">{name}</span>
       <RiExpandUpDownLine className="size-4 shrink-0 text-fg-3" aria-hidden />
     </div>
   );
@@ -344,6 +364,7 @@ function Breadcrumb({ pathname }: { pathname: string }) {
   } else {
     const page = PAGE_TITLES.find(([re]) => re.test(pathname));
     if (pathname.startsWith("/global-account")) crumbs.push({ label: "Global accounts" });
+    else if (pathname.startsWith("/get-started")) crumbs.push({ label: "Get started", href: pathname === "/get-started" ? undefined : "/get-started" }, ...(GET_STARTED[pathname] ? [{ label: GET_STARTED[pathname] }] : []));
     else if (page && page[1] !== "Cards") crumbs.push({ label: "Cards", href: "/cards" }, { label: page[1] });
     else crumbs.push({ label: page?.[1] ?? "Cards" });
   }
@@ -374,6 +395,13 @@ function Breadcrumb({ pathname }: { pathname: string }) {
     </nav>
   );
 }
+
+const GET_STARTED: Record<string, string> = {
+  "/get-started/stakeholders": "Stakeholders",
+  "/get-started/verification": "Stakeholder verification",
+  "/get-started/documents": "Business documents",
+  "/get-started/questionnaire": "Questionnaire",
+};
 
 const PAGE_TITLES: [RegExp, string][] = [
   [/^\/cards\/check-merchant/, "Check a merchant"],

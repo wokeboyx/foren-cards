@@ -3,7 +3,35 @@ import Link from "next/link";
 // QA / design-review index: every state in the UX doc's §10 checklist and how to reach it.
 const DEMO = "Demo panel";
 
+const ONB = "Onboarding controls (flask, right edge)";
+
 const MATRIX: { area: string; states: [string, string, string?][] }[] = [
+  {
+    area: "Sign-up",
+    states: [
+      ["Country and entity type, with documents you’ll need", "", "/onboarding"],
+      ["Country we don’t support yet → waitlist", "Pick a “Coming soon” country", "/onboarding"],
+      ["How you’ll use Foren", "", "/onboarding/use"],
+      ["Create your account", "", "/onboarding/account"],
+      ["Verify email (wrong code: 000000)", "", "/onboarding/verify-email"],
+      ["Verify identity, and ID needs a retry", `${ONB} → Identity check`, "/onboarding/identity"],
+      ["Find your business: found / not found / manual", `${ONB} → Registry lookup`, "/onboarding/business"],
+      ["A few more things (SCUML / new business notes)", "Nigeria + Real estate, or “We haven’t started trading yet”", "/onboarding/business/profile"],
+      ["Enhanced due diligence (MTO/PSP only)", "Entity type: Money transfer or payment service provider", "/onboarding/compliance"],
+      ["Review and Welcome", "", "/onboarding/review"],
+    ],
+  },
+  {
+    area: "Account activation (Get started)",
+    states: [
+      ["Checklist", `${ONB} → Signed up, nothing submitted`, "/get-started"],
+      ["Stakeholders, ownership totals, invites sent", "", "/get-started/stakeholders"],
+      ["Stakeholder verification", "", "/get-started/verification"],
+      ["Business documents (per country and entity)", "", "/get-started/documents"],
+      ["Questionnaire (+ API forms when API services is chosen)", "", "/get-started/questionnaire"],
+      ["In review / needs changes / approved", `${ONB} → Jump to…`, "/get-started"],
+    ],
+  },
   {
     area: "Cards overview",
     states: [

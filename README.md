@@ -23,6 +23,10 @@ npm run test:e2e     # production build + Playwright flows (§13 tasks) + axe ac
 - **Demo panel** (bottom right): switch role (Account owner / Cardholder / Finance lead; also "Viewing as" in the top bar),
   slow the network, force load or save failures, move the clock (+16 min expires approvals),
   simulate low balances, load sample AutoFX goals, reset data.
+- **Onboarding** starts at **/onboarding** (sign-up) and continues in-app at **/get-started** (activation). Requirements per country and entity type
+  come from the compliance doc and live in `domain/onboarding.ts`; the onboarding store is separate (`lib/onboarding-store.ts`).
+  The flask on the right edge of sign-up screens jumps to any screen, sets lookup/ID outcomes, or loads review states.
+  Titles use Megafield when it's installed locally (it's licensed, so it isn't in this repo), otherwise Instrument Serif.
 - **/qa** lists every state from the UX doc §10 checklist with a link or instructions to reach it.
 - State persists in localStorage, so a usability session survives a refresh. "Reset demo data" restores the seed.
 
