@@ -13,6 +13,7 @@ import { Note, SetupColumn, SetupHeader } from "./shared";
 
 const PURPOSES = ["Pay suppliers abroad", "Collect payments from customers", "Pay staff and contractors", "Hold and convert currencies", "Spend with company cards", "Other"];
 const VOLUMES = ["Under 10,000", "10,000 – 50,000", "50,000 – 250,000", "250,000 – 1M", "Above 1M"];
+const TX_COUNTS = ["1 – 100", "101 – 500", "501 – 1,000", "Above 1,000"];
 const SOURCES = ["Revenue from sales", "Investment or loans", "Owner’s own funds", "Grants or donations", "Other"];
 const CURRENCIES = ["NGN", "USD", "GBP", "EUR", "CAD", "KES"];
 const TIMELINES = ["Within a month", "1–3 months", "3–6 months", "Not sure yet"];
@@ -23,18 +24,20 @@ type Q = Record<string, string>;
 function requiredKeys(q: Q, banking: boolean, api: boolean) {
   const keys: string[] = [];
   if (banking) {
-    keys.push("purpose", "volume", "currencies", "countries", "source", "thirdParty", "pep");
+    keys.push("purpose", "inflow", "outflow", "txCount", "currencies", "countries", "source", "thirdParty", "pep");
     if (q.purpose === "Other") keys.push("purposeOther");
     if (q.pep === "yes") keys.push("pepDetails");
   }
-  if (api) keys.push("apiProducts", "apiUseCase", "apiVolume", "apiTimeline");
+  if (api) keys.push("apiProducts", "apiUseCase", "apiVolume", "apiTxCount", "apiTimeline");
   return keys;
 }
 
 const MESSAGES: Record<string, string> = {
   purpose: "Choose the main purpose",
   purposeOther: "Tell us the purpose",
-  volume: "Choose a monthly volume",
+  inflow: "Choose how much you’ll receive",
+  outflow: "Choose how much you’ll send",
+  txCount: "Choose how many transactions",
   currencies: "Choose at least one currency",
   countries: "List at least one country",
   source: "Choose where your funds come from",
@@ -44,6 +47,7 @@ const MESSAGES: Record<string, string> = {
   apiProducts: "Choose Payouts, Collections or both",
   apiUseCase: "Describe what you’ll build",
   apiVolume: "Choose an expected volume",
+  apiTxCount: "Choose how many transactions",
   apiTimeline: "Choose a timeline",
 };
 
@@ -114,16 +118,9 @@ export function QuestionnairePage() {
                 <input id="q-purposeOther" className={fieldCls} value={q.purposeOther ?? ""} aria-invalid={!!err("purposeOther")} onChange={(e) => upd({ purposeOther: e.target.value })} />
               </Field>
             )}
-            <Field label="How much do you expect to move each month?" description={`In ${currency}, across sending and receiving.`} htmlFor="q-volume" error={err("volume")}>
-              <select id="q-volume" className={fieldCls} value={q.volume ?? ""} aria-invalid={!!err("volume")} onChange={(e) => upd({ volume: e.target.value })}>
-                <option value="">Select a range</option>
-                {VOLUMES.map((v) => (
-                  <option key={v} value={v}>
-                    {currency} {v}
-                  </option>
-                ))}
-              </select>
-            </Field>
+            <RangeSelect id="q-inflow" label="How much do you expect to receive each month?" description={`In ${currency}.`} placeholder="Select a range" options={VOLUMES} prefix={currency} value={q.inflow} onChange={(v) => upd({ inflow: v })} error={err("inflow")} />
+            <RangeSelect id="q-outflow" label="How much do you expect to send each month?" description={`In ${currency}.`} placeholder="Select a range" options={VOLUMES} prefix={currency} value={q.outflow} onChange={(v) => upd({ outflow: v })} error={err("outflow")} />
+            <RangeSelect id="q-txCount" label="About how many transactions will you make each month?" description="Count both payments in and out." placeholder="Select a range" options={TX_COUNTS} value={q.txCount} onChange={(v) => upd({ txCount: v })} error={err("txCount")} />
             <Chips id="q-currencies" label="Which currencies will you use most?" options={CURRENCIES} value={list("currencies")} onToggle={(v) => toggle("currencies", v)} error={err("currencies")} />
             <Field label="Which countries will you send money to or receive from?" description="Separate countries with commas." htmlFor="q-countries" error={err("countries")}>
               <input id="q-countries" className={fieldCls} placeholder="e.g. United Kingdom, Ghana, China" value={q.countries ?? ""} aria-invalid={!!err("countries")} onChange={(e) => upd({ countries: e.target.value })} />
@@ -191,6 +188,7 @@ export function QuestionnairePage() {
                 ))}
               </select>
             </Field>
+            <RangeSelect id="q-apiTxCount" label="About how many API transactions each month?" description="Count both payouts and collections." placeholder="Select a range" options={TX_COUNTS} value={q.apiTxCount} onChange={(v) => upd({ apiTxCount: v })} error={err("apiTxCount")} />
             <Field label="When do you plan to go live?" htmlFor="q-apiTimeline" error={err("apiTimeline")}>
               <select id="q-apiTimeline" className={fieldCls} value={q.apiTimeline ?? ""} aria-invalid={!!err("apiTimeline")} onChange={(e) => upd({ apiTimeline: e.target.value })}>
                 <option value="">Select a timeline</option>
@@ -217,6 +215,21 @@ export function QuestionnairePage() {
         </ForenButton>
       )}
     </SetupColumn>
+  );
+}
+
+function RangeSelect({ id, label, description, placeholder, options, prefix, value, onChange, error }: { id: string; label: string; description?: string; placeholder: string; options: string[]; prefix?: string; value?: string; onChange: (v: string) => void; error?: string }) {
+  return (
+    <Field label={label} description={description} htmlFor={id} error={error}>
+      <select id={id} className={fieldCls} value={value ?? ""} aria-invalid={!!error} onChange={(e) => onChange(e.target.value)}>
+        <option value="">{placeholder}</option>
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {prefix ? `${prefix} ${o}` : o}
+          </option>
+        ))}
+      </select>
+    </Field>
   );
 }
 
