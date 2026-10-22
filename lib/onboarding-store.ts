@@ -203,7 +203,7 @@ export const useOnboarding = create<State & Actions>()(
           invitesSentAt: new Date().toISOString(),
           documents: docs,
           documentsSubmitted: true,
-          questionnaire: { purpose: "Pay suppliers abroad" },
+          questionnaire: { volume: "NGN 2 million", frequency: "1–100", hasWebsite: "Yes", website: "https://karayapharma.com", use: "Paying suppliers and staff salaries" },
           questionnaireSubmitted: true,
           review: preset === "approved" ? "approved" : preset === "changes_requested" ? "changes_requested" : "in_review",
           demo: get().demo,

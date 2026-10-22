@@ -143,14 +143,14 @@ function stakeholders(country: CountryCode, entity: EntityType): Requirement {
 function questionnaire(ctx: RequirementContext): Requirement[] {
   const out: Requirement[] = [];
   if (ctx.entity !== "mto" && ctx.banking !== false)
-    out.push({ id: "questionnaire", title: "Onboarding questionnaire", description: "About 10 questions on how you’ll use your account.", source: "questionnaire" });
+    out.push({ id: "questionnaire", title: "Onboarding questionnaire", description: "About 10 questions on how you’ll use your account and transact.", source: "questionnaire" });
   if (ctx.entity === "mto")
-    out.push({ id: "edd", title: "Onboarding questionnaire (business banking)", description: "Licensing, fund flow and AML controls. Part of sign-up.", source: "edd" });
+    out.push({ id: "edd", title: "Onboarding questionnaire (business banking)", description: "Business activity, fund flow and AML controls. Part of sign-up.", source: "edd" });
   if (ctx.api)
     out.push({
       id: "api_forms",
       title: "API onboarding forms",
-      description: "Preliminary forms for Payouts and Collections, depending on what you’ll build.",
+      description: "Prelim forms for Collections and Payouts (SendR), depending on what you need.",
       source: "questionnaire",
     });
   return out;
