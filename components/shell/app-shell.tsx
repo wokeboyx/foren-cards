@@ -72,6 +72,9 @@ function Shell({ children }: { children: React.ReactNode }) {
   // Temporary limit changes restore themselves when their period ends (prototype clock).
   React.useEffect(() => restoreExpiredLimits(now), [now]);
 
+  // Marketing-site mock-ups (foren.co sections) have no app chrome at all.
+  if (isWebsiteRoute(pathname)) return <>{children}</>;
+
   // Sign-up has its own layout (rail + inset panel) from the onboarding Figma.
   if (isOnboardingRoute(pathname))
     return (
@@ -171,6 +174,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
+export const isWebsiteRoute = (p: string) => p === "/website" || p.startsWith("/website/");
 export const isOnboardingRoute = (p: string) => p === "/onboarding" || p.startsWith("/onboarding/");
 
 export function isFocusRoute(p: string) {
