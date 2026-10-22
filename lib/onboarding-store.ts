@@ -8,6 +8,7 @@ import {
   isNewBusiness,
   isScumlCategory,
   requirementsFor,
+  type ControlType,
   type CountryCode,
   type EntityType,
   type RequirementContext,
@@ -31,15 +32,34 @@ export type Profile = { turnover: string; sector: string; category: string; webs
 export type StakeholderStatus = "not_sent" | "pending" | "action_required" | "verified";
 export type Stakeholder = {
   id: string;
+  /** A person, or a company that holds shares (indirect ownership). Companies aren't sent a verification link. */
+  kind: "person" | "company";
+  /** Company name goes in firstName (lastName stays empty), so names and avatars work the same for both. */
   firstName: string;
   lastName: string;
+  /** Set on a person who owns the business through this company stakeholder; their ownership is their % of it. */
+  parentId?: string;
+  /** Companies only. */
+  regNumber: string;
+  /** Companies only: ISO country code of registration. */
+  regCountry: string;
   email: string;
   position: string;
+  /** ISO date. Asked in the app; their ID is the proof. Empty until added (registry records don't carry it). */
+  dob: string;
+  /** ISO country code. */
+  nationality: string;
   director: boolean;
   shareholder: boolean;
   /** Percent, 0–100. */
   ownership: number;
   signatory: boolean;
+  /** Has significant control without owning enough to be a UBO (named when no one owns 10% or more). */
+  controller: boolean;
+  /** Nature of control, required for UBOs and controllers. */
+  control: ControlType[];
+  /** Describes "other" control. */
+  controlOther: string;
   /** Listed in the registry, or added by the user. */
   source: "registry" | "added";
   status: StakeholderStatus;
@@ -52,6 +72,9 @@ export type UploadedDoc = { fileName: string; sizeKb: number; status: DocStatus;
 export type TaskStatus = "not_started" | "in_progress" | "submitted" | "action_required" | "verified";
 
 export type Edd = Record<string, string | string[]>;
+
+/** The digital Director and UBO declaration, confirmed with a tick instead of a signature. */
+export type Declaration = { confirmedAt: string; name: string; email: string; position: string; phone: string };
 
 /** Prototype-only switches for outcomes we can't produce for real. */
 export type OnboardingDemo = {
@@ -69,6 +92,9 @@ type State = {
   email: string;
   firstName: string;
   lastName: string;
+  /** Job title and phone of the person signing up, who is the authorised representative on the declaration. */
+  position: string;
+  phone: string;
   emailVerified: boolean;
   identityVerified: boolean;
 
@@ -81,6 +107,9 @@ type State = {
 
   stakeholders: Stakeholder[];
   stakeholdersSubmitted: boolean;
+  /** Ticked on Stakeholders: no individual owns the threshold or more, so a controller is named instead. */
+  noMajorOwner: boolean;
+  declaration: Declaration | null;
   invitesSentAt: string | null;
   documents: Record<string, UploadedDoc>;
   documentsSubmitted: boolean;
@@ -114,6 +143,8 @@ const INITIAL: State = {
   email: "",
   firstName: "",
   lastName: "",
+  position: "",
+  phone: "",
   emailVerified: false,
   identityVerified: false,
   business: null,
@@ -123,6 +154,8 @@ const INITIAL: State = {
   signedUpAt: null,
   stakeholders: [],
   stakeholdersSubmitted: false,
+  noMajorOwner: false,
+  declaration: null,
   invitesSentAt: null,
   documents: {},
   documentsSubmitted: false,
@@ -143,11 +176,27 @@ export function registryBusiness(country: CountryCode, regType: string | undefin
   return { ...byCountry[country], regType, regNumber, source: "registry" };
 }
 
-/** Directors on the registry record, offered as stakeholders. Ownership is missing until the user adds it. */
+/** Defaults for a new person stakeholder. */
+export const PERSON: Omit<Stakeholder, "id" | "firstName" | "lastName" | "email" | "position" | "source" | "status"> = {
+  kind: "person",
+  regNumber: "",
+  regCountry: "",
+  dob: "",
+  nationality: "",
+  director: false,
+  shareholder: false,
+  ownership: 0,
+  signatory: false,
+  controller: false,
+  control: [],
+  controlOther: "",
+};
+
+/** Directors on the registry record, offered as stakeholders. Ownership, date of birth and nationality are missing until the user adds them. */
 export function registryStakeholders(): Stakeholder[] {
   return [
-    { id: "sh_david", firstName: "David", lastName: "Oyelowo", email: "david@karayapharma.com", position: "Director", director: true, shareholder: true, ownership: 0, signatory: true, source: "registry", status: "not_sent" },
-    { id: "sh_mariam", firstName: "Mariam", lastName: "Odunwale", email: "mariam@karayapharma.com", position: "Director", director: true, shareholder: true, ownership: 0, signatory: false, source: "registry", status: "not_sent" },
+    { ...PERSON, id: "sh_david", firstName: "David", lastName: "Oyelowo", email: "david@karayapharma.com", position: "Director", dob: "", nationality: "", director: true, shareholder: true, ownership: 0, signatory: true, source: "registry", status: "not_sent" },
+    { ...PERSON, id: "sh_mariam", firstName: "Mariam", lastName: "Odunwale", email: "mariam@karayapharma.com", position: "Director", dob: "", nationality: "", director: true, shareholder: true, ownership: 0, signatory: false, source: "registry", status: "not_sent" },
   ];
 }
 
@@ -159,7 +208,8 @@ export const useOnboarding = create<State & Actions>()(
       setDemo: (patch) => set((s) => ({ demo: { ...s.demo, ...patch } })),
       upsertStakeholder: (s) =>
         set((st) => ({ stakeholders: st.stakeholders.some((x) => x.id === s.id) ? st.stakeholders.map((x) => (x.id === s.id ? s : x)) : [...st.stakeholders, s] })),
-      removeStakeholder: (id) => set((st) => ({ stakeholders: st.stakeholders.filter((x) => x.id !== id) })),
+      // Removing a company also removes the people listed as its owners.
+      removeStakeholder: (id) => set((st) => ({ stakeholders: st.stakeholders.filter((x) => x.id !== id && x.parentId !== id) })),
       patchStakeholder: (id, patch) => set((st) => ({ stakeholders: st.stakeholders.map((x) => (x.id === id ? { ...x, ...patch } : x)) })),
       setDocument: (reqId, doc) =>
         set((st) => {
@@ -177,6 +227,8 @@ export const useOnboarding = create<State & Actions>()(
           email: "ayodele@karayapharma.com",
           firstName: "Ayodele",
           lastName: "Owoetoni",
+          position: "Finance Director",
+          phone: "+234 803 555 0142",
           emailVerified: true,
           identityVerified: true,
           business: registryBusiness("NG", "RC", "1234567"),
@@ -189,9 +241,9 @@ export const useOnboarding = create<State & Actions>()(
         for (const r of requirementsFor(ctx).filter((r) => r.source === "upload" && !r.optional))
           docs[r.id] = { fileName: `${r.id.replace(/_/g, "-")}.pdf`, sizeKb: 420, status: preset === "approved" ? "accepted" : "in_review" };
         const people: Stakeholder[] = [
-          { ...registryStakeholders()[0], ownership: 30, status: "verified" },
-          { ...registryStakeholders()[1], ownership: 20, status: preset === "changes_requested" ? "action_required" : "verified", note: preset === "changes_requested" ? "The ID photo was too blurry to read. Ask Mariam to retake it in good light." : undefined },
-          { id: "sh_ryan", firstName: "Ryan", lastName: "Adeyemi", email: "ryan@karayapharma.com", position: "Investor", director: false, shareholder: true, ownership: 50, signatory: false, source: "added", status: "verified" },
+          { ...registryStakeholders()[0], dob: "1978-06-14", nationality: "NG", ownership: 30, control: ["shares", "voting"], status: "verified" },
+          { ...registryStakeholders()[1], dob: "1985-02-03", nationality: "NG", ownership: 20, control: ["shares", "voting"], status: preset === "changes_requested" ? "action_required" : "verified", note: preset === "changes_requested" ? "The ID photo was too blurry to read. Ask Mariam to retake it in good light." : undefined },
+          { ...PERSON, id: "sh_ryan", firstName: "Ryan", lastName: "Adeyemi", email: "ryan@karayapharma.com", position: "Investor", dob: "1990-11-21", nationality: "GB", shareholder: true, ownership: 50, control: ["shares"], source: "added", status: "verified" },
         ];
         if (preset === "changes_requested")
           docs.cac_certificate = { fileName: "cac-certificate.pdf", sizeKb: 380, status: "needs_attention", note: "This certificate is no longer valid. Upload a current, certified true copy." };
@@ -200,6 +252,7 @@ export const useOnboarding = create<State & Actions>()(
           ...base,
           stakeholders: people,
           stakeholdersSubmitted: true,
+          declaration: { confirmedAt: new Date().toISOString(), name: "Ayodele Owoetoni", email: "ayodele@karayapharma.com", position: "Finance Director", phone: "+234 803 555 0142" },
           invitesSentAt: new Date().toISOString(),
           documents: docs,
           documentsSubmitted: true,
@@ -210,11 +263,33 @@ export const useOnboarding = create<State & Actions>()(
         });
       },
     }),
-    { name: "foren-onboarding-v1" }
+    {
+      name: "foren-onboarding-v1",
+      // Saved sign-ups from before newer stakeholder fields existed: fill the gaps so they show as missing, not crash.
+      merge: (saved, current) => {
+        const s = saved as Partial<State> | undefined;
+        return { ...current, ...s, stakeholders: (s?.stakeholders ?? []).map((p) => ({ ...PERSON, ...p })) };
+      },
+    }
   )
 );
 
 // ---------------------------------------------------------------- derived
+
+/** % of the business a stakeholder owns: directly, or through a company stakeholder (parent % × their % of it). */
+export function effectiveOwnership(p: Stakeholder, all: Stakeholder[]): number {
+  if (p.parentId) {
+    const parent = all.find((x) => x.id === p.parentId);
+    return parent ? Math.round(((parent.ownership * p.ownership) / 100) * 100) / 100 : 0;
+  }
+  return p.shareholder || p.kind === "company" ? p.ownership : 0;
+}
+
+/** Individuals who are ultimate beneficial owners: own the threshold or more, directly or indirectly. */
+export const ubosOf = (all: Stakeholder[], threshold: number) => all.filter((p) => p.kind === "person" && effectiveOwnership(p, all) >= threshold);
+
+/** People who get a verification link (companies don't). */
+export const peopleOf = (all: Stakeholder[]) => all.filter((p) => p.kind === "person");
 
 export function contextOf(s: Pick<State, "country" | "entity" | "business" | "profile" | "useCases">): RequirementContext | null {
   if (!s.country || !s.entity) return null;
@@ -255,11 +330,11 @@ export function checklist(s: State): ChecklistItem[] {
     items.push({
       id: "stakeholders",
       title: "Stakeholders and structure",
-      description: "Add your directors, shareholders and ownership structure.",
+      description: "Add your directors, owners and signatories, then confirm the declaration.",
       href: "/get-started/stakeholders",
       status: s.stakeholdersSubmitted ? (s.review === "approved" ? "verified" : "submitted") : s.stakeholders.length ? "in_progress" : "not_started",
     });
-    const people = s.stakeholders;
+    const people = peopleOf(s.stakeholders);
     items.push({
       id: "verification",
       title: "Stakeholder verification",

@@ -39,19 +39,51 @@ export const ENTITY_HINT: Record<EntityType, string> = {
   mto: "Licensed MTO or PSP that moves money for its own customers.",
 };
 
-/** Who counts as an ultimate beneficial owner (UBO), by ownership. */
-export function uboThreshold(country: CountryCode, entity: EntityType): number | null {
-  if (entity === "sole_trader") return null;
-  if (entity === "mto") return 10;
-  return country === "GB" || country === "CA" ? 25 : 10;
+/** Who counts as an ultimate beneficial owner (UBO), by ownership. Compliance set 10% for every country (Oct 2026). */
+export function uboThreshold(_country: CountryCode, entity: EntityType): number | null {
+  return entity === "sole_trader" ? null : 10;
 }
+
+/** Nature of control options for UBOs and controllers (Director and UBO declaration, Section 2). */
+export const CONTROL_TYPES = [
+  { id: "shares", label: "Holds shares" },
+  { id: "voting", label: "Holds voting rights" },
+  { id: "appoints", label: "Can appoint or remove directors" },
+  { id: "other", label: "Other significant control" },
+] as const;
+export type ControlType = (typeof CONTROL_TYPES)[number]["id"];
+
+/** "Holds shares, Holds voting rights", or the description given for other control. */
+export function controlLabel(control: ControlType[], other: string) {
+  return control.map((c) => (c === "other" ? other || "Other significant control" : CONTROL_TYPES.find((t) => t.id === c)!.label)).join(", ");
+}
+
+/** International dialling code for the representative's phone number. */
+export const DIAL_CODE: Record<CountryCode, string> = { NG: "+234", GB: "+44", CA: "+1", KE: "+254" };
 
 /** Companies and MTOs must name at least two directors. */
 export const minDirectors = (entity: EntityType) => (entity === "sole_trader" ? 0 : 2);
 
-/** Accepted photo IDs for people (proof of identity). */
+/** Accepted photo IDs for people (proof of identity): passport or national ID. Nigeria also takes the NIN slip. */
 export function acceptedIds(country: CountryCode): string {
-  return country === "NG" ? "International passport or driver’s licence" : "Passport, national ID card or driving licence";
+  return country === "NG" ? "International passport or national ID (NIN slip accepted)" : "Passport or national ID card";
+}
+
+export const idTypes = (country: CountryCode | null) =>
+  country === "NG" ? ["International passport", "National ID card or NIN slip"] : ["Passport", "National ID card"];
+
+const REGION_CODES =
+  "AF AX AL DZ AS AD AO AI AG AR AM AW AU AT AZ BS BH BD BB BY BE BZ BJ BM BT BO BA BW BR VG BN BG BF BI KH CM CA CV KY CF TD CL CN CO KM CG CD CK CR CI HR CU CW CY CZ DK DJ DM DO EC EG SV GQ ER EE SZ ET FK FO FJ FI FR GF PF GA GM GE DE GH GI GR GL GD GP GU GT GG GN GW GY HT HN HK HU IS IN ID IR IQ IE IM IL IT JM JP JE JO KZ KE KI XK KW KG LA LV LB LS LR LY LI LT LU MO MG MW MY MV ML MT MH MQ MR MU YT MX FM MD MC MN ME MS MA MZ MM NA NR NP NL NC NZ NI NE NG NU KP MK MP NO OM PK PW PS PA PG PY PE PH PL PT PR QA RE RO RU RW WS SM ST SA SN RS SC SL SG SX SK SI SB SO ZA KR SS ES LK BL SH KN LC MF PM VC SD SR SE CH SY TW TJ TZ TH TL TG TO TT TN TR TM TC TV UG UA AE GB US UY UZ VU VA VE VN WF EH YE ZM ZW";
+
+/** Nationality options for stakeholders: our four countries first, then every other country A–Z. */
+export function nationalityOptions(): { code: string; name: string }[] {
+  const names = new Intl.DisplayNames(["en-GB"], { type: "region" });
+  const first = ["NG", "GB", "CA", "KE"];
+  const all = REGION_CODES.split(" ").map((code) => ({ code, name: names.of(code) ?? code }));
+  return [
+    ...first.map((c) => all.find((x) => x.code === c)!),
+    ...all.filter((x) => !first.includes(x.code)).sort((a, b) => a.name.localeCompare(b.name)),
+  ];
 }
 
 // ---------------------------------------------------------------- documents
@@ -118,11 +150,12 @@ const LIVENESS: Requirement = {
   source: "identity",
 };
 
+/** Digital only: built from the stakeholders the user adds, then confirmed with a tick box. No upload. */
 const UBO_DECLARATION: Requirement = {
   id: "ubo_declaration",
-  title: "UBO declaration form",
-  description: "Signed by a director. Download our template, sign and upload it.",
-  source: "upload",
+  title: "Director and UBO declaration",
+  description: "Filled in for you from your stakeholders. You confirm it with a tick, no signature needed.",
+  source: "stakeholders",
 };
 
 function proprietorId(country: CountryCode): Requirement {
@@ -131,11 +164,10 @@ function proprietorId(country: CountryCode): Requirement {
 
 function stakeholders(country: CountryCode, entity: EntityType): Requirement {
   const t = uboThreshold(country, entity);
-  const poa = country === "NG" ? ", plus proof of address for directors" : "";
   return {
     id: "stakeholders",
-    title: "Directors and beneficial owners",
-    description: `At least two directors, everyone who owns ${t}% or more, and all authorised signatories. Each verifies their ID by link${poa}.`,
+    title: "Directors, beneficial owners and signatories",
+    description: `At least two directors, everyone who owns ${t}% or more, and all authorised signatories, with date of birth and nationality. Each verifies their ID and proof of address by link.`,
     source: "stakeholders",
   };
 }
@@ -409,3 +441,5 @@ export function isNewBusiness(incorporatedOn: string | undefined, today = new Da
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
   return d > sixMonthsAgo;
 }
+
+export const nationalityName = (code: string) => (code ? (new Intl.DisplayNames(["en-GB"], { type: "region" }).of(code) ?? code) : "");

@@ -6,7 +6,7 @@ import { EmptyState, Panel } from "@/components/states";
 import { ForenBadge } from "@/components/ui/foren-badge";
 import { ForenButton } from "@/components/ui/foren-button";
 import { LinkButton } from "@/components/link-button";
-import { useOnboarding, type Stakeholder } from "@/lib/onboarding-store";
+import { peopleOf, useOnboarding, type Stakeholder } from "@/lib/onboarding-store";
 import { CopyLink } from "./stakeholders";
 import { GroupLabel, PersonAvatar, SetupColumn, SetupHeader, fullName, roleLine } from "./shared";
 
@@ -31,9 +31,11 @@ export function VerificationPage() {
       </SetupColumn>
     );
 
-  const action = s.stakeholders.filter((p) => p.status === "action_required");
-  const waiting = s.stakeholders.filter((p) => p.status === "pending" || p.status === "not_sent");
-  const verified = s.stakeholders.filter((p) => p.status === "verified");
+  // Companies that own shares aren't verified themselves; the people behind them are.
+  const people = peopleOf(s.stakeholders);
+  const action = people.filter((p) => p.status === "action_required");
+  const waiting = people.filter((p) => p.status === "pending" || p.status === "not_sent");
+  const verified = people.filter((p) => p.status === "verified");
 
   return (
     <SetupColumn>
@@ -152,7 +154,7 @@ function Row({ person: p }: { person: Stakeholder }) {
 /** Prototype-only: stand in for stakeholders finishing (or failing) their checks. */
 function Simulate() {
   const s = useOnboarding();
-  const open = s.stakeholders.filter((p) => p.status !== "verified");
+  const open = peopleOf(s.stakeholders).filter((p) => p.status !== "verified");
   if (!open.length) return null;
   return (
     <div className="mt-10 rounded-[16px] border border-dashed border-line-2 px-4 py-3">

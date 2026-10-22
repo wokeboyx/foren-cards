@@ -84,6 +84,8 @@ export function ReviewDetails() {
             items={[
               { label: "First name", value: s.firstName },
               { label: "Last name", value: s.lastName },
+              { label: "Job title", value: s.position },
+              { label: "Phone number", value: s.phone },
               { label: "Email address", value: s.email, wide: true },
             ]}
           />

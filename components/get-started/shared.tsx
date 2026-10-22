@@ -127,7 +127,12 @@ export const fullName = (p: Pick<Stakeholder, "firstName" | "lastName">) => `${p
 
 /** "Director & shareholder · 25% ownership" */
 export function roleLine(p: Stakeholder) {
-  const roles = [p.director && "Director", p.shareholder && "shareholder", !p.director && !p.shareholder && p.signatory && "Authorised signatory"].filter(Boolean) as string[];
+  const roles = [
+    p.director && "Director",
+    p.shareholder && "shareholder",
+    !p.director && !p.shareholder && p.signatory && "Authorised signatory",
+    !p.director && !p.shareholder && !p.signatory && p.controller && "Significant control",
+  ].filter(Boolean) as string[];
   let text = roles.join(" & ");
   text = text.charAt(0).toUpperCase() + text.slice(1);
   if (!text) text = p.position || "Stakeholder";

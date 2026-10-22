@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { RiDownloadLine, RiQuestionLine } from "@remixicon/react";
+import { RiQuestionLine } from "@remixicon/react";
 import { toast } from "sonner";
 import { ForenBadge } from "@/components/ui/foren-badge";
 import { ForenButton } from "@/components/ui/foren-button";
@@ -157,16 +157,6 @@ function DocCard({ req, doc, showError, locked }: { req: Requirement; doc?: Uplo
           </div>
         )}
 
-        {req.id === "ubo_declaration" && !doc && (
-          <button
-            type="button"
-            onClick={() => downloadTemplate()}
-            className="inline-flex w-fit items-center gap-1.5 text-[12px] leading-[18px] font-semibold text-fg underline underline-offset-2 outline-none focus-visible:ring-2 focus-visible:ring-focus"
-          >
-            <RiDownloadLine className="size-3.5" aria-hidden />
-            Download the UBO declaration template
-          </button>
-        )}
       </div>
 
       {req.accepted && (
@@ -198,26 +188,4 @@ function DocCard({ req, doc, showError, locked }: { req: Requirement; doc?: Uplo
       )}
     </section>
   );
-}
-
-function downloadTemplate() {
-  const body = [
-    "ULTIMATE BENEFICIAL OWNER (UBO) DECLARATION",
-    "",
-    "Company name:",
-    "Registration number:",
-    "",
-    "We declare that the people below are the ultimate beneficial owners of the company:",
-    "",
-    "Full name | Date of birth | Nationality | Ownership % | Nature of control",
-    "",
-    "Signed (director):                 Date:",
-  ].join("\n");
-  const url = URL.createObjectURL(new Blob([body], { type: "text/plain" }));
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "foren-ubo-declaration-template.txt";
-  a.click();
-  URL.revokeObjectURL(url);
-  toast("Template downloaded", { description: "Fill it in, get a director to sign it, then upload it here." });
 }

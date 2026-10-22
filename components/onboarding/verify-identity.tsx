@@ -7,16 +7,13 @@ import { Modal } from "@/components/overlay";
 import { ForenButton } from "@/components/ui/foren-button";
 import { ForenCheckbox } from "@/components/ui/foren-checkbox";
 import { ForenSpinner } from "@/components/ui/foren-spinner";
-import { acceptedIds, countryInfo, type CountryCode } from "@/domain/onboarding";
+import { acceptedIds, countryInfo, idTypes, type CountryCode } from "@/domain/onboarding";
 import { asset } from "@/lib/base-path";
 import { useOnboarding } from "@/lib/onboarding-store";
 import { cn } from "@/lib/utils";
 import { OnboardingFrame } from "./frame";
 import { useSignupGuard } from "./guard";
 
-function idTypes(country: CountryCode | null) {
-  return country === "NG" ? ["International passport", "Driver’s licence"] : ["Passport", "National ID card", "Driving licence"];
-}
 
 export function VerifyIdentity() {
   const ok = useSignupGuard("/onboarding/identity");
@@ -31,7 +28,7 @@ export function VerifyIdentity() {
       step="identity"
       back="/onboarding/account"
       title="Verify your identity"
-      description={`Have a valid ID ready (${country ? acceptedIds(country) : "Passport or driving licence"}), then do a quick face check. About 2 mins.`}
+      description={`Have a valid ID ready (${country ? acceptedIds(country) : "Passport or national ID"}), then do a quick face check. About 2 mins.`}
     >
       <div className="flex flex-col gap-10">
         <div className="relative aspect-[310/156] w-full max-w-[310px] overflow-hidden rounded-[16px] bg-subtle sm:max-w-[310px]">
