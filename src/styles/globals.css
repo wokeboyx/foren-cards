@@ -1,9 +1,18 @@
 @import "tailwindcss";
+@import "@fontsource-variable/inter";
+
+/* Foren display face (onboarding titles), from the design system's web-font kit. */
+@font-face { font-family: "Megafield"; src: url("../assets/fonts/Megafield-Regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Megafield"; src: url("../assets/fonts/Megafield-Medium.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Megafield"; src: url("../assets/fonts/Megafield-SemiBold.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Megafield"; src: url("../assets/fonts/Megafield-Bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
 
 /* Foren Design System tokens — mirrored from foren-docs.vercel.app (@foren/ui/tokens.css). */
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
+  --font-inter: "Inter Variable";
+  --font-megafield: "Megafield";
   --color-foren-text-primary: #383633;
   --color-foren-text-secondary: #5e5c5a;
   --color-foren-text-tertiary: #95908b;

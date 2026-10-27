@@ -1,6 +1,6 @@
 import type { Card } from "@/domain/types";
 import { COMPANY } from "@/fixtures/seed";
-import { personById } from "@/lib/store";
+import { personById } from "@/stores/app";
 
 /** Name printed on the card: the company for company cards, otherwise the cardholder. */
 export function nameOnCard(card: Pick<Card, "holderId" | "companyCard">): string | undefined {
