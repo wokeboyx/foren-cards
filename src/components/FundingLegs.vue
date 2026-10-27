@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RiExchangeLine, RiWallet3Line } from "@remixicon/vue";
+import { RiExchangeLine, RiWallet3Line } from "@/components/icons";
 import Money from "@/components/Money.vue";
 import { formatRate } from "@/domain/money";
 import type { FeeAvoided, FundingLeg } from "@/domain/types";

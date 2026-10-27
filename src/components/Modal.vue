@@ -2,7 +2,7 @@
 /** Centered modal dialog for confirmations and short tasks. Slots: default, title, description. */
 import type { HTMLAttributes } from "vue";
 import { DialogClose, DialogContent, DialogDescription, DialogOverlay, DialogPortal, DialogRoot, DialogTitle } from "reka-ui";
-import { RiCloseLine } from "@remixicon/vue";
+import { RiCloseLine } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 const props = defineProps<{ open: boolean; title?: string; description?: string; class?: HTMLAttributes["class"] }>();

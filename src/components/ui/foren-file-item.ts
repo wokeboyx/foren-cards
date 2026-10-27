@@ -1,5 +1,5 @@
 import { cva } from "class-variance-authority";
-import { RiFileImageFill, RiFilePdf2Fill } from "@remixicon/vue";
+import { RiFileImageFill, RiFilePdf2Fill } from "@/components/icons";
 import type { Component } from "vue";
 
 // File-type logos from Remix Icon, keyed off the extension. Remix has no

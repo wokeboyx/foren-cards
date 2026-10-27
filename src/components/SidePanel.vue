@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /** Mercury-style inline detail panel beside a list (desktop). Phones use a full-screen Sheet instead. */
-import { RiCloseLine } from "@remixicon/vue";
+import { RiCloseLine } from "@/components/icons";
 import ForenButton from "@/components/ui/ForenButton.vue";
 
 defineProps<{ label: string }>();

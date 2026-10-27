@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RiLockLine, RiLockUnlockLine } from "@remixicon/vue";
+import { RiLockLine, RiLockUnlockLine } from "@/components/icons";
 import ForenBadge from "@/components/ui/ForenBadge.vue";
 import type { Card } from "@/domain/types";
 

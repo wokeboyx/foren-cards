@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /** Bottom sheet for the phone-only personal track: slides up, dismiss by tapping outside or Close. Slots: default, title, description. */
 import { DialogClose, DialogContent, DialogDescription, DialogOverlay, DialogPortal, DialogRoot, DialogTitle } from "reka-ui";
-import { RiCloseLine } from "@remixicon/vue";
+import { RiCloseLine } from "@/components/icons";
 import ForenButton from "@/components/ui/ForenButton.vue";
 
 defineProps<{ open: boolean; title?: string; description?: string }>();

@@ -1,22 +1,27 @@
-# Foren Cards — prototype
+# Foren Cards — UI
 
-A clickable Next.js prototype of the Foren Cards UX flows (business cards, Flows 1–8). Built with the Foren Design System components from
-foren-docs.vercel.app. **Test data only — no real cards, money or merchants.**
+The Foren Cards web UI (business cards, Flows 1–8), plus sign-up and account setup. Built with **Vue 3, Vite, Vue Router, Pinia and Tailwind v4**,
+using the Foren Design System components. It runs on a **mock backend with test data only: no real cards, money or merchants.**
+Connecting it to the API is the frontend team's next step: see [`src/services/README.md`](src/services/README.md).
 
 ```bash
 npm install
-npm run dev          # http://localhost:3000
+npm run dev          # http://localhost:5173
+npm run typecheck    # vue-tsc
+npm run lint         # eslint (Vue + TypeScript)
 npm test             # domain unit tests (authorisation engine, routing, forecasts, contrast)
-npm run test:e2e     # production build + Playwright flows (§13 tasks) + axe accessibility scan
+npm run test:e2e     # production build + Playwright flows (§13 tasks), responsive checks and axe accessibility scan
+npm run build        # type-check + production build to dist/
 ```
+
+Node 24 or later.
 
 ## Live prototype
 
-**https://wokeboyx.github.io/foren-cards/** — deployed to GitHub Pages by `.github/workflows/deploy-pages.yml` on every push to `main`.
+**https://wokeboyx.github.io/foren-cards/**, deployed to GitHub Pages by `.github/workflows/deploy-pages.yml` on every push to `main`.
 
-- The Pages build is a static export (`GITHUB_PAGES=true npx next build` → `out/`, served from `/foren-cards`). Local dev, tests and `next start` don't use it.
-- Sample cards have pre-built pages. Cards created in the browser live in localStorage, so `app/not-found.tsx` renders their pages on the client.
-- Files in `public/` are referenced through `asset()` (`lib/base-path.ts`) so they work under the sub-path.
+- The Pages build sets `GITHUB_PAGES=true`, so the app is served from `/foren-cards/` (Vite `base`). CI copies `index.html` to `404.html` so deep links like `/cards/c_ops/edit` load the app.
+- Files in `public/` are referenced through `asset()` (`src/lib/base-path.ts`) so they work under the sub-path.
 
 ## Using the prototype
 
@@ -24,9 +29,9 @@ npm run test:e2e     # production build + Playwright flows (§13 tasks) + axe ac
   slow the network, force load or save failures, move the clock (+16 min expires approvals),
   simulate low balances, load sample AutoFX goals, reset data.
 - **Onboarding** starts at **/onboarding** (sign-up) and continues in-app at **/get-started** (activation). Requirements per country and entity type
-  come from the compliance doc and live in `domain/onboarding.ts`; the onboarding store is separate (`lib/onboarding-store.ts`).
+  come from the compliance doc and live in `src/domain/onboarding.ts`; the onboarding store is separate (`src/stores/onboarding.ts`).
   The flask on the right edge of sign-up screens jumps to any screen, sets lookup/ID outcomes, or loads review states.
-  Titles use Megafield (`app/fonts/`, from the design system's web-font kit).
+  Titles use Megafield (`src/assets/fonts/`, from the design system's web-font kit).
 - **/qa** lists every state from the UX doc §10 checklist with a link or instructions to reach it.
 - State persists in localStorage, so a usability session survives a refresh. "Reset demo data" restores the seed.
 
@@ -34,11 +39,28 @@ npm run test:e2e     # production build + Playwright flows (§13 tasks) + axe ac
 
 | Path | What |
 | --- | --- |
-| `domain/` | Pure logic: `authorize.ts` (single authorisation engine), `routing.ts` (SmartRoute), `forecast.ts`, `compatibility.ts`, `autofx.ts` |
-| `content/copy.ts` | §8 content patterns and §9 decline inventory — the single source of copy |
-| `config/policy.ts` | Open questions from §12 as settings (approver roles, full-PAN roles, emergency ceiling, forecast threshold…) |
-| `components/ui/` | Foren Design System components, copied verbatim from the docs site |
-| `lib/store.ts`, `lib/actions.ts`, `lib/api.ts` | Persisted store, user actions, mock API with latency + fault injection |
+| `src/router/index.ts` | Every route. `meta.layout` picks the page chrome: app (sidebar), `focus` (full-screen create/edit), `onboarding`, `bare` |
+| `src/components/shell/` | App shell: sidebar, top bar, search, notifications, demo panel |
+| `src/components/ui/` | Foren Design System components (Button, Badge, Toggle, Input, Table, Segmented control…), with cva variants in the `.ts` files beside them |
+| `src/components/<feature>/` | Screens by area: `cards`, `create`, `requests`, `subscriptions`, `transactions`, `travel`, `autofx`, `merchant`, `onboarding`, `get-started`, `website` |
+| `src/components/*.vue` | Shared app pieces: `Sheet`, `Modal`, `ConfirmDialog`, `EmptyState`, `ErrorState`, `Panel`, `PageHeader`, `LinkButton`, `Money`… |
+| `src/components/icons.ts` | The Remix icons in use. Each is compiled on its own by `unplugin-icons`, so only these are bundled |
+| `src/services/` | **The API boundary.** One function per user action; mock-backed today. Read its README before wiring the API |
+| `src/stores/` | Pinia stores: `app.ts` (cards, transactions, requests, balances…), `onboarding.ts` (sign-up and setup). `persist.ts` mirrors them to localStorage for the mock |
+| `src/composables/` | `useLoad` (loading/error/retry), `useAction` (pending/error for a save), `useNow`, `useIsDesktop`, `useSignupGuard` |
+| `src/domain/` | Pure logic: `authorize.ts` (single authorisation engine), `routing.ts` (SmartRoute), `forecast.ts`, `compatibility.ts`, `autofx.ts`, `onboarding.ts` (requirements per country/entity) |
+| `src/content/copy.ts` | §8 content patterns and §9 decline inventory: the single source of copy |
+| `src/config/policy.ts` | Open questions from §12 as settings (approver roles, full-PAN roles, emergency ceiling, forecast threshold…) |
+| `src/fixtures/` | Seed data for the mock |
+| `tests/e2e/` | Playwright specs. They query by role and accessible name, so keep labels stable when changing screens |
+
+### Conventions
+
+- One component per `.vue` file (`<script setup lang="ts">`, PascalCase name). Non-component helpers for a component sit next to it in a kebab-case `.ts` file.
+- Components read state from the stores and write through `@/services`. They never call `fetch` themselves.
+- Content passed into a component goes in slots. A text prop has a same-named slot that overrides it (`title` prop and `#title` slot). Controlled values use `v-model` (`v-model:open` on dialogs).
+- Styling is Tailwind with the Foren tokens in `src/styles/globals.css` (`text-fg`, `bg-surface`, `border-line`…). Merge classes with `cn()`.
+- Screens built on Reka UI (dialogs, popovers) get focus and keyboard handling from it. Keep the `aria-*` attributes and labels: the e2e and axe tests rely on them.
 
 ## Layout reference
 
@@ -63,8 +85,8 @@ and a full-screen create view whose live summary doubles as the review step.
 ## Deviations and assumptions to review
 
 - **Text/Tertiary token override.** The design system's `#95908b` is ~3.2:1 on white and fails WCAG AA.
-  `app/globals.css` overrides it to `#6e6964` (≥ 4.5:1 everywhere). Raise with the design-system owners.
-- **SmartRoute semantics** (`domain/routing.ts`) are a prototype interpretation: same-currency balance first,
+  `src/styles/globals.css` overrides it to `#6e6964` (≥ 4.5:1 everywhere). Raise with the design-system owners.
+- **SmartRoute semantics** (`src/domain/routing.ts`) are a prototype interpretation: same-currency balance first,
   then lowest FX fee, charges may split. Cards only pay from Foren balances (no fallback account). Needs product/engineering validation.
 - **Fee avoided** is only claimed for non-USD, non-NGN charges paid entirely from a same-currency balance,
   compared with converting from USD at the Foren fee. The real comparison basis is an open question.

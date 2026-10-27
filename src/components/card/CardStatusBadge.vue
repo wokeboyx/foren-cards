@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RiCheckboxCircleFill, RiCloseCircleLine, RiLockLine, RiSnowflakeLine, RiTimeLine } from "@remixicon/vue";
+import { RiCheckboxCircleFill, RiCloseCircleLine, RiLockLine, RiSnowflakeLine, RiTimeLine } from "@/components/icons";
 import ForenBadge from "@/components/ui/ForenBadge.vue";
 import { STATUS_LABEL } from "@/domain/labels";
 import type { Card } from "@/domain/types";

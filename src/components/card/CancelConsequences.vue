@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RiCloseCircleLine, RiForbidLine, RiSnowflakeLine } from "@remixicon/vue";
+import { RiCloseCircleLine, RiForbidLine, RiSnowflakeLine } from "@/components/icons";
 
 /** Revolut-style list of what cancelling does, with the reversible alternative called out. */
 defineProps<{ canFreeze: boolean }>();

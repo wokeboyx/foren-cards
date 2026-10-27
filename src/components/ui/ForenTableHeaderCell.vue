@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { HTMLAttributes } from "vue";
-import { RiExpandUpDownLine } from "@remixicon/vue";
+import { RiExpandUpDownLine } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import ForenCheckbox from "./ForenCheckbox.vue";
 import type { Checked } from "./foren-checkbox";

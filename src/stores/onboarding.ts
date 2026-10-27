@@ -119,18 +119,6 @@ type State = {
   demo: OnboardingDemo;
 };
 
-type Actions = {
-  set: (patch: Partial<State>) => void;
-  setDemo: (patch: Partial<OnboardingDemo>) => void;
-  upsertStakeholder: (s: Stakeholder) => void;
-  removeStakeholder: (id: string) => void;
-  patchStakeholder: (id: string, patch: Partial<Stakeholder>) => void;
-  setDocument: (reqId: string, doc: UploadedDoc | null) => void;
-  reset: () => void;
-  /** Jump to a ready-made point in the journey (demo panel). */
-  loadPreset: (preset: OnboardingPreset) => void;
-};
-
 export type OnboardingPreset = "signed_up" | "in_review" | "changes_requested" | "approved";
 
 const INITIAL: State = {

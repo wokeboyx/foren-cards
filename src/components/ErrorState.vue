@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /** Load failure with an optional Retry (shown when a `retry` listener is attached). */
 import { getCurrentInstance, type HTMLAttributes } from "vue";
-import { RiErrorWarningLine } from "@remixicon/vue";
+import { RiErrorWarningLine } from "@/components/icons";
 import ForenButton from "@/components/ui/ForenButton.vue";
 import { COPY } from "@/content/copy";
 import { cn } from "@/lib/utils";

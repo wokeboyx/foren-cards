@@ -1,4 +1,6 @@
-# Foren Cards — Next.js prototype implementation plan
+# Foren Cards — prototype implementation plan
+
+> Historical: this plan was written for the original Next.js prototype. The app is now Vue 3 + Vite (see README.md); the product scope below still applies.
 
 Source: *Foren Cards — UX Flows, User Stories & Acceptance Criteria* v1.0 (12 Oct 2026).
 Goal: a clickable, state-complete Next.js prototype of the business-card V1 flows (Flows 1–8) for design review, usability testing (doc §13) and QA reference, plus the personal-card discovery track (Flows 9–10) behind a flag.

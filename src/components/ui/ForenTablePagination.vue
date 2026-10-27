@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, type HTMLAttributes } from "vue";
-import { RiArrowLeftSLine, RiArrowRightSLine } from "@remixicon/vue";
+import { RiArrowLeftSLine, RiArrowRightSLine } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { buildPages, PAGINATION_SIZES, type ForenPaginationLayout, type ForenPaginationSize } from "./foren-table";
 

@@ -4,7 +4,7 @@
  * (with a real Progress bar), success, error. Pair with `ForenFileUpload`.
  */
 import { computed, type HTMLAttributes } from "vue";
-import { RiCheckboxCircleLine, RiCloseLine, RiErrorWarningLine, RiFileLine, RiRefreshLine } from "@remixicon/vue";
+import { RiCheckboxCircleLine, RiCloseLine, RiErrorWarningLine, RiFileLine, RiRefreshLine } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import ForenProgress from "./ForenProgress.vue";
 import { extensionOf, FILE_TYPE_ICON, fileItemVariants, type FileItemState } from "./foren-file-item";
@@ -45,7 +45,7 @@ const metaColor = computed(() =>
     <span class="shrink-0 size-9 rounded-xl bg-[var(--color-foren-bg-default)] flex items-center justify-center" aria-hidden="true">
       <slot name="icon">
         <component :is="entry.Icon" v-if="entry" size="20" :class="entry.fg" />
-        <RiFileLine v-else size="20" class="text-[var(--color-foren-text-secondary)]" />
+        <RiFileLine v-else width="20" height="20" class="text-[var(--color-foren-text-secondary)]" />
       </slot>
     </span>
     <!-- Info -->
@@ -66,10 +66,10 @@ const metaColor = computed(() =>
     <!-- Trailing status + actions -->
     <div class="shrink-0 flex items-center gap-1.5">
       <span v-if="state === 'success'" class="text-[var(--color-foren-success)]" aria-hidden="true">
-        <RiCheckboxCircleLine size="18" />
+        <RiCheckboxCircleLine width="18" height="18" />
       </span>
       <span v-if="state === 'error'" class="text-[var(--color-foren-error)]" aria-hidden="true">
-        <RiErrorWarningLine size="18" />
+        <RiErrorWarningLine width="18" height="18" />
       </span>
       <button
         v-if="state === 'error' && onRetry"
@@ -78,7 +78,7 @@ const metaColor = computed(() =>
         class="size-5 flex items-center justify-center rounded-[10px] text-[var(--color-foren-text-secondary)] hover:bg-[var(--color-foren-bg-button-secondary-active)] transition-colors"
         @click="onRetry()"
       >
-        <RiRefreshLine size="14" />
+        <RiRefreshLine width="14" height="14" />
       </button>
       <button
         v-if="onRemove"
@@ -87,7 +87,7 @@ const metaColor = computed(() =>
         class="size-5 flex items-center justify-center rounded-[10px] text-[var(--color-foren-text-tertiary)] hover:bg-[var(--color-foren-bg-button-secondary-active)] hover:text-[var(--color-foren-text-primary)] transition-colors"
         @click="onRemove()"
       >
-        <RiCloseLine size="14" />
+        <RiCloseLine width="14" height="14" />
       </button>
     </div>
   </div>

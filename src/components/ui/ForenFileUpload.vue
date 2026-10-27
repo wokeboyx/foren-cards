@@ -4,7 +4,7 @@
  * is an inline field + browse button. Render selected files with `ForenFileItem`.
  */
 import { computed, ref, type HTMLAttributes } from "vue";
-import { RiUploadCloud2Line } from "@remixicon/vue";
+import { RiUploadCloud2Line } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import ForenButton from "./ForenButton.vue";
 
@@ -124,7 +124,7 @@ function onDragOver(e: DragEvent) {
       @dragleave="dragging = false"
     >
       <span class="size-12 rounded-full bg-[var(--color-foren-bg-subtle)] flex items-center justify-center text-[var(--color-foren-text-secondary)]">
-        <RiUploadCloud2Line size="20" />
+        <RiUploadCloud2Line width="20" height="20" />
       </span>
       <div class="flex flex-col gap-2 items-center">
         <p class="text-[14px] leading-[21px] font-semibold tracking-[0.0125em] text-[var(--color-foren-text-primary)]">

@@ -6,7 +6,7 @@
  */
 import { computed } from "vue";
 import { useMediaQuery } from "@vueuse/core";
-import { RiAppleFill, RiGoogleFill } from "@remixicon/vue";
+import { RiAppleFill, RiGoogleFill } from "@/components/icons";
 import { toast } from "vue-sonner";
 import ForenButton from "@/components/ui/ForenButton.vue";
 import Modal from "@/components/Modal.vue";

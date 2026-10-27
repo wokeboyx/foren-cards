@@ -4,7 +4,7 @@
 // with a plain-text prop of the same name as the fallback (label, description, value, currency,
 // date, time, count); icons are slots only (leadingIcon, trailingIcon, icon).
 import { computed, useSlots, type HTMLAttributes } from "vue";
-import { RiArrowRightDownLine, RiArrowRightUpLine, RiCalendarLine, RiSubtractLine } from "@remixicon/vue";
+import { RiArrowRightDownLine, RiArrowRightUpLine, RiCalendarLine, RiSubtractLine } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import ForenAvatar from "./ForenAvatar.vue";
 import ForenAvatarGroup from "./ForenAvatarGroup.vue";

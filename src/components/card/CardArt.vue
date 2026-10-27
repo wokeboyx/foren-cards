@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, type HTMLAttributes } from "vue";
-import { RiSnowflakeLine } from "@remixicon/vue";
+import { RiSnowflakeLine } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import type { Card } from "@/domain/types";
 import { DESIGNS, EMERGENCY } from "./designs";

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /** Side sheet: a right-hand panel on desktop, full-screen on narrow screens (§4, §11). Slots: default, title, description, footer. */
 import { DialogClose, DialogContent, DialogDescription, DialogOverlay, DialogPortal, DialogRoot, DialogTitle } from "reka-ui";
-import { RiCloseLine } from "@remixicon/vue";
+import { RiCloseLine } from "@/components/icons";
 
 withDefaults(defineProps<{ open: boolean; title?: string; description?: string; width?: number }>(), { width: 489 });
 const emit = defineEmits<{ "update:open": [open: boolean] }>();

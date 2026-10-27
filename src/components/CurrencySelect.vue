@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, useId } from "vue";
 import { PopoverContent, PopoverPortal, PopoverRoot, PopoverTrigger } from "reka-ui";
-import { RiArrowDownSLine, RiCheckLine } from "@remixicon/vue";
+import { RiArrowDownSLine, RiCheckLine } from "@/components/icons";
 import CurrencyFlag from "@/components/CurrencyFlag.vue";
 import Money from "@/components/Money.vue";
 import type { Balance, Currency } from "@/domain/types";
