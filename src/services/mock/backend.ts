@@ -13,6 +13,7 @@ import {
   validateLimits,
 } from "@/domain/limits";
 import { convert, format, zero } from "@/domain/money";
+import { cardFundingFee } from "@/domain/fees";
 import { fundingCost } from "@/domain/routing";
 import type {
   Card,
@@ -978,6 +979,8 @@ function applyFunding(c: Card, from: Currency, amount: Money, by = actor()) {
       legs: [],
       kind: "funding",
       fundedFrom: from,
+      fee: cardFundingFee(amount),
+      debit,
     },
     { debit: false },
   );

@@ -56,11 +56,7 @@ const description = computed(() => {
 </script>
 
 <template>
-  <ForenTableRow
-    :selected="selected"
-    :last="last"
-    @click="!funding && emit('open')"
-  >
+  <ForenTableRow :selected="selected" :last="last" @click="emit('open')">
     <ForenTableCell
       v-if="!compact"
       :label="txRef(t)"
@@ -72,14 +68,12 @@ const description = computed(() => {
       :description="description"
     >
       <template #label>
-        <span v-if="funding">Card funded</span>
         <button
-          v-else
           type="button"
           class="outline-none focus-visible:underline"
           @click.stop="emit('open')"
         >
-          {{ m?.name }}
+          {{ funding ? "Card funded" : m?.name }}
         </button>
       </template>
     </ForenTableCell>

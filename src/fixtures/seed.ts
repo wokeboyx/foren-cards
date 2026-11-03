@@ -1,6 +1,7 @@
 // Seed data, generated relative to "now" so due-soon windows and limit periods always have data.
 import { expiryFrom } from "@/domain/limits";
 import { DEFAULT_BLOCKED_CATEGORIES } from "@/domain/labels";
+import { cardFundingFee } from "@/domain/fees";
 import { money } from "@/domain/money";
 import { route } from "@/domain/routing";
 import type {
@@ -398,6 +399,11 @@ export function seed(now = new Date()): SeedState {
       legs: [],
       kind: "funding",
       fundedFrom: from,
+      fee: cardFundingFee(amount),
+      debit: {
+        minor: amount.minor + cardFundingFee(amount).minor,
+        currency: amount.currency,
+      },
     });
   fund("c_ops", money(50_000, "USD"), "USD", 30);
   fund("c_ops", money(25_000, "USD"), "USD", 9);

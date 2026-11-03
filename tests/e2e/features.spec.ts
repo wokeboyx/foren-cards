@@ -149,3 +149,24 @@ test("the sidebar shows the business logo, name and Foren tag, and no Requests",
   await expect(nav.getByTestId("foren-tag")).toHaveText("@kolalogistics");
   await expect(nav.getByRole("link", { name: /Requests/ })).toHaveCount(0);
 });
+
+test("a funding row opens a transaction details drawer with the fee and the total taken", async ({
+  page,
+}) => {
+  await ready(page, "/cards/c_ops");
+  await choose(page, "Status", "Funded");
+  await page
+    .getByRole("row", { name: /Card funded/ })
+    .first()
+    .click();
+  const drawer = page.getByRole("dialog", { name: "Card funded" });
+  await expect(drawer).toContainText("How it was funded");
+  await expect(drawer).toContainText("Added to the card");
+  // 1% of $25,000.00 is more than the cap, so the fee is $100.00 and the total taken $25,100.00
+  await expect(drawer.getByTestId("detail-funding-fee")).toContainText(
+    "$100.00",
+  );
+  await expect(drawer).toContainText("Taken from your USD balance");
+  await expect(drawer).toContainText("$25,100.00");
+  await expect(drawer).toContainText("Reference");
+});
