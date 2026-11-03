@@ -1,9 +1,7 @@
-<!-- BEGIN:nextjs-agent-rules -->
+# Foren Cards — agent notes
 
-## This is NOT the Next.js you know
+Vue 3 + Vite single-page app. Read `README.md` (layout, conventions) and `src/services/README.md` (API boundary) before changing code.
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->
+- Components read from Pinia stores (`src/stores/`) and write through `@/services`; never `fetch` in a component.
+- New icons: add them to `src/components/icons.ts`.
+- Before finishing: `npm run typecheck && npm run lint && npm test && npm run test:e2e`.
