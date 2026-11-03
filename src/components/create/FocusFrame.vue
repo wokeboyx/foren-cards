@@ -26,25 +26,28 @@ defineSlots<{ default(): unknown; footer?(): unknown }>();
 </script>
 
 <template>
-  <div class="flex min-h-dvh flex-col bg-surface px-2 pt-2">
+  <!-- Fixed height: the header and the button bar never move, and only the content between them scrolls. Nothing is sticky, so nothing shakes. -->
+  <div class="flex h-dvh flex-col overflow-hidden bg-surface px-2 pt-2">
     <div
-      class="relative flex flex-1 flex-col overflow-clip rounded-[20px] bg-canvas shadow-[0px_1px_2px_0px_rgba(36,28,21,0.05)]"
+      class="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-[20px] bg-canvas shadow-[0px_1px_2px_0px_rgba(36,28,21,0.05)]"
     >
       <FocusHeader :closable="closable" @close="emit('close')" />
-      <div
-        :class="
-          cn(
-            'relative flex flex-1 flex-col',
-            center && 'items-center justify-center py-10',
-          )
-        "
-      >
-        <slot />
+      <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div
+          :class="
+            cn(
+              'relative flex min-h-full flex-col',
+              center && 'items-center justify-center py-10',
+            )
+          "
+        >
+          <slot />
+        </div>
       </div>
     </div>
     <div
       v-if="$slots.footer"
-      class="sticky bottom-0 z-20 -mx-2 mt-2 border-t border-[var(--color-foren-border-muted)] bg-white"
+      class="z-20 -mx-2 mt-2 shrink-0 border-t border-[var(--color-foren-border-muted)] bg-white"
     >
       <div
         :class="
