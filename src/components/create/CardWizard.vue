@@ -9,7 +9,6 @@ import CurrencySelect from "@/components/CurrencySelect.vue";
 import ForenButton from "@/components/ui/ForenButton.vue";
 import ForenInput from "@/components/ui/ForenInput.vue";
 import FocusFrame from "./FocusFrame.vue";
-import CardPolicyInfo from "@/components/cards/CardPolicyInfo.vue";
 import SendingOverlay from "./SendingOverlay.vue";
 import InlineError from "@/components/InlineError.vue";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
@@ -331,7 +330,6 @@ const issueFailure = computed(() =>
                 : undefined
             "
           />
-          <CardPolicyInfo class="w-full" />
         </div>
       </aside>
     </div>

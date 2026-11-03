@@ -117,8 +117,7 @@ and a full-screen create view whose live summary doubles as the review step.
   (kind *Top-up*), approves with the PIN, and the money moves from the balance in the card's currency if it covers it,
   otherwise from USD.
 - **Fees, limits and the PIN.** The empty state links to the card terms and conditions, which open with a "Limits and fees" list
-  (15 active cards, daily and per-transaction limits, the $2.00 creation fee, and the funding and withdrawal fees). The same list
-  sits under the create-card preview. Putting money on a card costs a funding fee: 1% of the amount, capped at $100 (in
+  (15 active cards, daily and per-transaction limits, the $2.00 creation fee, and the funding and withdrawal fees). Putting money on a card costs a funding fee: 1% of the amount, capped at $100 (in
   `POLICY.cardFundingFee`; the withdrawal fee is a placeholder with the same schedule). The transaction PIN is needed to add money,
   to show the card number and security code (they hide again after 45 seconds), to freeze, and to terminate a card.
   "Cancel card" is now **Terminate card** everywhere users see it. Subscriptions are hidden for now: no tab, no sidebar or search entry, and `/subscriptions` redirects to `/cards`.
