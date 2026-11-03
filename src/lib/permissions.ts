@@ -18,7 +18,7 @@ export type Capability =
 
 export function can(role: Role, cap: Capability, card?: Card): boolean {
   const me = currentUserId(role);
-  const own = card ? card.holderId === me || !!card.contactIds?.includes(me) : false;
+  const own = card ? card.holderId === me : false;
   switch (cap) {
     case "issue":
     case "edit":
@@ -44,6 +44,6 @@ export function can(role: Role, cap: Capability, card?: Card): boolean {
 export function visibleCards(role: Role, cards: Card[]): Card[] {
   const biz = cards.filter((c) => !c.personal);
   const me = currentUserId(role);
-  if (role === "cardholder") return biz.filter((c) => c.holderId === me || c.contactIds?.includes(me));
+  if (role === "cardholder") return biz.filter((c) => c.holderId === me);
   return biz;
 }

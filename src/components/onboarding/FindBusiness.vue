@@ -13,5 +13,9 @@ const store = useOnboardingStore();
 </script>
 
 <template>
-  <FindBusinessForm v-if="ready && store.country && store.entity" :key="`${store.country}-${store.entity}`" :country="store.country" />
+  <FindBusinessForm
+    v-if="ready && store.country && store.entity"
+    :key="`${store.country}-${store.entity}`"
+    :country="store.country"
+  />
 </template>

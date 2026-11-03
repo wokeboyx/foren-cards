@@ -8,8 +8,15 @@ withDefaults(defineProps<{ what?: string }>(), { what: "card" });
 
 <template>
   <Panel>
-    <EmptyState :title="`We couldn’t find that ${what}`" body="It may have been removed, or the link is out of date.">
-      <template #action><LinkButton href="/cards" variant="outline" size="sm">Back to cards</LinkButton></template>
+    <EmptyState
+      :title="`We couldn’t find that ${what}`"
+      body="It may have been removed, or the link is out of date."
+    >
+      <template #action
+        ><LinkButton href="/cards" variant="outline" size="sm"
+          >Back to cards</LinkButton
+        ></template
+      >
     </EmptyState>
   </Panel>
 </template>

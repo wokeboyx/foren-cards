@@ -22,7 +22,7 @@ export const fieldVariants = cva(
       },
     },
     defaultVariants: { size: "md", status: "default", disabled: false },
-  }
+  },
 );
 
 export const inputVariants = cva(
@@ -35,7 +35,7 @@ export const inputVariants = cva(
       },
     },
     defaultVariants: { size: "md" },
-  }
+  },
 );
 
 export const inputIconColor = "text-[var(--color-foren-text-tertiary)]";

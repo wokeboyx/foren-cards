@@ -2,12 +2,21 @@
 /** Prototype-only controls for sign-up: jump to a screen, load a ready-made state, pick outcomes. */
 import { ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
-import { PopoverContent, PopoverPortal, PopoverRoot, PopoverTrigger } from "reka-ui";
+import {
+  PopoverContent,
+  PopoverPortal,
+  PopoverRoot,
+  PopoverTrigger,
+} from "reka-ui";
 import { RiFlaskLine } from "@/components/icons";
 import { toast } from "vue-sonner";
 import ForenButton from "@/components/ui/ForenButton.vue";
 import ForenSegmentedControl from "@/components/ui/ForenSegmentedControl.vue";
-import { useOnboardingStore, type OnboardingDemo, type OnboardingPreset } from "@/stores/onboarding";
+import {
+  useOnboardingStore,
+  type OnboardingDemo,
+  type OnboardingPreset,
+} from "@/stores/onboarding";
 import { PRESETS, SIGNUP_ROUTES } from "./demo-panel";
 
 const s = useOnboardingStore();
@@ -29,11 +38,13 @@ const lookupOptions: { value: OnboardingDemo["lookup"]; label: string }[] = [
   { value: "found", label: "Finds the business" },
   { value: "not_found", label: "Finds nothing" },
 ];
-const identityOptions: { value: OnboardingDemo["identity"]; label: string }[] = [
-  { value: "approved", label: "Approved" },
-  { value: "retry", label: "Needs a retry" },
-];
-const sectionLabel = "mb-2 text-[12px] font-semibold tracking-[0.01em] text-fg-3 uppercase";
+const identityOptions: { value: OnboardingDemo["identity"]; label: string }[] =
+  [
+    { value: "approved", label: "Approved" },
+    { value: "retry", label: "Needs a retry" },
+  ];
+const sectionLabel =
+  "mb-2 text-[12px] font-semibold tracking-[0.01em] text-fg-3 uppercase";
 </script>
 
 <template>
@@ -53,8 +64,12 @@ const sectionLabel = "mb-2 text-[12px] font-semibold tracking-[0.01em] text-fg-3
         :collision-padding="12"
         class="z-50 max-h-[85dvh] w-[360px] max-w-[calc(100vw-24px)] overflow-y-auto rounded-[24px] bg-surface p-5 shadow-[var(--shadow-foren-xl)] ring-1 ring-line outline-none"
       >
-        <div class="mb-1 text-[15px] font-semibold text-fg">Onboarding controls</div>
-        <p class="mb-4 text-[12px] leading-[16px] text-fg-3">Test data only. Answers are saved on this device.</p>
+        <div class="mb-1 text-[15px] font-semibold text-fg">
+          Onboarding controls
+        </div>
+        <p class="mb-4 text-[12px] leading-[16px] text-fg-3">
+          Test data only. Answers are saved on this device.
+        </p>
 
         <div class="mb-4">
           <div :class="sectionLabel">Registry lookup</div>
@@ -94,15 +109,30 @@ const sectionLabel = "mb-2 text-[12px] font-semibold tracking-[0.01em] text-fg-3
         </div>
 
         <div class="mb-4">
-          <div :class="sectionLabel">Jump to after sign-up (Nigerian company)</div>
+          <div :class="sectionLabel">
+            Jump to after sign-up (Nigerian company)
+          </div>
           <div class="grid gap-2">
-            <ForenButton v-for="[p, label] in PRESETS" :key="p" variant="secondary" size="xs" class="justify-start" @click="preset(p)">
+            <ForenButton
+              v-for="[p, label] in PRESETS"
+              :key="p"
+              variant="secondary"
+              size="xs"
+              class="justify-start"
+              @click="preset(p)"
+            >
               {{ label }}
             </ForenButton>
           </div>
         </div>
 
-        <ForenButton variant="outline" size="xs" class="mt-2 w-full" @click="restart">Start sign-up again</ForenButton>
+        <ForenButton
+          variant="outline"
+          size="xs"
+          class="mt-2 w-full"
+          @click="restart"
+          >Start sign-up again</ForenButton
+        >
       </PopoverContent>
     </PopoverPortal>
   </PopoverRoot>

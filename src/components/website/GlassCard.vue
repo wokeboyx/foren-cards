@@ -11,7 +11,7 @@ const props = defineProps<{ class?: HTMLAttributes["class"] }>();
     :class="
       cn(
         'relative w-full rounded-[40px] border border-[rgba(192,225,250,0.2)] bg-gradient-to-b from-[rgba(216,237,255,0.1)] to-[#d8edff] to-[168.8%] p-4 backdrop-blur-[16px]',
-        props.class
+        props.class,
       )
     "
   >

@@ -38,8 +38,12 @@ export const tagVariants = cva(
       { size: "normal", padding: "both", className: "px-3" },
       { size: "normal", padding: "iconOnly", className: "px-0 aspect-square" },
     ],
-    defaultVariants: { state: "unselected", size: "normal", padding: "symmetric" },
-  }
+    defaultVariants: {
+      state: "unselected",
+      size: "normal",
+      padding: "symmetric",
+    },
+  },
 );
 
 export type TagVariants = VariantProps<typeof tagVariants>;

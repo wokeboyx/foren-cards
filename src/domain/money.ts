@@ -45,20 +45,28 @@ export function rate(from: Currency, to: Currency, rates = USD_RATES): number {
 
 export function convert(m: Money, to: Currency, rates = USD_RATES): Money {
   if (m.currency === to) return m;
-  return { minor: Math.round(m.minor * rate(m.currency, to, rates)), currency: to };
+  return {
+    minor: Math.round(m.minor * rate(m.currency, to, rates)),
+    currency: to,
+  };
 }
 
 export function add(a: Money, b: Money): Money {
-  if (a.currency !== b.currency) throw new Error(`Currency mismatch ${a.currency}/${b.currency}`);
+  if (a.currency !== b.currency)
+    throw new Error(`Currency mismatch ${a.currency}/${b.currency}`);
   return { minor: a.minor + b.minor, currency: a.currency };
 }
 
 export function sub(a: Money, b: Money): Money {
-  if (a.currency !== b.currency) throw new Error(`Currency mismatch ${a.currency}/${b.currency}`);
+  if (a.currency !== b.currency)
+    throw new Error(`Currency mismatch ${a.currency}/${b.currency}`);
   return { minor: a.minor - b.minor, currency: a.currency };
 }
 
-export function format(m: Money, opts: { code?: boolean; compact?: boolean } = {}): string {
+export function format(
+  m: Money,
+  opts: { code?: boolean; compact?: boolean } = {},
+): string {
   const major = m.minor / 100;
   const s = new Intl.NumberFormat("en-GB", {
     style: "currency",
@@ -74,6 +82,16 @@ export function format(m: Money, opts: { code?: boolean; compact?: boolean } = {
 export function formatRate(from: Currency, to: Currency, r: number): string {
   const digits = r >= 100 ? 2 : 4;
   return `1 ${from} = ${r.toFixed(digits)} ${to}`;
+}
+
+/** "1 USD ≈ 1,580.45 NGN": the exchange-rate line from the Figma swap review. */
+export function formatApproxRate(from: Currency, to: Currency): string {
+  const r = rate(from, to);
+  const s = r.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: r >= 100 ? 2 : 4,
+  });
+  return `1 ${from} ≈ ${s} ${to}`;
 }
 
 /** Parse a user-typed amount ("1,240.50") into minor units. Returns null when malformed. */

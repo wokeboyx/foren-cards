@@ -8,14 +8,21 @@ import { ink, muted } from "./shared";
 
 const MAX_IMAGE_MB = 5;
 
-defineProps<{ id: string; label: string; hint: string; shape: "logo" | "cover" }>();
+defineProps<{
+  id: string;
+  label: string;
+  hint: string;
+  shape: "logo" | "cover";
+}>();
 const value = defineModel<string | null>({ required: true });
 const error = ref<string>();
 
 function pick(file?: File) {
   if (!file) return;
-  if (!file.type.startsWith("image/")) return (error.value = "Choose an image file");
-  if (file.size > MAX_IMAGE_MB * 1024 * 1024) return (error.value = `Use an image under ${MAX_IMAGE_MB} MB`);
+  if (!file.type.startsWith("image/"))
+    return (error.value = "Choose an image file");
+  if (file.size > MAX_IMAGE_MB * 1024 * 1024)
+    return (error.value = `Use an image under ${MAX_IMAGE_MB} MB`);
   error.value = undefined;
   value.value = URL.createObjectURL(file);
 }
@@ -28,12 +35,27 @@ function pick(file?: File) {
       :for="id"
       class="flex h-16 cursor-pointer items-center gap-3 rounded-[16px] border border-dashed border-[#d8d6d5] bg-white px-3 transition-colors hover:border-[#2f2d2b] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#2f2d2b]/30"
     >
-      <span :class="cn('grid shrink-0 place-items-center overflow-hidden bg-[#f6f5f2]', shape === 'logo' ? 'size-10 rounded-full' : 'h-10 w-14 rounded-[8px]')">
+      <span
+        :class="
+          cn(
+            'grid shrink-0 place-items-center overflow-hidden bg-[#f6f5f2]',
+            shape === 'logo'
+              ? 'size-10 rounded-full'
+              : 'h-10 w-14 rounded-[8px]',
+          )
+        "
+      >
         <img v-if="value" :src="value" alt="" class="size-full object-cover" />
-        <RiImageAddLine v-else class="size-5 text-[#95908b]" aria-hidden="true" />
+        <RiImageAddLine
+          v-else
+          class="size-5 text-[#95908b]"
+          aria-hidden="true"
+        />
       </span>
       <span class="min-w-0">
-        <span :class="cn('block truncate text-[13px] font-semibold', ink)">{{ value ? "Change" : "Upload" }}</span>
+        <span :class="cn('block truncate text-[13px] font-semibold', ink)">{{
+          value ? "Change" : "Upload"
+        }}</span>
         <span :class="cn('block truncate text-[12px]', muted)">{{ hint }}</span>
       </span>
       <input

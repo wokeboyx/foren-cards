@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { computed, useSlots, type ButtonHTMLAttributes, type HTMLAttributes } from "vue";
+import {
+  computed,
+  useSlots,
+  type ButtonHTMLAttributes,
+  type HTMLAttributes,
+} from "vue";
 import { cn } from "@/lib/utils";
 import { tagVariants, type TagVariants } from "./foren-tag";
 
@@ -12,11 +17,17 @@ const props = withDefaults(
     type?: ButtonHTMLAttributes["type"];
     class?: HTMLAttributes["class"];
   }>(),
-  { type: "button" }
+  { type: "button" },
 );
-defineSlots<{ default?(): unknown; leadingIcon?(): unknown; trailingIcon?(): unknown }>();
+defineSlots<{
+  default?(): unknown;
+  leadingIcon?(): unknown;
+  trailingIcon?(): unknown;
+}>();
 const slots = useSlots();
-const resolvedState = computed(() => props.state ?? (props.selected ? "selected" : "unselected"));
+const resolvedState = computed(
+  () => props.state ?? (props.selected ? "selected" : "unselected"),
+);
 const padding = computed(() => {
   const lead = !!slots.leadingIcon;
   const trail = !!slots.trailingIcon;
@@ -31,8 +42,15 @@ const padding = computed(() => {
 <template>
   <button
     :type="props.type"
-    :aria-pressed="resolvedState === 'selected' || resolvedState === 'destructive'"
-    :class="cn(tagVariants({ state: resolvedState, size: props.size, padding }), props.class)"
+    :aria-pressed="
+      resolvedState === 'selected' || resolvedState === 'destructive'
+    "
+    :class="
+      cn(
+        tagVariants({ state: resolvedState, size: props.size, padding }),
+        props.class,
+      )
+    "
   >
     <slot name="leadingIcon" />
     <span v-if="$slots.default"><slot /></span>

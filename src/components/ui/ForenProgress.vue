@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, useAttrs, watch, type HTMLAttributes } from "vue";
+import {
+  computed,
+  onBeforeUnmount,
+  ref,
+  useAttrs,
+  watch,
+  type HTMLAttributes,
+} from "vue";
 import { cn } from "@/lib/utils";
 import { progressLabelVariants, progressTrackVariants } from "./foren-progress";
 
@@ -23,13 +30,24 @@ const props = withDefaults(
     fillColor?: string;
     class?: HTMLAttributes["class"];
   }>(),
-  { size: "md", value: 0, max: 100, indeterminate: false, hideValue: false, fillColor: "var(--color-foren-brand-green)" }
+  {
+    size: "md",
+    value: 0,
+    max: 100,
+    indeterminate: false,
+    hideValue: false,
+    fillColor: "var(--color-foren-brand-green)",
+  },
 );
 defineSlots<{ label?(): unknown; valueText?(): unknown }>();
 const attrs = useAttrs();
 
-const targetPct = computed(() => Math.max(0, Math.min(100, (props.value / props.max) * 100)));
-const showHeader = computed(() => !!props.label || (!props.hideValue && !props.indeterminate));
+const targetPct = computed(() =>
+  Math.max(0, Math.min(100, (props.value / props.max) * 100)),
+);
+const showHeader = computed(
+  () => !!props.label || (!props.hideValue && !props.indeterminate),
+);
 
 // Smoothly tween the displayed value so the text rolls instead of snapping.
 // Bar width animates from the same source for perfect sync.
@@ -52,14 +70,22 @@ watch([targetPct, () => props.indeterminate], ([end, indeterminate]) => {
 });
 onBeforeUnmount(() => cancelAnimationFrame(raf));
 const rounded = computed(() => Math.round(displayPct.value));
-const ariaLabel = computed(() => props.label ?? (attrs["aria-label"] as string | undefined) ?? "Progress");
+const ariaLabel = computed(
+  () =>
+    props.label ?? (attrs["aria-label"] as string | undefined) ?? "Progress",
+);
 </script>
 
 <template>
   <div :class="cn('w-full', props.class)" v-bind="$attrs">
     <div v-if="showHeader" :class="progressLabelVariants({ size })">
-      <span class="text-[var(--color-foren-text-primary)] truncate"><slot name="label">{{ label }}</slot></span>
-      <span v-if="!hideValue && !indeterminate" class="text-[var(--color-foren-text-tertiary)] tabular-nums shrink-0">
+      <span class="text-[var(--color-foren-text-primary)] truncate"
+        ><slot name="label">{{ label }}</slot></span
+      >
+      <span
+        v-if="!hideValue && !indeterminate"
+        class="text-[var(--color-foren-text-tertiary)] tabular-nums shrink-0"
+      >
         <slot name="valueText">{{ valueText ?? `${rounded}%` }}</slot>
       </span>
     </div>
@@ -76,9 +102,19 @@ const ariaLabel = computed(() => props.label ?? (attrs["aria-label"] as string |
         v-if="indeterminate"
         aria-hidden="true"
         class="absolute inset-y-0 rounded-full"
-        :style="{ backgroundColor: fillColor, width: '40%', animation: 'forenProgressIndeterminate 1.4s cubic-bezier(0.4, 0, 0.6, 1) infinite' }"
+        :style="{
+          backgroundColor: fillColor,
+          width: '40%',
+          animation:
+            'forenProgressIndeterminate 1.4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        }"
       />
-      <span v-else aria-hidden="true" class="block h-full rounded-full" :style="{ width: `${displayPct}%`, backgroundColor: fillColor }" />
+      <span
+        v-else
+        aria-hidden="true"
+        class="block h-full rounded-full"
+        :style="{ width: `${displayPct}%`, backgroundColor: fillColor }"
+      />
     </div>
   </div>
 </template>

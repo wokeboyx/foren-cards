@@ -21,7 +21,13 @@ const props = withDefaults(
     width?: number | string;
     class?: HTMLAttributes["class"];
   }>(),
-  { align: "left", sortable: false, sortDirection: null, checkbox: false, modelValue: undefined }
+  {
+    align: "left",
+    sortable: false,
+    sortDirection: null,
+    checkbox: false,
+    modelValue: undefined,
+  },
 );
 const emit = defineEmits<{ sort: []; "update:modelValue": [next: Checked] }>();
 /** Default slot is used as the label when `label` isn't set. */
@@ -31,11 +37,26 @@ defineSlots<{ default?(): unknown }>();
 <template>
   <th
     scope="col"
-    :aria-sort="sortable ? (sortDirection === 'asc' ? 'ascending' : sortDirection === 'desc' ? 'descending' : 'none') : undefined"
+    :aria-sort="
+      sortable
+        ? sortDirection === 'asc'
+          ? 'ascending'
+          : sortDirection === 'desc'
+            ? 'descending'
+            : 'none'
+        : undefined
+    "
     :style="width != null ? { width: cssSize(width) } : undefined"
     :class="cn('h-11 px-4 align-middle font-normal', props.class)"
   >
-    <div :class="cn('flex items-center gap-1', align === 'right' ? 'justify-end' : 'justify-start')">
+    <div
+      :class="
+        cn(
+          'flex items-center gap-1',
+          align === 'right' ? 'justify-end' : 'justify-start',
+        )
+      "
+    >
       <ForenCheckbox
         v-if="checkbox"
         size="sm"
@@ -50,21 +71,30 @@ defineSlots<{ default?(): unknown }>();
         class="group/sort inline-flex cursor-pointer items-center gap-1 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-foren-border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-foren-bg-default)]"
         @click="emit('sort')"
       >
-        <span class="text-[12px] font-semibold leading-[18px] tracking-[0.01em] whitespace-nowrap text-[var(--color-foren-text-tertiary)] uppercase">
-          <template v-if="label">{{ label }}</template><slot v-else />
+        <span
+          class="text-[12px] font-semibold leading-[18px] tracking-[0.01em] whitespace-nowrap text-[var(--color-foren-text-tertiary)] uppercase"
+        >
+          <template v-if="label">{{ label }}</template
+          ><slot v-else />
         </span>
         <RiExpandUpDownLine
           aria-hidden="true"
           :class="
             cn(
               'size-3 shrink-0 transition-colors',
-              sortDirection ? 'text-[var(--color-foren-text-primary)]' : 'text-[var(--color-foren-text-tertiary)] group-hover/sort:text-[var(--color-foren-text-secondary)]'
+              sortDirection
+                ? 'text-[var(--color-foren-text-primary)]'
+                : 'text-[var(--color-foren-text-tertiary)] group-hover/sort:text-[var(--color-foren-text-secondary)]',
             )
           "
         />
       </button>
-      <span v-else class="text-[12px] font-semibold leading-[18px] tracking-[0.01em] whitespace-nowrap text-[var(--color-foren-text-tertiary)] uppercase">
-        <template v-if="label">{{ label }}</template><slot v-else />
+      <span
+        v-else
+        class="text-[12px] font-semibold leading-[18px] tracking-[0.01em] whitespace-nowrap text-[var(--color-foren-text-tertiary)] uppercase"
+      >
+        <template v-if="label">{{ label }}</template
+        ><slot v-else />
       </span>
     </div>
   </th>

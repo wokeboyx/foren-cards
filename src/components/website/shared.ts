@@ -12,6 +12,7 @@ export const primaryBtn =
 export const secondaryBtn =
   "inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#ebe9e5] px-6 text-[14px] font-semibold tracking-[0.175px] text-[#2f2d2b] outline-none transition-colors hover:bg-[#dfdcd7] focus-visible:ring-2 focus-visible:ring-[#2f2d2b]/30";
 
-export const linkBtn = "text-[14px] font-medium text-[#6b6661] underline underline-offset-4 outline-none hover:text-[#2f2d2b] focus-visible:ring-2 focus-visible:ring-[#2f2d2b]/30 rounded";
+export const linkBtn =
+  "text-[14px] font-medium text-[#6b6661] underline underline-offset-4 outline-none hover:text-[#2f2d2b] focus-visible:ring-2 focus-visible:ring-[#2f2d2b]/30 rounded";
 
 export const validPhone = (n: string) => n.replace(/\D/g, "").length >= 7;

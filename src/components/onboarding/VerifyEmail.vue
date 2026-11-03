@@ -30,7 +30,7 @@ watch(
     clearTimeout(tick);
     if (w > 0) tick = setTimeout(() => wait.value--, 1000);
   },
-  { immediate: true }
+  { immediate: true },
 );
 // autofocus only applies on page load; focus the first digit when the screen mounts.
 onMounted(() => focusAt(0));
@@ -46,14 +46,17 @@ function verify(code: string) {
   verifyTimer = setTimeout(() => {
     if (code === "000000") {
       checking.value = false;
-      error.value = "That code isn’t right. Check the latest email we sent, or resend the code.";
+      error.value =
+        "That code isn’t right. Check the latest email we sent, or resend the code.";
       digits.value = Array(LENGTH).fill("");
       // Inputs are disabled while checking; focus once they're enabled again.
       setTimeout(() => focusAt(0));
       return;
     }
     store.set({ emailVerified: true });
-    toast.success("Email has been confirmed", { description: "Your email has been verified successfully." });
+    toast.success("Email has been confirmed", {
+      description: "Your email has been verified successfully.",
+    });
     router.push("/onboarding/identity");
   }, 1200);
 }
@@ -88,14 +91,16 @@ function onKeyDown(i: number, e: KeyboardEvent) {
     e.preventDefault();
     update(
       digits.value.map((d, j) => (j === i - 1 ? "" : d)),
-      i - 1
+      i - 1,
     );
   } else if (e.key === "ArrowLeft" && i > 0) focusAt(i - 1);
   else if (e.key === "ArrowRight" && i < LENGTH - 1) focusAt(i + 1);
 }
 
 function onPaste(e: ClipboardEvent) {
-  const text = (e.clipboardData?.getData("text") ?? "").replace(/\D/g, "").slice(0, LENGTH);
+  const text = (e.clipboardData?.getData("text") ?? "")
+    .replace(/\D/g, "")
+    .slice(0, LENGTH);
   if (!text) return;
   e.preventDefault();
   const next = Array(LENGTH)
@@ -111,13 +116,26 @@ function resend() {
 </script>
 
 <template>
-  <OnboardingFrame v-if="ok" step="account" back="/onboarding/account" title="Enter the verification code we sent to your email">
+  <OnboardingFrame
+    v-if="ok"
+    step="account"
+    back="/onboarding/account"
+    title="Enter the verification code we sent to your email"
+  >
     <template #description>
-      We sent a code to <span class="font-semibold text-fg">{{ maskEmail(store.email) }}</span>. This keeps your account secure by checking it’s really you.
+      We sent a code to
+      <span class="font-semibold text-fg">{{ maskEmail(store.email) }}</span
+      >. This keeps your account secure by checking it’s really you.
     </template>
-    <div class="flex flex-col items-center gap-6 rounded-[24px] bg-surface px-4 py-6">
+    <div
+      class="flex flex-col items-center gap-6 rounded-[24px] bg-surface px-4 py-6"
+    >
       <fieldset class="flex flex-col items-center gap-3">
-        <legend class="mb-3 text-center text-[14px] leading-[21px] font-medium text-fg">Verification code</legend>
+        <legend
+          class="mb-3 text-center text-[14px] leading-[21px] font-medium text-fg"
+        >
+          Verification code
+        </legend>
         <div class="flex gap-2" @paste="onPaste">
           <input
             v-for="(d, i) in digits"
@@ -133,7 +151,7 @@ function resend() {
             :class="
               cn(
                 'size-11 rounded-[12px] border bg-subtle text-center text-[20px] font-semibold text-fg tabular-nums outline-none focus-visible:border-focus focus-visible:ring-2 focus-visible:ring-focus/20 sm:size-12',
-                error ? 'border-error' : 'border-line'
+                error ? 'border-error' : 'border-line',
               )
             "
             @input="onInput(i, $event)"
@@ -142,7 +160,15 @@ function resend() {
           />
         </div>
       </fieldset>
-      <p :role="error ? 'alert' : undefined" :class="cn('text-center text-[12px] leading-[18px] font-medium', error ? 'text-error' : 'text-fg-2')">
+      <p
+        :role="error ? 'alert' : undefined"
+        :class="
+          cn(
+            'text-center text-[12px] leading-[18px] font-medium',
+            error ? 'text-error' : 'text-fg-2',
+          )
+        "
+      >
         {{ error ?? "Didn’t get it? Check spam, or resend below." }}
       </p>
       <button
@@ -154,7 +180,9 @@ function resend() {
         <RiRefreshLine class="size-3.5" aria-hidden="true" />
         {{ wait > 0 ? `Resend code (${wait}s)` : "Resend code" }}
       </button>
-      <p class="text-[11px] leading-4 text-fg-3">Prototype: any 6 digits work. 000000 shows the error.</p>
+      <p class="text-[11px] leading-4 text-fg-3">
+        Prototype: any 6 digits work. 000000 shows the error.
+      </p>
     </div>
     <CheckingOverlay v-if="checking" label="Checking your code" />
   </OnboardingFrame>

@@ -14,4 +14,5 @@ export const COUNTRIES: { code: string; name: string; currency: Currency }[] = [
   { code: "NG", name: "Nigeria", currency: "NGN" },
 ];
 
-export const countryByCode = (code: string | null | undefined) => COUNTRIES.find((c) => c.code === code);
+export const countryByCode = (code: string | null | undefined) =>
+  COUNTRIES.find((c) => c.code === code);

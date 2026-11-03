@@ -14,7 +14,7 @@ export const avatarVariants = cva(
       },
     },
     defaultVariants: { size: "md" },
-  }
+  },
 );
 export const innerBgVariants = cva(
   "absolute inset-0 rounded-full flex items-center justify-center overflow-hidden font-medium tracking-[0.01em]",
@@ -22,14 +22,19 @@ export const innerBgVariants = cva(
     variants: {
       tone: {
         dark: "bg-[var(--color-foren-bg-button-primary)] text-[var(--color-foren-text-inverse)]",
-        muted: "bg-[var(--color-foren-bg-subtle)] text-[var(--color-foren-text-secondary)]",
+        muted:
+          "bg-[var(--color-foren-bg-subtle)] text-[var(--color-foren-text-secondary)]",
       },
     },
     defaultVariants: { tone: "dark" },
-  }
+  },
 );
-export type AvatarSize = NonNullable<VariantProps<typeof avatarVariants>["size"]>;
-export type AvatarTone = NonNullable<VariantProps<typeof innerBgVariants>["tone"]>;
+export type AvatarSize = NonNullable<
+  VariantProps<typeof avatarVariants>["size"]
+>;
+export type AvatarTone = NonNullable<
+  VariantProps<typeof innerBgVariants>["tone"]
+>;
 export type AvatarStatus = "online" | "away" | "busy" | "offline";
 
 export function initialsFromName(name?: string) {

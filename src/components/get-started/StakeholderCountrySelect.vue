@@ -10,9 +10,16 @@ const model = defineModel<string>({ required: true });
 
 <template>
   <Field :label="label" :html-for="id" :error="error">
-    <select :id="id" v-model="model" :aria-invalid="!!error || undefined" :class="cn(fieldCls, !model && 'text-fg-3')">
+    <select
+      :id="id"
+      v-model="model"
+      :aria-invalid="!!error || undefined"
+      :class="cn(fieldCls, !model && 'text-fg-3')"
+    >
       <option value="">Choose…</option>
-      <option v-for="n in NATIONALITIES" :key="n.code" :value="n.code">{{ n.name }}</option>
+      <option v-for="n in NATIONALITIES" :key="n.code" :value="n.code">
+        {{ n.name }}
+      </option>
     </select>
   </Field>
 </template>

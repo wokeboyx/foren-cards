@@ -16,22 +16,15 @@ export type Person = {
   invited?: boolean;
 };
 
-export type CardKind = "standard" | "emergency" | "subscription";
+export type CardKind = "standard" | "emergency" | "subscription" | "disposable";
 export type CardStatus = "active" | "frozen" | "canceled";
-export type CardDesign = "midnight" | "skyline" | "aurora" | "cream" | "lime" | "titanium";
-
-export type FundingStrategy = "cheapest_fx" | "protect" | "custom";
-
-export type FundingConfig = {
-  strategy: FundingStrategy;
-  /** Balance order. For cheapest_fx / protect this is derived per charge; for custom it is used as-is. */
-  order: Currency[];
-  /** protect: the currency kept for last, e.g. GBP for a UK business. */
-  protect?: Currency;
-};
+/** The six card skins from the Foren Mobile Figma. */
+export type CardDesign =
+  "ink" | "silver" | "cobalt" | "clay" | "chalk" | "lime";
 
 /** first_merchant: the card locks itself to whichever merchant charges it first (then lockedMerchantId is set). */
-export type PermissionMode = "anywhere" | "first_merchant" | "merchants" | "categories";
+export type PermissionMode =
+  "anywhere" | "first_merchant" | "merchants" | "categories";
 
 export type Category =
   | "software"
@@ -54,10 +47,15 @@ export type PermissionConfig = {
   blockedCategories: Category[];
 };
 
-export type LimitPeriod = "per_txn" | "daily" | "weekly" | "monthly";
-export type Limit = { period: LimitPeriod; amount: Money };
+/** A card has two limits: the most it can spend in a day and the most it can spend on one charge (txn <= daily). */
+export type Limit = { daily: Money; txn: Money };
 
-export type Address = { line1: string; city: string; postcode: string; country: string };
+export type Address = {
+  line1: string;
+  city: string;
+  postcode: string;
+  country: string;
+};
 
 export type Card = {
   id: string;
@@ -71,7 +69,8 @@ export type Card = {
   /** ISO date (yyyy-mm) */
   expiry: string;
   lockedMerchantId?: string;
-  funding: FundingConfig;
+  /** What the card can spend. Cards are prefunded: a payment is declined once the balance runs out. The card's currency is its limits' currency. */
+  balance: Money;
   permissions: PermissionConfig;
   limit: Limit;
   billingAddress: Address;
@@ -86,13 +85,9 @@ export type Card = {
   activeFrom?: string;
   activeUntil?: string;
   /** Admin lock (Revolut): frozen by the account owner; the cardholder can't ask to unfreeze it. */
-  adminLock?: { by: string; at: string; reason?: string };
-  /** Mobile wallets the card has been added to (simulated). */
-  wallets?: ("apple" | "google")[];
   /** Company card (Revolut "virtual company card"): issued in the company's name for shared spend
-   *  like subscriptions and suppliers. holderId is the main contact; contactIds can also use and manage it. */
+   *  like subscriptions and suppliers. holderId is the one person who uses and manages it. */
   companyCard?: boolean;
-  contactIds?: string[];
   /** A merchant's own card that's waiting for the merchant to switch over from a shared card. */
   moveFrom?: { cardId: string; merchantId: string; blockOld: boolean };
   /** Personal track: how the card can be used (Card controls). Changes apply straight away. */
@@ -107,7 +102,6 @@ export type Card = {
 };
 
 /** A card being created, saved to finish later (Revolut "Save draft"). */
-export type CardDraft = { id: string; savedAt: string; step: number; card: Card; names: string[]; amountText: string; years: number };
 
 export type CardEvent = { at: string; text: string; by: string };
 
@@ -119,8 +113,11 @@ export type CardControls = {
   non3ds: boolean;
 };
 
-export type Balance = { currency: Currency; available: Money; autoFxGoalIds?: string[] };
-
+export type Balance = {
+  currency: Currency;
+  available: Money;
+  autoFxGoalIds?: string[];
+};
 
 export type NetworkVerdict =
   | { kind: "works" }
@@ -140,10 +137,15 @@ export type Merchant = {
   network: NetworkVerdict;
 };
 
-export type FxDetail = { from: Currency; rate: number; fee: Money; converted: Money };
+export type FxDetail = {
+  from: Currency;
+  rate: number;
+  fee: Money;
+  converted: Money;
+};
 
 export type FundingLeg = {
-  source: { kind: "balance"; currency: Currency };
+  source: { kind: "card" | "balance"; currency: Currency };
   /** Amount debited from the source, in the source currency */
   debit: Money;
   /** Portion of the charge this leg covered, in the charge currency */
@@ -177,6 +179,10 @@ export type Transaction = {
   status: TxStatus;
   at: string;
   legs: FundingLeg[];
+  /** "funding": money added to the card from an account balance. It's in the card's history but isn't spend. */
+  kind?: "funding";
+  /** For a funding entry: the balance it was taken from. */
+  fundedFrom?: Currency;
   feeAvoided?: FeeAvoided;
   declineReason?: DeclineReason;
   /** Set when the charge came through on a one-time approval */
@@ -187,9 +193,17 @@ export type Transaction = {
   receipt?: { name: string; size: number; at: string };
 };
 
-export type ExpenseCategory = "travel" | "meals" | "software" | "marketing" | "office" | "transport" | "other";
+export type ExpenseCategory =
+  | "travel"
+  | "meals"
+  | "software"
+  | "marketing"
+  | "office"
+  | "transport"
+  | "other";
 
-export type SubscriptionFrequency = "weekly" | "monthly" | "quarterly" | "yearly";
+export type SubscriptionFrequency =
+  "weekly" | "monthly" | "quarterly" | "yearly";
 
 export type Subscription = {
   id: string;
@@ -198,7 +212,6 @@ export type Subscription = {
   usualAmount: Money;
   frequency: SubscriptionFrequency;
   chargeDates: string[];
-  blocked: boolean;
   allowNextAttempt?: boolean;
   /** Set when a dedicated card was created; cleared when merchant billing is updated */
   movingToCardId?: string;
@@ -206,8 +219,16 @@ export type Subscription = {
   reminders: { owner: boolean; cardholder: boolean; daysBefore: number };
 };
 
-export type RequestKind = "one_time_approval" | "unfreeze" | "emergency_card" | "new_card" | "limit_increase";
-export type RequestState = "pending" | "approved" | "denied" | "expired" | "used";
+export type RequestKind =
+  | "one_time_approval"
+  | "unfreeze"
+  | "emergency_card"
+  | "new_card"
+  | "limit_increase"
+  /** A cardholder asks the account owner to add money to their card. `amount` is in the card's currency. */
+  | "topup";
+export type RequestState =
+  "pending" | "approved" | "denied" | "expired" | "used";
 
 export type CardRequest = {
   id: string;
@@ -231,14 +252,20 @@ export type CardRequest = {
   /** limit_increase: the limit the cardholder asked for, and what it was at the time. */
   newLimit?: Limit;
   oldLimit?: Limit;
-  /** new_card: what the team member asked for. The owner sets funding and can adjust before approving. */
-  newCard?: { nickname: string; limit: Limit; oneMerchant: boolean; design: CardDesign };
+  /** new_card: what the team member asked for. The owner can adjust before approving. */
+  newCard?: {
+    nickname: string;
+    limit: Limit;
+    oneMerchant: boolean;
+    design: CardDesign;
+  };
   /** The declined payment attempt this request came from */
   attemptTxId?: string;
 };
 
 export type GoalType = "keep_min" | "target_rate" | "cap";
-export type GoalStatus = "on_track" | "waiting_for_rate" | "action_taken" | "unable_to_act";
+export type GoalStatus =
+  "on_track" | "waiting_for_rate" | "action_taken" | "unable_to_act";
 
 export type AutoFxGoal = {
   id: string;

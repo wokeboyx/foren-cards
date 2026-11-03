@@ -24,18 +24,36 @@ function submit() {
 </script>
 
 <template>
-  <div class="mt-10 flex flex-col gap-3 rounded-[16px] bg-surface px-4 py-3.5 sm:-mx-6 sm:flex-row sm:items-center">
-    <RiInformationFill class="size-4 shrink-0 text-[#e0a526] max-sm:hidden" aria-hidden="true" />
+  <div
+    class="mt-10 flex flex-col gap-3 rounded-[16px] bg-surface px-4 py-3.5 sm:-mx-6 sm:flex-row sm:items-center"
+  >
+    <RiInformationFill
+      class="size-4 shrink-0 text-[#e0a526] max-sm:hidden"
+      aria-hidden="true"
+    />
     <div class="min-w-0 flex-1">
-      <p class="text-[13px] leading-[19px] font-medium text-fg">Rather have someone else handle setup?</p>
-      <p class="text-[12px] leading-[18px] font-medium text-fg-2">They complete these same steps on your behalf.</p>
+      <p class="text-[13px] leading-[19px] font-medium text-fg">
+        Rather have someone else handle setup?
+      </p>
+      <p class="text-[12px] leading-[18px] font-medium text-fg-2">
+        They complete these same steps on your behalf.
+      </p>
     </div>
-    <ForenButton variant="outline" size="xxs" class="self-start sm:self-auto" @click="open = true">
+    <ForenButton
+      variant="outline"
+      size="xxs"
+      class="self-start sm:self-auto"
+      @click="open = true"
+    >
       Delegate setup
       <template #trailingIcon><RiArrowRightLine /></template>
     </ForenButton>
   </div>
-  <Modal v-model:open="open" title="Delegate setup" description="We’ll email them a link to finish these steps. You stay the account owner.">
+  <Modal
+    v-model:open="open"
+    title="Delegate setup"
+    description="We’ll email them a link to finish these steps. You stay the account owner."
+  >
     <form novalidate class="flex flex-col gap-4" @submit.prevent="submit">
       <ForenInput
         v-model="name"
@@ -51,7 +69,13 @@ function submit() {
         :error="tried && !emailOk ? 'Enter a valid email address' : undefined"
       />
       <div class="mt-1 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <ForenButton type="button" variant="outline" size="sm" @click="open = false">Cancel</ForenButton>
+        <ForenButton
+          type="button"
+          variant="outline"
+          size="sm"
+          @click="open = false"
+          >Cancel</ForenButton
+        >
         <ForenButton type="submit" size="sm">Send invite</ForenButton>
       </div>
     </form>

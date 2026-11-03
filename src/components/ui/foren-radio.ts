@@ -65,43 +65,52 @@ export const dotVariants = cva(
       {
         checked: true,
         disabled: false,
-        className: "bg-[var(--color-foren-brand-green)] border-[var(--color-foren-brand-green)] hover:bg-[var(--color-foren-brand-green-hover)] hover:border-[var(--color-foren-brand-green-hover)]",
+        className:
+          "bg-[var(--color-foren-brand-green)] border-[var(--color-foren-brand-green)] hover:bg-[var(--color-foren-brand-green-hover)] hover:border-[var(--color-foren-brand-green-hover)]",
       },
       {
         checked: false,
         disabled: true,
-        className: "bg-[var(--color-foren-bg-button-disabled)] border-[var(--color-foren-border-disabled)]",
+        className:
+          "bg-[var(--color-foren-bg-button-disabled)] border-[var(--color-foren-border-disabled)]",
       },
       {
         checked: true,
         disabled: true,
-        className: "bg-[var(--color-foren-disabled-strong)] border-[var(--color-foren-disabled-strong)]",
+        className:
+          "bg-[var(--color-foren-disabled-strong)] border-[var(--color-foren-disabled-strong)]",
       },
     ],
     defaultVariants: { size: "md", checked: false, disabled: false },
-  }
+  },
 );
 
 /* ─── Plain radio row ─────────────────────────────────────────────────── */
-export const labelTextVariants = cva("font-medium tracking-[0.01em] text-[var(--color-foren-text-primary)]", {
-  variants: {
-    size: {
-      sm: "text-[13px] leading-[18px]",
-      md: "text-[14px] leading-[21px]",
-      lg: "text-[16px] leading-[24px]",
+export const labelTextVariants = cva(
+  "font-medium tracking-[0.01em] text-[var(--color-foren-text-primary)]",
+  {
+    variants: {
+      size: {
+        sm: "text-[13px] leading-[18px]",
+        md: "text-[14px] leading-[21px]",
+        lg: "text-[16px] leading-[24px]",
+      },
+      disabled: { true: "!text-[var(--color-foren-text-disabled)]", false: "" },
     },
-    disabled: { true: "!text-[var(--color-foren-text-disabled)]", false: "" },
+    defaultVariants: { size: "md", disabled: false },
   },
-  defaultVariants: { size: "md", disabled: false },
-});
-export const descTextVariants = cva("text-[var(--color-foren-text-tertiary)] tracking-[0.01em]", {
-  variants: {
-    size: {
-      sm: "text-[11px] leading-[16px]",
-      md: "text-[12px] leading-[17px]",
-      lg: "text-[13px] leading-[18px]",
+);
+export const descTextVariants = cva(
+  "text-[var(--color-foren-text-tertiary)] tracking-[0.01em]",
+  {
+    variants: {
+      size: {
+        sm: "text-[11px] leading-[16px]",
+        md: "text-[12px] leading-[17px]",
+        lg: "text-[13px] leading-[18px]",
+      },
+      disabled: { true: "!text-[var(--color-foren-text-disabled)]", false: "" },
     },
-    disabled: { true: "!text-[var(--color-foren-text-disabled)]", false: "" },
+    defaultVariants: { size: "md", disabled: false },
   },
-  defaultVariants: { size: "md", disabled: false },
-});
+);

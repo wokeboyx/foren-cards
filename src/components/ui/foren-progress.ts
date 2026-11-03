@@ -11,7 +11,7 @@ export const progressTrackVariants = cva(
       },
     },
     defaultVariants: { size: "md" },
-  }
+  },
 );
 export const progressLabelVariants = cva(
   "flex items-baseline justify-between gap-3 font-medium tracking-[0.01em]",
@@ -24,5 +24,5 @@ export const progressLabelVariants = cva(
       },
     },
     defaultVariants: { size: "md" },
-  }
+  },
 );

@@ -42,7 +42,7 @@ Node 24 or later.
 | `src/router/index.ts` | Every route. `meta.layout` picks the page chrome: app (sidebar), `focus` (full-screen create/edit), `onboarding`, `bare` |
 | `src/components/shell/` | App shell: sidebar, top bar, search, notifications, demo panel |
 | `src/components/ui/` | Foren Design System components (Button, Badge, Toggle, Input, Table, Segmented control…), with cva variants in the `.ts` files beside them |
-| `src/components/<feature>/` | Screens by area: `cards`, `create`, `requests`, `subscriptions`, `transactions`, `travel`, `autofx`, `merchant`, `onboarding`, `get-started`, `website` |
+| `src/components/<feature>/` | Screens by area: `cards`, `create`, `requests`, `subscriptions`, `transactions`, `autofx`, `onboarding`, `get-started`, `website` |
 | `src/components/*.vue` | Shared app pieces: `Sheet`, `Modal`, `ConfirmDialog`, `EmptyState`, `ErrorState`, `Panel`, `PageHeader`, `LinkButton`, `Money`… |
 | `src/components/icons.ts` | The Remix icons in use. Each is compiled on its own by `unplugin-icons`, so only these are bundled |
 | `src/services/` | **The API boundary.** One function per user action; mock-backed today. Read its README before wiring the API |
@@ -67,14 +67,20 @@ Node 24 or later.
 The shell follows the Foren Business Banking Figma file (DEV READY page): the "NEW IA" sidebar (workspace switcher;
 Home, Dashboard, Global accounts, **Cards**; Move money; Records; Manage; Developers at the bottom), and content in an inset
 panel with a breadcrumb, search, bell and avatar across the top. **Cards** sits after Move money and expands like Receive
-into Overview, Requests and Spending abroad. Subscriptions and Check a merchant are tabs on the Cards overview
-(Manage / Subscriptions / Check a merchant / Archived). Sidebar items outside cards show a "not part of the cards
+into Overview and Requests. Subscriptions is a tab on the Cards overview
+(Manage / Subscriptions / Archived). Sidebar items outside cards show a "not part of the cards
 prototype" toast. "Viewing as" (a prototype control) sits where the Figma top bar has Test mode.
 
-Each card has its own page (`/cards/[id]`, Figma dashboard layout): spend this period with Freeze / Transactions /
-Spending abroad, then one panel with tabs — Recent transactions, **Card controls** and Subscriptions (`?tab=controls`) — in the Figma Settings › Security pattern — each row says what
-the control does and what it's set to now, with a switch (applies straight away) or a Change button. The right column
-shows the card with its details in place (Show details → number, expiry, CVC with copy), wallets and facts.
+A card opens the way it does in Mercury: click a row in the list and a panel opens beside it (a full-screen sheet on phones).
+Each fact is shown once. The panel has one note at the top (the most urgent: terminated, frozen, emergency, limit request, no
+balance, expiring), then the limit as "$X left of $Y today" with a bar, the card with its balance on the face, and
+one row of actions (Fund card, Freeze and a **More** menu: Edit nickname, Edit limit, Change log, Terminate card). On the full
+page (`/cards/[id]`) the page header names the card, so the panel leaves the name out; the tabs on the left are **History**
+(search and filters; *Missing receipts* is a status filter; Source and Notes only show on very wide screens), **Card details**
+(number, expiry, CVC, name on card, billing address, copy buttons) and **Subscriptions**.
+Edit limit is Mercury's "Edit card limits".
+Creating a card lets you choose which balance pays the creation fee (any balance that can cover it, converted when it isn't USD).
+There is no lock card and no Card controls section.
 
 **Design system:** screens use the foren-docs components (Button, Badge, Toggle, Progress, Segmented control for all tabs,
 Table, Info note, Input, Search, Avatar, ComboBox…). The DS has no Tabs, Sidebar, Breadcrumb or Modal, so tabs use the
@@ -93,19 +99,31 @@ and a full-screen create view whose live summary doubles as the review step.
 - **Merchant logos** are letter tiles; network compatibility data is illustrative.
 - **Emergency-card ceiling** is hidden (`POLICY.emergencyCeiling = null`) until product confirms it.
 - Revolut Business iOS patterns, every card keeps a history (what changed, when, who: Card controls → History); cancelling lists the consequences and offers "Freeze instead"; requests show an approvals timeline (submitted by → approved/declined by, with the reason, up to 500 characters). Spend programs and bulk ordering of company cards were noted but not built (not in the UX doc).
-- **Create card is a 5-step flow** (who, where, money, limits, review) with a single progress bar, per-step checks and the live preview + summary fixed on the right. Editing a card stays one page. All radio choices are stacked vertically.
+- **Create card is a 2-step flow** (card details, then limits) as a Mercury-style focus page (thin progress line, one centred column, "Next →"). Closing part-way asks "Leave without creating the card?"; there are no drafts. A live card preview sits above the colour swatches, the cost and active-card count show on step 1, and step 2 ends with a summary. There is one kind of card and a plain Create card button (no menu). A card is for the company by default (only the account admin sees it) or, by radio choice, for a team member. New cards allow any merchant except the default blocked categories; merchant rules are edited from the card, not at creation. Editing a card stays one page. The success screen shows what was set up and paid, with **Fund card** first.
 - **Borrowed from Revolut / Wise / Mercury:** limit increase requests (cardholder → owner, shown on the card row and in Requests);
-  receipts, notes and expense categories on transactions with a "Missing receipt" marker and filter; a monthly statement per card
+  receipts, notes and expense categories on transactions with a "Missing receipt" marker and filter
   with CSV export; admin **Lock card** (stronger than freeze: the cardholder can't ask to unfreeze); **spending periods** (card only
-  works between two dates; declines with "outside_period"); **bulk create** (several cards with the same settings); **Save and
-  finish later** drafts shown in the card list; **Add to Apple Pay / Google Pay** (simulated: real provisioning depends on the
-  card processor and needs confirming with engineering). **Spending abroad** (Wise travel hub, adapted): pick a country and a card to see which balance pays and what it costs, whether the card will work there (status, limit, period, controls), tips, and set trip dates. At /travel (from the sidebar, the card page, Global account and search).
-- **Card requests live in the card list.** Team members see **Request card** where the owner sees Create card (same focus layout, single progress bar, live preview). A sent request appears in the card list as a **Pending request** row for the requester and the owner; the owner opens it in a side panel and chooses **Approve and create** or Decline. Requests also appear on the Requests page.
+  works between two dates; declines with "outside_period"). Removed because they can't be supported yet: Check a merchant and network compatibility, Spending abroad, Apple Pay / Google Pay and saved drafts.
+- **Card requests live in the card list.** Team members see **Request card** where the owner sees Create card (the same one-page form as Create a card: nickname and colour, why, limits, with a live preview and the creation fee; no steps). A sent request appears in the card list as a **Pending request** row for the requester and the owner; the owner opens it in a side panel and chooses **Approve and create** or Decline. Approving creates the card and charges the owner the creation fee, like any new card. Requests also appear on the Requests page.
 - **Auto cards were removed.** Payments happen at the merchant's checkout, so Foren can't suggest a card before someone pays.
-  Instead, card creation asks "How many merchants will use this card?" — **One merchant** (locks to the first merchant that
-  charges it; each other subscription needs its own card) or **Many merchants** (anywhere / selected merchants / categories).
-  A subscription can still be given its own card (§8.4): create the card → update it at the merchant (off-app) → Foren blocks
-  the merchant on the old card once it switches.
+  Cards are not tied to a purpose or a merchant: there is no merchant lock, no "one merchant" choice and no allowed
+  merchants or categories, because a card can't be told what it is for. A subscription can still be given its own
+  (plain) card (§8.4): create the card → update it at the merchant (off-app) → Foren blocks the merchant on the old card
+  once it switches. The only merchant-bound card is the single-use emergency card.
+- **Funding and top-up requests follow the Figma money flows.** *Fund card* (owner and finance) is a full page on the Figma
+  grey canvas: amount and balance, a review with a round back button, a floating Cancel / Next bar, then a **Card funded**
+  status page. A cardholder can't fund their own card: the panel shows **Request top-up** instead. It opens "Request a
+  top-up" (amount, why), then the **Request sent** status page (timeline and a TXN reference). The owner sees it in Requests
+  (kind *Top-up*), approves with the PIN, and the money moves from the balance in the card's currency if it covers it,
+  otherwise from USD.
+- **Fees, limits and the PIN.** The empty state links to the card terms and conditions, which open with a "Limits and fees" list
+  (15 active cards, daily and per-transaction limits, the $2.00 creation fee, and the funding and withdrawal fees). The same list
+  sits under the create-card preview. Putting money on a card costs a funding fee: 1% of the amount, capped at $100 (in
+  `POLICY.cardFundingFee`; the withdrawal fee is a placeholder with the same schedule). The transaction PIN is needed to add money,
+  to show the card number and security code (they hide again after 45 seconds), to freeze, and to terminate a card.
+  "Cancel card" is now **Terminate card** everywhere users see it. Subscriptions are hidden for now: no tab, no sidebar or search entry, and `/subscriptions` redirects to `/cards`.
+- **History includes funding.** Every top-up of a card (from the card page or the create success screen) is a *Card funded*
+  row in History, shown as a credit with the balance it came from. It isn't spend, so it doesn't change "left today".
 - **No fallback bank account.** Cards only pay from Foren balances; the fallback was removed from the model, engine and every screen.
 - **Company cards and invites.** A card can be for a team member (in their name) or for the company (Revolut's "virtual company card",
   up to 5 people can use and manage it). You can add someone who isn't on Foren yet while creating a card; they get an invite.

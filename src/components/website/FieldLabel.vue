@@ -6,5 +6,7 @@ defineProps<{ htmlFor: string }>();
 </script>
 
 <template>
-  <label :for="htmlFor" :class="cn('mb-2 block text-[14px] font-medium', ink)"><slot /></label>
+  <label :for="htmlFor" :class="cn('mb-2 block text-[14px] font-medium', ink)"
+    ><slot
+  /></label>
 </template>

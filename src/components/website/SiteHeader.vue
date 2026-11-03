@@ -3,17 +3,44 @@
 import { RouterLink } from "vue-router";
 import { asset } from "@/lib/base-path";
 
-const NAV = ["Business", "Personal", "Platform", "Use Cases", "Resources", "Company"];
+const NAV = [
+  "Business",
+  "Personal",
+  "Platform",
+  "Use Cases",
+  "Resources",
+  "Company",
+];
 </script>
 
 <template>
   <header class="bg-[#17120d]">
-    <div class="relative mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-4 sm:px-6">
-      <RouterLink to="/website" aria-label="Foren home" class="rounded outline-none focus-visible:ring-2 focus-visible:ring-white/50">
-        <img :src="asset('/website/foren-wordmark-light.svg')" alt="Foren" width="100" height="24" class="h-6 w-[100px]" />
+    <div
+      class="relative mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-4 sm:px-6"
+    >
+      <RouterLink
+        to="/website"
+        aria-label="Foren home"
+        class="rounded outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+      >
+        <img
+          :src="asset('/website/foren-wordmark-light.svg')"
+          alt="Foren"
+          width="100"
+          height="24"
+          class="h-6 w-[100px]"
+        />
       </RouterLink>
-      <nav aria-label="Main" class="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 gap-1 lg:flex">
-        <span v-for="n in NAV" :key="n" class="inline-flex h-8 items-center rounded-full px-3 text-[14px] font-medium text-[#d8d6d5]">{{ n }}</span>
+      <nav
+        aria-label="Main"
+        class="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 gap-1 lg:flex"
+      >
+        <span
+          v-for="n in NAV"
+          :key="n"
+          class="inline-flex h-8 items-center rounded-full px-3 text-[14px] font-medium text-[#d8d6d5]"
+          >{{ n }}</span
+        >
       </nav>
       <div class="flex gap-2 sm:gap-4">
         <RouterLink

@@ -12,9 +12,19 @@ const currency = defineModel<string>("currency", { required: true });
 <template>
   <Panel class="flex items-end gap-2 py-2 pr-6 pl-2">
     <div class="flex flex-1 flex-col gap-1">
-      <p :class="cn('px-2 py-1 text-[12px] font-medium tracking-[0.12px]', muted)">{{ label }}</p>
+      <p
+        :class="
+          cn('px-2 py-1 text-[12px] font-medium tracking-[0.12px]', muted)
+        "
+      >
+        {{ label }}
+      </p>
       <div>
-        <CurrencyPill v-model="currency" :label="`${label} currency`" :options="CALCULATOR" />
+        <CurrencyPill
+          v-model="currency"
+          :label="`${label} currency`"
+          :options="CALCULATOR"
+        />
       </div>
     </div>
     <div class="flex-1 pb-1"><slot /></div>

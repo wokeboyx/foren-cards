@@ -22,7 +22,9 @@ const props = defineProps<{
   animateExpand: boolean;
 }>();
 
-const hasChildren = computed(() => !!props.node.children && props.node.children.length > 0);
+const hasChildren = computed(
+  () => !!props.node.children && props.node.children.length > 0,
+);
 const isOpen = computed(() => props.expanded.includes(props.node.id));
 const isSelected = computed(() => props.selected.includes(props.node.id));
 
@@ -51,7 +53,13 @@ function onKey(e: KeyboardEvent) {
 </script>
 
 <template>
-  <div role="treeitem" :aria-expanded="hasChildren ? isOpen : undefined" :aria-selected="isSelected" :aria-disabled="node.disabled || undefined" class="select-none">
+  <div
+    role="treeitem"
+    :aria-expanded="hasChildren ? isOpen : undefined"
+    :aria-selected="isSelected"
+    :aria-disabled="node.disabled || undefined"
+    class="select-none"
+  >
     <div
       :tabindex="node.disabled ? -1 : 0"
       :class="
@@ -60,7 +68,7 @@ function onKey(e: KeyboardEvent) {
           'text-[13px] leading-[18px] tracking-[0.01em] font-medium text-[var(--color-foren-text-primary)]',
           'hover:bg-[var(--color-foren-bg-sunken)] focus-visible:ring-2 focus-visible:ring-[var(--color-foren-border-focus)]',
           isSelected && 'bg-[var(--color-foren-bg-subtle)]',
-          node.disabled && 'opacity-50 cursor-not-allowed'
+          node.disabled && 'opacity-50 cursor-not-allowed',
         )
       "
       :style="{ paddingLeft: `${8 + level * indent}px` }"
@@ -81,45 +89,108 @@ function onKey(e: KeyboardEvent) {
         <span
           aria-hidden="true"
           class="absolute left-0 border-l border-[var(--color-foren-border-muted)] pointer-events-none"
-          :style="{ left: `${(level - 1) * indent + 14}px`, top: 0, height: isLast ? '50%' : '100%' }"
+          :style="{
+            left: `${(level - 1) * indent + 14}px`,
+            top: 0,
+            height: isLast ? '50%' : '100%',
+          }"
         />
         <!-- Horizontal connector from parent rail to row content. -->
         <span
           aria-hidden="true"
           class="absolute border-t border-[var(--color-foren-border-muted)] pointer-events-none"
-          :style="{ left: `${(level - 1) * indent + 14}px`, width: `${indent - 6}px`, top: '50%' }"
+          :style="{
+            left: `${(level - 1) * indent + 14}px`,
+            width: `${indent - 6}px`,
+            top: '50%',
+          }"
         />
       </template>
       <span
         :class="
           cn(
             'inline-flex items-center justify-center size-4 shrink-0 text-[var(--color-foren-text-tertiary)] transition-transform duration-150 ease-out',
-            hasChildren ? (isOpen ? 'rotate-90' : 'rotate-0') : 'opacity-0'
+            hasChildren ? (isOpen ? 'rotate-90' : 'rotate-0') : 'opacity-0',
           )
         "
         aria-hidden="true"
       >
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.25"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
           <path d="m9 6 6 6-6 6" />
         </svg>
       </span>
-      <span v-if="showIcons" class="inline-flex items-center justify-center size-4 shrink-0 text-[var(--color-foren-text-secondary)]" aria-hidden="true">
+      <span
+        v-if="showIcons"
+        class="inline-flex items-center justify-center size-4 shrink-0 text-[var(--color-foren-text-secondary)]"
+        aria-hidden="true"
+      >
         <component :is="node.icon" v-if="node.icon" />
-        <span v-else-if="hasChildren" class="t-icon-swap" :data-state="isOpen ? 'a' : 'b'">
+        <span
+          v-else-if="hasChildren"
+          class="t-icon-swap"
+          :data-state="isOpen ? 'a' : 'b'"
+        >
           <span class="t-icon" data-icon="a">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
               <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H3Z" />
-              <path d="m3 9 1.7 8.4A2 2 0 0 0 6.66 19h10.68a2 2 0 0 0 1.96-1.6L21 9" />
+              <path
+                d="m3 9 1.7 8.4A2 2 0 0 0 6.66 19h10.68a2 2 0 0 0 1.96-1.6L21 9"
+              />
             </svg>
           </span>
           <span class="t-icon" data-icon="b">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"
+              />
             </svg>
           </span>
         </span>
-        <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z" />
+        <svg
+          v-else
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path
+            d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"
+          />
           <path d="M14 3v6h6" />
         </svg>
       </span>
@@ -127,7 +198,13 @@ function onKey(e: KeyboardEvent) {
     </div>
     <div
       v-if="hasChildren"
-      :class="cn('grid transition-[grid-template-rows] ease-out', isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]', animateExpand ? 'duration-200' : 'duration-0')"
+      :class="
+        cn(
+          'grid transition-[grid-template-rows] ease-out',
+          isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+          animateExpand ? 'duration-200' : 'duration-0',
+        )
+      "
       :aria-hidden="!isOpen"
     >
       <div class="overflow-hidden">

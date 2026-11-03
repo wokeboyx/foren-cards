@@ -7,7 +7,9 @@ defineProps<{ label: string }>();
 
 <template>
   <div class="flex items-center justify-between gap-4">
-    <span :class="cn('text-[14px] font-medium tracking-[0.14px]', muted)">{{ label }}</span>
+    <span :class="cn('text-[14px] font-medium tracking-[0.14px]', muted)">{{
+      label
+    }}</span>
     <slot />
   </div>
 </template>

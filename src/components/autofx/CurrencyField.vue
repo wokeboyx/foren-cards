@@ -15,9 +15,16 @@ const model = defineModel<Currency>({ required: true });
       :id="id"
       v-model="model"
       :aria-invalid="!!error"
-      :class="cn('h-12 rounded-[16px] border bg-subtle px-3 text-[14px] font-medium text-fg outline-none focus:ring-2 focus:ring-focus', error ? 'border-error' : 'border-transparent')"
+      :class="
+        cn(
+          'h-12 rounded-[16px] border bg-subtle px-3 text-[14px] font-medium text-fg outline-none focus:ring-2 focus:ring-focus',
+          error ? 'border-error' : 'border-transparent',
+        )
+      "
     >
-      <option v-for="c in POLICY.launchCurrencies" :key="c" :value="c">{{ c }} — {{ CURRENCY_NAME[c] }}</option>
+      <option v-for="c in POLICY.launchCurrencies" :key="c" :value="c">
+        {{ c }} — {{ CURRENCY_NAME[c] }}
+      </option>
     </select>
     <p v-if="error" class="text-[12px] text-error">{{ error }}</p>
   </div>

@@ -22,24 +22,34 @@ export const COPY = {
     body: "Tell Foren how you want to manage a currency balance, and review each goal before it acts.",
   },
   merchantUnknown: "No history yet",
-  estimatedNextCharge: "Estimated next charge",
   insufficientHistory: "We need one more charge to estimate the next payment.",
-  blockMerchantConfirm:
-    "Future charges from this merchant on this card will be declined. Other merchants are unaffected. This does not cancel your subscription with the merchant.",
-  cardFrozen: "This card is frozen. New charges and subscriptions on it will fail.",
+  cardFrozen: "This card is frozen. New charges on it will fail.",
   approvalWindow: "Approved for one charge. Retry within 15 minutes.",
   loading: "Loading…",
   genericError: "We couldn’t load this information. Try again.",
-  saveFailure: "We couldn’t save your changes. Your previous settings are unchanged. Try again.",
+  saveFailure:
+    "We couldn’t save your changes. Your previous settings are unchanged. Try again.",
   successTitle: "Card created",
-  successBody: "Your card is ready. Review its details and share them only with the intended cardholder.",
+  successBody:
+    "Your card is ready. Review its details and share them only with the intended cardholder.",
   simulationLabel: "Simulation — no real payment was made.",
   stillOnOldCard: "Still on the old card",
 } as const;
 
-export const DECLINE: Record<DeclineReason, { title: string; next: string; fixable: boolean }> = {
-  frozen: { title: "This card is frozen.", next: "Ask the owner to unfreeze it.", fixable: true },
-  canceled: { title: "This card has been canceled.", next: "Use another card.", fixable: false },
+export const DECLINE: Record<
+  DeclineReason,
+  { title: string; next: string; fixable: boolean }
+> = {
+  frozen: {
+    title: "This card is frozen.",
+    next: "Ask the owner to unfreeze it.",
+    fixable: true,
+  },
+  canceled: {
+    title: "This card has been terminated.",
+    next: "Use another card.",
+    fixable: false,
+  },
   merchant_blocked: {
     title: "This merchant is blocked on this card.",
     next: "Ask the owner to allow this charge if it is legitimate.",
@@ -71,13 +81,21 @@ export const DECLINE: Record<DeclineReason, { title: string; next: string; fixab
     fixable: true,
   },
   insufficient_balance: {
-    title: "None of the eligible balances could cover this payment.",
-    next: "Check available balances or use an approved alternative.",
+    title: "This card doesn’t have enough balance for this payment.",
+    next: "Fund the card to spend on it.",
     fixable: true,
   },
   // Not in the §9 inventory — added for prototype state coverage; confirm with content design.
-  expired: { title: "This card has expired.", next: "Use another card.", fixable: false },
-  outside_period: { title: "This card only works on certain dates.", next: "Ask the owner to change the card’s spending period.", fixable: true },
+  expired: {
+    title: "This card has expired.",
+    next: "Use another card.",
+    fixable: false,
+  },
+  outside_period: {
+    title: "This card only works on certain dates.",
+    next: "Ask the owner to change the card’s spending period.",
+    fixable: true,
+  },
   unknown: {
     title: "We couldn’t complete this payment.",
     next: "Try another payment method or contact support if the problem continues.",

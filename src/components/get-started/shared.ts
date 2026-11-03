@@ -9,7 +9,8 @@ export const TASK_BADGE: Record<TaskStatus, [BadgeColor, string]> = {
   verified: ["success", "Verified"],
 };
 
-export const fullName = (p: Pick<Stakeholder, "firstName" | "lastName">) => `${p.firstName} ${p.lastName}`.trim();
+export const fullName = (p: Pick<Stakeholder, "firstName" | "lastName">) =>
+  `${p.firstName} ${p.lastName}`.trim();
 
 /** "Director & shareholder · 25% ownership" */
 export function roleLine(p: Stakeholder) {
@@ -17,7 +18,11 @@ export function roleLine(p: Stakeholder) {
     p.director && "Director",
     p.shareholder && "shareholder",
     !p.director && !p.shareholder && p.signatory && "Authorised signatory",
-    !p.director && !p.shareholder && !p.signatory && p.controller && "Significant control",
+    !p.director &&
+      !p.shareholder &&
+      !p.signatory &&
+      p.controller &&
+      "Significant control",
   ].filter(Boolean) as string[];
   let text = roles.join(" & ");
   text = text.charAt(0).toUpperCase() + text.slice(1);
@@ -28,4 +33,5 @@ export function roleLine(p: Stakeholder) {
 }
 
 /** Fake but stable per-person verification link (prototype). */
-export const verificationLink = (p: Stakeholder) => `https://verify.foren.co/k/${p.id.replace(/^sh_/, "")}-${p.firstName.toLowerCase()}`;
+export const verificationLink = (p: Stakeholder) =>
+  `https://verify.foren.co/k/${p.id.replace(/^sh_/, "")}-${p.firstName.toLowerCase()}`;

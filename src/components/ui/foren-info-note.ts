@@ -5,11 +5,15 @@ export const noteVariants = cva(
   {
     variants: {
       intent: {
-        default: "bg-[var(--color-foren-bg-subtle)] text-[var(--color-foren-text-secondary)]",
+        default:
+          "bg-[var(--color-foren-bg-subtle)] text-[var(--color-foren-text-secondary)]",
         info: "bg-[var(--color-foren-bg-info-subtle)] text-[var(--color-foren-info)]",
-        success: "bg-[var(--color-foren-bg-success-subtle)] text-[var(--color-foren-success)]",
-        warning: "bg-[var(--color-foren-bg-warning-subtle)] text-[var(--color-foren-warning)]",
-        error: "bg-[var(--color-foren-bg-error-subtle)] text-[var(--color-foren-error)]",
+        success:
+          "bg-[var(--color-foren-bg-success-subtle)] text-[var(--color-foren-success)]",
+        warning:
+          "bg-[var(--color-foren-bg-warning-subtle)] text-[var(--color-foren-warning)]",
+        error:
+          "bg-[var(--color-foren-bg-error-subtle)] text-[var(--color-foren-error)]",
       },
       size: {
         sm: "h-9 px-3 text-[13px] leading-[18px] [&_svg]:size-[14px]",
@@ -17,10 +21,12 @@ export const noteVariants = cva(
       },
     },
     defaultVariants: { intent: "default", size: "sm" },
-  }
+  },
 );
 
-export type NoteIntent = NonNullable<VariantProps<typeof noteVariants>["intent"]>;
+export type NoteIntent = NonNullable<
+  VariantProps<typeof noteVariants>["intent"]
+>;
 
 export interface ForenInfoNoteProps {
   intent?: NoteIntent;

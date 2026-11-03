@@ -37,9 +37,17 @@ const ok = useSignupGuard("/onboarding/use");
 const store = useOnboardingStore();
 
 const toggle = (id: UseCaseId) =>
-  store.set({ useCases: store.useCases.includes(id) ? store.useCases.filter((x) => x !== id) : [...store.useCases, id] });
+  store.set({
+    useCases: store.useCases.includes(id)
+      ? store.useCases.filter((x) => x !== id)
+      : [...store.useCases, id],
+  });
 const footer = computed(() => ({
-  primary: { label: "Continue", disabled: store.useCases.length === 0, onClick: () => router.push("/onboarding/account") },
+  primary: {
+    label: "Continue",
+    disabled: store.useCases.length === 0,
+    onClick: () => router.push("/onboarding/account"),
+  },
 }));
 </script>
 
@@ -62,26 +70,51 @@ const footer = computed(() => ({
           :class="
             cn(
               'relative flex cursor-pointer flex-col gap-4 rounded-[16px] border bg-surface p-4 transition-[border-color,box-shadow] duration-150 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-focus',
-              store.useCases.includes(u.id) ? 'border-success shadow-[var(--shadow-foren-xs)]' : 'border-transparent hover:border-line'
+              store.useCases.includes(u.id)
+                ? 'border-success shadow-[var(--shadow-foren-xs)]'
+                : 'border-transparent hover:border-line',
             )
           "
         >
-          <input type="checkbox" class="peer sr-only" :checked="store.useCases.includes(u.id)" @change="toggle(u.id)" />
+          <input
+            type="checkbox"
+            class="peer sr-only"
+            :checked="store.useCases.includes(u.id)"
+            @change="toggle(u.id)"
+          />
           <span
             aria-hidden="true"
             :class="
               cn(
                 'absolute top-4 right-4 grid size-4 place-items-center rounded-full border transition-colors',
-                store.useCases.includes(u.id) ? 'border-success' : 'border-line-2'
+                store.useCases.includes(u.id)
+                  ? 'border-success'
+                  : 'border-line-2',
               )
             "
           >
-            <span v-if="store.useCases.includes(u.id)" class="size-2 rounded-full bg-success" />
+            <span
+              v-if="store.useCases.includes(u.id)"
+              class="size-2 rounded-full bg-success"
+            />
           </span>
-          <component :is="ICON[u.id]" :class="cn('size-6', store.useCases.includes(u.id) ? 'text-success' : 'text-fg-2')" aria-hidden="true" />
+          <component
+            :is="ICON[u.id]"
+            :class="
+              cn(
+                'size-6',
+                store.useCases.includes(u.id) ? 'text-success' : 'text-fg-2',
+              )
+            "
+            aria-hidden="true"
+          />
           <span class="flex flex-col gap-1 pr-4">
-            <span class="text-[14px] leading-[21px] font-medium text-fg">{{ u.title }}</span>
-            <span class="text-[12px] leading-[18px] font-medium text-fg-3">{{ u.description }}</span>
+            <span class="text-[14px] leading-[21px] font-medium text-fg">{{
+              u.title
+            }}</span>
+            <span class="text-[12px] leading-[18px] font-medium text-fg-3">{{
+              u.description
+            }}</span>
           </span>
         </label>
       </div>

@@ -3,7 +3,13 @@
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import ForenCheckbox from "@/components/ui/ForenCheckbox.vue";
-import { SECTORS, TURNOVER_BANDS, countryInfo, isNewBusiness, isScumlCategory } from "@/domain/onboarding";
+import {
+  SECTORS,
+  TURNOVER_BANDS,
+  countryInfo,
+  isNewBusiness,
+  isScumlCategory,
+} from "@/domain/onboarding";
 import { useSignupGuard } from "@/composables/useSignupGuard";
 import { useOnboardingStore } from "@/stores/onboarding";
 import { cn } from "@/lib/utils";
@@ -26,13 +32,24 @@ const notTrading = ref(saved?.notTrading ?? false);
 const websiteTouched = ref(false);
 
 const currency = computed(() => countryInfo(store.country)?.currency ?? "");
-const categories = computed(() => SECTORS.find((s) => s.name === sector.value)?.categories ?? []);
-const websiteError = computed(() =>
-  website.value && !/^https:\/\/[^\s.]+\.[^\s]+$/.test(website.value.trim()) ? "Enter a full address starting with https://" : undefined
+const categories = computed(
+  () => SECTORS.find((s) => s.name === sector.value)?.categories ?? [],
 );
-const scuml = computed(() => store.country === "NG" && isScumlCategory(sector.value, category.value));
-const isNew = computed(() => notTrading.value || isNewBusiness(store.business?.incorporatedOn));
-const complete = computed(() => !!(turnover.value && sector.value && category.value && !websiteError.value));
+const websiteError = computed(() =>
+  website.value && !/^https:\/\/[^\s.]+\.[^\s]+$/.test(website.value.trim())
+    ? "Enter a full address starting with https://"
+    : undefined,
+);
+const scuml = computed(
+  () => store.country === "NG" && isScumlCategory(sector.value, category.value),
+);
+const isNew = computed(
+  () => notTrading.value || isNewBusiness(store.business?.incorporatedOn),
+);
+const complete = computed(
+  () =>
+    !!(turnover.value && sector.value && category.value && !websiteError.value),
+);
 
 const footer = computed(() => ({
   primary: {
@@ -40,9 +57,19 @@ const footer = computed(() => ({
     disabled: !complete.value,
     onClick: () => {
       store.set({
-        profile: { turnover: turnover.value, sector: sector.value, category: category.value, website: website.value.trim(), notTrading: notTrading.value },
+        profile: {
+          turnover: turnover.value,
+          sector: sector.value,
+          category: category.value,
+          website: website.value.trim(),
+          notTrading: notTrading.value,
+        },
       });
-      router.push(store.entity === "mto" ? "/onboarding/compliance" : "/onboarding/review");
+      router.push(
+        store.entity === "mto"
+          ? "/onboarding/compliance"
+          : "/onboarding/review",
+      );
     },
   },
 }));
@@ -69,24 +96,48 @@ function onWebsiteBlur() {
     <div class="flex flex-col gap-4">
       <FormCard>
         <Field label="Annual turnover" html-for="turnover">
-          <select id="turnover" v-model="turnover" :class="cn(fieldCls, !turnover && 'text-fg-3')">
+          <select
+            id="turnover"
+            v-model="turnover"
+            :class="cn(fieldCls, !turnover && 'text-fg-3')"
+          >
             <option value="">Select a range</option>
-            <option v-for="b in TURNOVER_BANDS" :key="b" :value="b">{{ currency }} {{ b }}</option>
+            <option v-for="b in TURNOVER_BANDS" :key="b" :value="b">
+              {{ currency }} {{ b }}
+            </option>
           </select>
         </Field>
         <Field label="Business sector" html-for="sector">
-          <select id="sector" :value="sector" :class="cn(fieldCls, !sector && 'text-fg-3')" @change="onSector">
+          <select
+            id="sector"
+            :value="sector"
+            :class="cn(fieldCls, !sector && 'text-fg-3')"
+            @change="onSector"
+          >
             <option value="">Select a sector</option>
             <option v-for="s in SECTORS" :key="s.name">{{ s.name }}</option>
           </select>
         </Field>
-        <Field label="Business category" html-for="category" :hint="!sector ? 'Choose a sector first.' : undefined">
-          <select id="category" v-model="category" :disabled="!sector" :class="cn(fieldCls, !category && 'text-fg-3')">
+        <Field
+          label="Business category"
+          html-for="category"
+          :hint="!sector ? 'Choose a sector first.' : undefined"
+        >
+          <select
+            id="category"
+            v-model="category"
+            :disabled="!sector"
+            :class="cn(fieldCls, !category && 'text-fg-3')"
+          >
             <option value="">Select a category</option>
             <option v-for="c in categories" :key="c.name">{{ c.name }}</option>
           </select>
         </Field>
-        <Field label="Website/Socials (optional)" html-for="website" :error="websiteTouched ? websiteError : undefined">
+        <Field
+          label="Website/Socials (optional)"
+          html-for="website"
+          :error="websiteTouched ? websiteError : undefined"
+        >
           <input
             id="website"
             v-model="website"
@@ -107,8 +158,14 @@ function onWebsiteBlur() {
           @update:model-value="(v) => (notTrading = v === true)"
         />
       </FormCard>
-      <Note v-if="scuml" intent="info">You’ll need a SCUML certificate for this category. We’ll ask for it with your documents.</Note>
-      <Note v-if="isNew" intent="info">New businesses also share the owner’s bank statement and a business plan or proof of funding.</Note>
+      <Note v-if="scuml" intent="info"
+        >You’ll need a SCUML certificate for this category. We’ll ask for it
+        with your documents.</Note
+      >
+      <Note v-if="isNew" intent="info"
+        >New businesses also share the owner’s bank statement and a business
+        plan or proof of funding.</Note
+      >
     </div>
   </OnboardingFrame>
 </template>

@@ -7,9 +7,18 @@ import FormCard from "./FormCard.vue";
 import Note from "./Note.vue";
 import RegTypePicker from "./RegTypePicker.vue";
 import { fieldCls } from "./frame";
-import { POSTCODE_LABEL, REGIONS, type Manual, type RegType } from "./find-business";
+import {
+  POSTCODE_LABEL,
+  REGIONS,
+  type Manual,
+  type RegType,
+} from "./find-business";
 
-const props = defineProps<{ country: CountryCode; types: RegType[]; touched: boolean }>();
+const props = defineProps<{
+  country: CountryCode;
+  types: RegType[];
+  touched: boolean;
+}>();
 const emit = defineEmits<{ back: [] }>();
 const value = defineModel<Manual>({ required: true });
 const regType = defineModel<string>("regType", { required: true });
@@ -17,15 +26,22 @@ const regNumber = defineModel<string>("regNumber", { required: true });
 
 const info = computed(() => countryInfo(props.country)!);
 const region = computed(() => REGIONS[props.country]);
-const up = (k: keyof Manual, e: Event) => (value.value = { ...value.value, [k]: (e.target as HTMLInputElement | HTMLSelectElement).value });
-const err = (k: keyof Manual) => (props.touched && !value.value[k] ? "Required" : undefined);
+const up = (k: keyof Manual, e: Event) =>
+  (value.value = {
+    ...value.value,
+    [k]: (e.target as HTMLInputElement | HTMLSelectElement).value,
+  });
+const err = (k: keyof Manual) =>
+  props.touched && !value.value[k] ? "Required" : undefined;
 const today = new Date().toISOString().slice(0, 10);
 </script>
 
 <template>
   <div class="flex flex-col gap-6">
     <div class="flex items-center justify-between gap-3">
-      <h2 class="text-[16px] leading-6 font-semibold text-fg">Enter your business manually</h2>
+      <h2 class="text-[16px] leading-6 font-semibold text-fg">
+        Enter your business manually
+      </h2>
       <button
         type="button"
         class="shrink-0 text-[12px] font-medium text-fg underline underline-offset-2 outline-none focus-visible:ring-2 focus-visible:ring-focus"
@@ -37,19 +53,32 @@ const today = new Date().toISOString().slice(0, 10);
 
     <RegTypePicker v-model="regType" :types="types" />
 
-    <Field label="Registration number" html-for="m-reg" :hint="`Enter the number exactly as it appears on your ${info.registry} certificate.`">
+    <Field
+      label="Registration number"
+      html-for="m-reg"
+      :hint="`Enter the number exactly as it appears on your ${info.registry} certificate.`"
+    >
       <div class="flex gap-2">
         <span
           v-if="regType"
           class="grid h-12 min-w-12 shrink-0 place-items-center rounded-[16px] border border-line bg-subtle px-3 text-[14px] font-medium text-fg-2"
           >{{ regType }}-</span
         >
-        <input id="m-reg" v-model="regNumber" :class="fieldCls" autocomplete="off" />
+        <input
+          id="m-reg"
+          v-model="regNumber"
+          :class="fieldCls"
+          autocomplete="off"
+        />
       </div>
     </Field>
 
     <FormCard>
-      <Field label="Registered business name" html-for="m-name" :error="err('name')">
+      <Field
+        label="Registered business name"
+        html-for="m-name"
+        :error="err('name')"
+      >
         <input
           id="m-name"
           :value="value.name"
@@ -59,7 +88,11 @@ const today = new Date().toISOString().slice(0, 10);
           @input="up('name', $event)"
         />
       </Field>
-      <Field label="Date incorporated" html-for="m-date" :error="err('incorporatedOn')">
+      <Field
+        label="Date incorporated"
+        html-for="m-date"
+        :error="err('incorporatedOn')"
+      >
         <input
           id="m-date"
           type="date"
@@ -71,10 +104,18 @@ const today = new Date().toISOString().slice(0, 10);
         />
       </Field>
       <fieldset class="flex flex-col gap-4">
-        <legend class="mb-4 text-[16px] leading-6 font-semibold text-fg">Business address</legend>
+        <legend class="mb-4 text-[16px] leading-6 font-semibold text-fg">
+          Business address
+        </legend>
         <div class="grid gap-4 sm:grid-cols-2">
           <Field label="Street no." html-for="m-no">
-            <input id="m-no" :value="value.streetNo" :class="fieldCls" autocomplete="address-line1" @input="up('streetNo', $event)" />
+            <input
+              id="m-no"
+              :value="value.streetNo"
+              :class="fieldCls"
+              autocomplete="address-line1"
+              @input="up('streetNo', $event)"
+            />
           </Field>
           <Field label="Street name" html-for="m-street" :error="err('street')">
             <input
@@ -96,7 +137,11 @@ const today = new Date().toISOString().slice(0, 10);
               @input="up('city', $event)"
             />
           </Field>
-          <Field :label="region.label" html-for="m-region" :error="err('region')">
+          <Field
+            :label="region.label"
+            html-for="m-region"
+            :error="err('region')"
+          >
             <select
               id="m-region"
               :value="value.region"
@@ -109,14 +154,28 @@ const today = new Date().toISOString().slice(0, 10);
             </select>
           </Field>
           <Field label="Area" html-for="m-area">
-            <input id="m-area" :value="value.area" :class="fieldCls" @input="up('area', $event)" />
+            <input
+              id="m-area"
+              :value="value.area"
+              :class="fieldCls"
+              @input="up('area', $event)"
+            />
           </Field>
           <Field :label="POSTCODE_LABEL[country]" html-for="m-post">
-            <input id="m-post" :value="value.postcode" :class="fieldCls" autocomplete="postal-code" @input="up('postcode', $event)" />
+            <input
+              id="m-post"
+              :value="value.postcode"
+              :class="fieldCls"
+              autocomplete="postal-code"
+              @input="up('postcode', $event)"
+            />
           </Field>
         </div>
       </fieldset>
     </FormCard>
-    <Note intent="info">Our compliance team checks details entered by hand against your documents, so make sure they match your certificate.</Note>
+    <Note intent="info"
+      >Our compliance team checks details entered by hand against your
+      documents, so make sure they match your certificate.</Note
+    >
   </div>
 </template>

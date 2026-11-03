@@ -16,14 +16,15 @@ export const tooltipVariants = cva(
       },
     },
     defaultVariants: { variant: "dark", size: "sm" },
-  }
+  },
 );
 
 export const arrowVariants = cva("absolute size-2 rotate-45", {
   variants: {
     variant: {
       dark: "bg-[var(--color-foren-bg-button-primary,#1e1711)]",
-      light: "bg-[var(--color-foren-bg-default)] border-[var(--color-foren-border-muted)]",
+      light:
+        "bg-[var(--color-foren-bg-default)] border-[var(--color-foren-border-muted)]",
     },
   },
   defaultVariants: { variant: "dark" },
@@ -55,24 +56,29 @@ export const sidePosition: Record<TooltipSide, string> = {
   right: "left-full top-1/2 -translate-y-1/2 translate-x-2 ml-2",
 };
 
-export const sideMotion: Record<TooltipSide, { open: string; closed: string }> = {
-  top: {
-    open: "data-[state=open]:translate-y-0 data-[state=open]:-translate-x-1/2",
-    closed: "data-[state=closed]:translate-y-1 data-[state=closed]:-translate-x-1/2",
-  },
-  bottom: {
-    open: "data-[state=open]:translate-y-0 data-[state=open]:-translate-x-1/2",
-    closed: "data-[state=closed]:-translate-y-1 data-[state=closed]:-translate-x-1/2",
-  },
-  left: {
-    open: "data-[state=open]:translate-x-0 data-[state=open]:-translate-y-1/2",
-    closed: "data-[state=closed]:translate-x-1 data-[state=closed]:-translate-y-1/2",
-  },
-  right: {
-    open: "data-[state=open]:translate-x-0 data-[state=open]:-translate-y-1/2",
-    closed: "data-[state=closed]:-translate-x-1 data-[state=closed]:-translate-y-1/2",
-  },
-};
+export const sideMotion: Record<TooltipSide, { open: string; closed: string }> =
+  {
+    top: {
+      open: "data-[state=open]:translate-y-0 data-[state=open]:-translate-x-1/2",
+      closed:
+        "data-[state=closed]:translate-y-1 data-[state=closed]:-translate-x-1/2",
+    },
+    bottom: {
+      open: "data-[state=open]:translate-y-0 data-[state=open]:-translate-x-1/2",
+      closed:
+        "data-[state=closed]:-translate-y-1 data-[state=closed]:-translate-x-1/2",
+    },
+    left: {
+      open: "data-[state=open]:translate-x-0 data-[state=open]:-translate-y-1/2",
+      closed:
+        "data-[state=closed]:translate-x-1 data-[state=closed]:-translate-y-1/2",
+    },
+    right: {
+      open: "data-[state=open]:translate-x-0 data-[state=open]:-translate-y-1/2",
+      closed:
+        "data-[state=closed]:-translate-x-1 data-[state=closed]:-translate-y-1/2",
+    },
+  };
 
 export const arrowPosition: Record<TooltipSide, string> = {
   top: "left-1/2 -translate-x-1/2 -bottom-1 border-b border-r",

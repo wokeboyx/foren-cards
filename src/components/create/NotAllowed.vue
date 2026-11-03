@@ -11,7 +11,11 @@ defineProps<{ body: string }>();
   <Panel>
     <EmptyState title="You can’t do this here" :body="body">
       <template #icon><RiLockLine /></template>
-      <template #action><LinkButton href="/cards" variant="outline" size="sm">Back to cards</LinkButton></template>
+      <template #action
+        ><LinkButton href="/cards" variant="outline" size="sm"
+          >Back to cards</LinkButton
+        ></template
+      >
     </EmptyState>
   </Panel>
 </template>

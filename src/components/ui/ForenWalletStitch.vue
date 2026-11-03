@@ -7,7 +7,12 @@ defineProps<{ d: string }>();
 </script>
 
 <template>
-  <g :stroke-dasharray="STITCH_DASH" stroke-width="1.3" stroke-linecap="round" fill="none">
+  <g
+    :stroke-dasharray="STITCH_DASH"
+    stroke-width="1.3"
+    stroke-linecap="round"
+    fill="none"
+  >
     <path :d="d" stroke="rgba(0,0,0,0.9)" transform="translate(0 -0.6)" />
     <path :d="d" stroke="rgba(255,255,255,0.14)" transform="translate(0 0.6)" />
   </g>

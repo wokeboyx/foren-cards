@@ -8,7 +8,11 @@ const props = defineProps<{ class?: HTMLAttributes["class"] }>();
 
 <template>
   <div :class="cn('flex items-center justify-between gap-3', props.class)">
-    <h3 class="text-[16px] leading-[22px] font-semibold tracking-[0.005em] text-fg"><slot /></h3>
+    <h3
+      class="text-[16px] leading-[22px] font-semibold tracking-[0.005em] text-fg"
+    >
+      <slot />
+    </h3>
     <slot name="action" />
   </div>
 </template>

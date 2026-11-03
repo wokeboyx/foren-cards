@@ -6,14 +6,19 @@ import ForenAvatar from "@/components/ui/ForenAvatar.vue";
 import ForenBadge from "@/components/ui/ForenBadge.vue";
 import ForenTableRow from "@/components/ui/ForenTableRow.vue";
 import { useNow } from "@/composables/useNow";
-import { PERIOD_PHRASE } from "@/domain/labels";
+import { limitSummary } from "@/domain/limits";
 import { format } from "@/domain/money";
 import type { CardRequest } from "@/domain/types";
 import { personById } from "@/stores/app";
 import { timeAgo } from "./card-detail";
 import PendingRequestBadge from "./PendingRequestBadge.vue";
 
-const props = defineProps<{ r: CardRequest; compact: boolean; selected: boolean; me: string }>();
+const props = defineProps<{
+  r: CardRequest;
+  compact: boolean;
+  selected: boolean;
+  me: string;
+}>();
 const emit = defineEmits<{ select: [] }>();
 const now = useNow(30_000);
 const requester = computed(() => personById(props.r.requesterId));
@@ -22,23 +27,40 @@ const initials = computed(() =>
   requester.value?.name
     .split(" ")
     .map((x) => x[0])
-    .join("")
+    .join(""),
 );
 </script>
 
 <template>
-  <ForenTableRow :selected="selected" :aria-selected="selected" @click="emit('select')">
+  <ForenTableRow
+    :selected="selected"
+    :aria-selected="selected"
+    @click="emit('select')"
+  >
     <td class="px-4 py-2.5">
       <div class="flex items-center gap-2.5">
-        <ForenAvatar size="xs" :name="requester?.name" :initials="initials" fallback="initials" />
+        <ForenAvatar
+          size="xs"
+          :name="requester?.name"
+          :initials="initials"
+          fallback="initials"
+        />
         <span class="truncate text-[13px] text-fg">{{ requester?.name }}</span>
-        <ForenBadge v-if="r.requesterId === me" size="sm" color="primary">You</ForenBadge>
+        <ForenBadge v-if="r.requesterId === me" size="sm" color="primary"
+          >You</ForenBadge
+        >
       </div>
     </td>
     <td class="px-4 py-2.5">
       <div class="flex items-center gap-2.5">
         <CardArt
-          :card="{ design: want.design, nickname: want.nickname, last4: '', kind: 'standard', status: 'active' }"
+          :card="{
+            design: want.design,
+            nickname: want.nickname,
+            last4: '',
+            kind: 'standard',
+            status: 'active',
+          }"
           size="xs"
           class="opacity-50"
         />
@@ -48,18 +70,24 @@ const initials = computed(() =>
           @click.stop="emit('select')"
         >
           <span class="font-medium">{{ want.nickname }}</span>
-          <span v-if="!compact" class="text-fg-3"> · asked {{ timeAgo(r.createdAt, now) }}</span>
+          <span v-if="!compact" class="text-fg-3">
+            · asked {{ timeAgo(r.createdAt, now) }}</span
+          >
         </button>
         <PendingRequestBadge />
       </div>
     </td>
-    <td class="tnum px-4 py-2.5 text-right text-[13px] whitespace-nowrap text-fg-2">
+    <td
+      class="tnum px-4 py-2.5 text-right text-[13px] whitespace-nowrap text-fg-2"
+    >
       {{
         compact
-          ? `${format(want.limit.amount, { compact: true })} asked`
-          : `Up to ${format(want.limit.amount, { compact: true })} ${PERIOD_PHRASE[want.limit.period]}`
+          ? `${format(want.limit.daily, { compact: true })} a day asked`
+          : limitSummary(want.limit, { compact: true })
       }}
     </td>
-    <td v-if="!compact" class="px-4 py-2.5 text-[13px] text-fg-3">Set on approval</td>
+    <td v-if="!compact" class="px-4 py-2.5 text-[13px] text-fg-3">
+      Set on approval
+    </td>
   </ForenTableRow>
 </template>

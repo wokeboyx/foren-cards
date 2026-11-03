@@ -16,16 +16,49 @@ export type OnboardingCountry = {
 };
 
 export const ONBOARDING_COUNTRIES: OnboardingCountry[] = [
-  { code: "NG", name: "Nigeria", registry: "CAC", currency: "NGN", entities: ["sole_trader", "company", "mto"] },
-  { code: "GB", name: "United Kingdom", registry: "Companies House", currency: "GBP", entities: ["sole_trader", "company", "mto"] },
-  { code: "CA", name: "Canada", registry: "Corporations Canada", currency: "CAD", entities: ["sole_trader", "company", "mto"] },
-  { code: "KE", name: "Kenya", registry: "Business Registration Service", currency: "KES", entities: ["company", "mto"] },
+  {
+    code: "NG",
+    name: "Nigeria",
+    registry: "CAC",
+    currency: "NGN",
+    entities: ["sole_trader", "company", "mto"],
+  },
+  {
+    code: "GB",
+    name: "United Kingdom",
+    registry: "Companies House",
+    currency: "GBP",
+    entities: ["sole_trader", "company", "mto"],
+  },
+  {
+    code: "CA",
+    name: "Canada",
+    registry: "Corporations Canada",
+    currency: "CAD",
+    entities: ["sole_trader", "company", "mto"],
+  },
+  {
+    code: "KE",
+    name: "Kenya",
+    registry: "Business Registration Service",
+    currency: "KES",
+    entities: ["company", "mto"],
+  },
 ];
 
 /** Countries people can pick that we don't support yet; they lead to the waitlist. */
-export const WAITLIST_COUNTRIES = ["Ghana", "South Africa", "United States", "Germany", "France", "India", "Other country"];
+export const WAITLIST_COUNTRIES = [
+  "Ghana",
+  "South Africa",
+  "United States",
+  "Germany",
+  "France",
+  "India",
+  "Other country",
+];
 
-export const countryInfo = (c: CountryCode | null | undefined) => ONBOARDING_COUNTRIES.find((x) => x.code === c);
+export const countryInfo = (c: CountryCode | null | undefined) =>
+  ONBOARDING_COUNTRIES.find((x) => x.code === c);
 
 export const ENTITY_LABEL: Record<EntityType, string> = {
   sole_trader: "Sole trader",
@@ -40,7 +73,10 @@ export const ENTITY_HINT: Record<EntityType, string> = {
 };
 
 /** Who counts as an ultimate beneficial owner (UBO), by ownership. Compliance set 10% for every country (Oct 2026). */
-export function uboThreshold(_country: CountryCode, entity: EntityType): number | null {
+export function uboThreshold(
+  _country: CountryCode,
+  entity: EntityType,
+): number | null {
   return entity === "sole_trader" ? null : 10;
 }
 
@@ -55,22 +91,38 @@ export type ControlType = (typeof CONTROL_TYPES)[number]["id"];
 
 /** "Holds shares, Holds voting rights", or the description given for other control. */
 export function controlLabel(control: ControlType[], other: string) {
-  return control.map((c) => (c === "other" ? other || "Other significant control" : CONTROL_TYPES.find((t) => t.id === c)!.label)).join(", ");
+  return control
+    .map((c) =>
+      c === "other"
+        ? other || "Other significant control"
+        : CONTROL_TYPES.find((t) => t.id === c)!.label,
+    )
+    .join(", ");
 }
 
 /** International dialling code for the representative's phone number. */
-export const DIAL_CODE: Record<CountryCode, string> = { NG: "+234", GB: "+44", CA: "+1", KE: "+254" };
+export const DIAL_CODE: Record<CountryCode, string> = {
+  NG: "+234",
+  GB: "+44",
+  CA: "+1",
+  KE: "+254",
+};
 
 /** Companies and MTOs must name at least two directors. */
-export const minDirectors = (entity: EntityType) => (entity === "sole_trader" ? 0 : 2);
+export const minDirectors = (entity: EntityType) =>
+  entity === "sole_trader" ? 0 : 2;
 
 /** Accepted photo IDs for people (proof of identity): passport or national ID. Nigeria also takes the NIN slip. */
 export function acceptedIds(country: CountryCode): string {
-  return country === "NG" ? "International passport or national ID (NIN slip accepted)" : "Passport or national ID card";
+  return country === "NG"
+    ? "International passport or national ID (NIN slip accepted)"
+    : "Passport or national ID card";
 }
 
 export const idTypes = (country: CountryCode | null) =>
-  country === "NG" ? ["International passport", "National ID card or NIN slip"] : ["Passport", "National ID card"];
+  country === "NG"
+    ? ["International passport", "National ID card or NIN slip"]
+    : ["Passport", "National ID card"];
 
 const REGION_CODES =
   "AF AX AL DZ AS AD AO AI AG AR AM AW AU AT AZ BS BH BD BB BY BE BZ BJ BM BT BO BA BW BR VG BN BG BF BI KH CM CA CV KY CF TD CL CN CO KM CG CD CK CR CI HR CU CW CY CZ DK DJ DM DO EC EG SV GQ ER EE SZ ET FK FO FJ FI FR GF PF GA GM GE DE GH GI GR GL GD GP GU GT GG GN GW GY HT HN HK HU IS IN ID IR IQ IE IM IL IT JM JP JE JO KZ KE KI XK KW KG LA LV LB LS LR LY LI LT LU MO MG MW MY MV ML MT MH MQ MR MU YT MX FM MD MC MN ME MS MA MZ MM NA NR NP NL NC NZ NI NE NG NU KP MK MP NO OM PK PW PS PA PG PY PE PH PL PT PR QA RE RO RU RW WS SM ST SA SN RS SC SL SG SX SK SI SB SO ZA KR SS ES LK BL SH KN LC MF PM VC SD SR SE CH SY TW TJ TZ TH TL TG TO TT TN TR TM TC TV UG UA AE GB US UY UZ VU VA VE VN WF EH YE ZM ZW";
@@ -79,17 +131,23 @@ const REGION_CODES =
 export function nationalityOptions(): { code: string; name: string }[] {
   const names = new Intl.DisplayNames(["en-GB"], { type: "region" });
   const first = ["NG", "GB", "CA", "KE"];
-  const all = REGION_CODES.split(" ").map((code) => ({ code, name: names.of(code) ?? code }));
+  const all = REGION_CODES.split(" ").map((code) => ({
+    code,
+    name: names.of(code) ?? code,
+  }));
   return [
     ...first.map((c) => all.find((x) => x.code === c)!),
-    ...all.filter((x) => !first.includes(x.code)).sort((a, b) => a.name.localeCompare(b.name)),
+    ...all
+      .filter((x) => !first.includes(x.code))
+      .sort((a, b) => a.name.localeCompare(b.name)),
   ];
 }
 
 // ---------------------------------------------------------------- documents
 
 /** Where a requirement gets satisfied. Only "upload" items appear on the Business documents page. */
-export type RequirementSource = "upload" | "identity" | "stakeholders" | "questionnaire" | "edd";
+export type RequirementSource =
+  "upload" | "identity" | "stakeholders" | "questionnaire" | "edd";
 
 export type Requirement = {
   id: string;
@@ -133,11 +191,20 @@ const PROOF_OF_ADDRESS_KE = [
 ];
 
 function proofOfAddress(country: CountryCode, entity: EntityType): Requirement {
-  const accepted = country === "NG" ? PROOF_OF_ADDRESS_NG : country === "KE" || entity === "mto" ? PROOF_OF_ADDRESS_KE : PROOF_OF_ADDRESS;
+  const accepted =
+    country === "NG"
+      ? PROOF_OF_ADDRESS_NG
+      : country === "KE" || entity === "mto"
+        ? PROOF_OF_ADDRESS_KE
+        : PROOF_OF_ADDRESS;
   return {
     id: "proof_of_address",
-    title: entity === "sole_trader" ? "Proof of registered address" : "Proof of business address",
-    description: "Dated within the last 3 months and showing the business name. All 4 edges visible.",
+    title:
+      entity === "sole_trader"
+        ? "Proof of registered address"
+        : "Proof of business address",
+    description:
+      "Dated within the last 3 months and showing the business name. All 4 edges visible.",
     source: "upload",
     accepted,
   };
@@ -154,12 +221,18 @@ const LIVENESS: Requirement = {
 const UBO_DECLARATION: Requirement = {
   id: "ubo_declaration",
   title: "Director and UBO declaration",
-  description: "Filled in for you from your stakeholders. You confirm it with a tick, no signature needed.",
+  description:
+    "Filled in for you from your stakeholders. You confirm it with a tick, no signature needed.",
   source: "stakeholders",
 };
 
 function proprietorId(country: CountryCode): Requirement {
-  return { id: "proprietor_id", title: "Valid ID of the owner", description: `${acceptedIds(country)}. Done with your identity check.`, source: "identity" };
+  return {
+    id: "proprietor_id",
+    title: "Valid ID of the owner",
+    description: `${acceptedIds(country)}. Done with your identity check.`,
+    source: "identity",
+  };
 }
 
 function stakeholders(country: CountryCode, entity: EntityType): Requirement {
@@ -175,14 +248,27 @@ function stakeholders(country: CountryCode, entity: EntityType): Requirement {
 function questionnaire(ctx: RequirementContext): Requirement[] {
   const out: Requirement[] = [];
   if (ctx.entity !== "mto" && ctx.banking !== false)
-    out.push({ id: "questionnaire", title: "Onboarding questionnaire", description: "About 10 questions on how you’ll use your account and transact.", source: "questionnaire" });
+    out.push({
+      id: "questionnaire",
+      title: "Onboarding questionnaire",
+      description:
+        "About 10 questions on how you’ll use your account and transact.",
+      source: "questionnaire",
+    });
   if (ctx.entity === "mto")
-    out.push({ id: "edd", title: "Onboarding questionnaire (business banking)", description: "Business activity, fund flow and AML controls. Part of sign-up.", source: "edd" });
+    out.push({
+      id: "edd",
+      title: "Onboarding questionnaire (business banking)",
+      description:
+        "Business activity, fund flow and AML controls. Part of sign-up.",
+      source: "edd",
+    });
   if (ctx.api)
     out.push({
       id: "api_forms",
       title: "API onboarding forms",
-      description: "Prelim forms for Collections and Payouts (SendR), depending on what you need.",
+      description:
+        "Prelim forms for Collections and Payouts (SendR), depending on what you need.",
       source: "questionnaire",
     });
   return out;
@@ -194,7 +280,8 @@ function conditional(ctx: RequirementContext): Requirement[] {
     out.push({
       id: "scuml",
       title: "SCUML certificate",
-      description: "Registration with the Special Control Unit against Money Laundering.",
+      description:
+        "Registration with the Special Control Unit against Money Laundering.",
       source: "upload",
       because: "Required for your business category",
     });
@@ -213,7 +300,7 @@ function conditional(ctx: RequirementContext): Requirement[] {
         description: "A business plan, investment agreement or proof of funds.",
         source: "upload",
         because: "Your business is new or hasn’t traded yet",
-      }
+      },
     );
   return out;
 }
@@ -224,23 +311,55 @@ export function requirementsFor(ctx: RequirementContext): Requirement[] {
 
   if (entity === "sole_trader" && country === "NG") {
     base = [
-      { id: "cac_certificate", title: "CAC certificate", description: "Your business name registration certificate.", source: "upload" },
-      { id: "status_report", title: "Status report", description: "Or other documents of business registration from CAC.", source: "upload" },
-      { id: "company_bank_statement", title: "Business bank statement", description: "Dated within the last 3–6 months.", source: "upload" },
+      {
+        id: "cac_certificate",
+        title: "CAC certificate",
+        description: "Your business name registration certificate.",
+        source: "upload",
+      },
+      {
+        id: "status_report",
+        title: "Status report",
+        description: "Or other documents of business registration from CAC.",
+        source: "upload",
+      },
+      {
+        id: "company_bank_statement",
+        title: "Business bank statement",
+        description: "Dated within the last 3–6 months.",
+        source: "upload",
+      },
       proofOfAddress(country, entity),
       proprietorId(country),
       LIVENESS,
     ];
   } else if (entity === "sole_trader") {
     base = [
-      { id: "registration_document", title: "Registration document", description: "Incorporation certificate or other proof of registration.", source: "upload" },
-      { id: "ownership_document", title: "Proof of ownership", description: "A document showing you own the business.", source: "upload" },
+      {
+        id: "registration_document",
+        title: "Registration document",
+        description:
+          "Incorporation certificate or other proof of registration.",
+        source: "upload",
+      },
+      {
+        id: "ownership_document",
+        title: "Proof of ownership",
+        description: "A document showing you own the business.",
+        source: "upload",
+      },
       {
         id: "trading_evidence",
         title: "Proof of trading",
-        description: "One of the documents below, dated within the last 3–6 months.",
+        description:
+          "One of the documents below, dated within the last 3–6 months.",
         source: "upload",
-        accepted: ["Business bank statement", "Invoices", "Business plan", "Partnership agreement"],
+        accepted: [
+          "Business bank statement",
+          "Invoices",
+          "Business plan",
+          "Partnership agreement",
+        ],
       },
       proofOfAddress(country, entity),
       proprietorId(country),
@@ -248,8 +367,18 @@ export function requirementsFor(ctx: RequirementContext): Requirement[] {
     ];
   } else if (entity === "company" && country === "NG") {
     base = [
-      { id: "cac_certificate", title: "Certificate of Incorporation", description: "Your CAC certificate.", source: "upload" },
-      { id: "memart", title: "Memorandum and Articles of Association", description: "The complete document.", source: "upload" },
+      {
+        id: "cac_certificate",
+        title: "Certificate of Incorporation",
+        description: "Your CAC certificate.",
+        source: "upload",
+      },
+      {
+        id: "memart",
+        title: "Memorandum and Articles of Association",
+        description: "The complete document.",
+        source: "upload",
+      },
       proofOfAddress(country, entity),
       {
         id: "financials",
@@ -258,35 +387,115 @@ export function requirementsFor(ctx: RequirementContext): Requirement[] {
         source: "upload",
         accepted: ["Audited financial statements", "Business bank statement"],
       },
-      { id: "cac_02", title: "Form CAC 02", description: "Return of Allotment.", source: "upload" },
-      { id: "cac_07", title: "Form CAC 07", description: "Particulars of Directors.", source: "upload" },
-      { id: "board_resolution", title: "Board resolution", description: "Or a letter of authorisation to open this account.", source: "upload" },
+      {
+        id: "cac_02",
+        title: "Form CAC 02",
+        description: "Return of Allotment.",
+        source: "upload",
+      },
+      {
+        id: "cac_07",
+        title: "Form CAC 07",
+        description: "Particulars of Directors.",
+        source: "upload",
+      },
+      {
+        id: "board_resolution",
+        title: "Board resolution",
+        description: "Or a letter of authorisation to open this account.",
+        source: "upload",
+      },
       UBO_DECLARATION,
       stakeholders(country, entity),
       LIVENESS,
     ];
   } else if (entity === "company" && country === "KE") {
     base = [
-      { id: "memart", title: "Memorandum and Articles of Association", description: "Or your Articles of Incorporation.", source: "upload" },
-      { id: "certificate", title: "Certificate of Incorporation", description: "Or your Certificate of Registration.", source: "upload" },
+      {
+        id: "memart",
+        title: "Memorandum and Articles of Association",
+        description: "Or your Articles of Incorporation.",
+        source: "upload",
+      },
+      {
+        id: "certificate",
+        title: "Certificate of Incorporation",
+        description: "Or your Certificate of Registration.",
+        source: "upload",
+      },
       proofOfAddress(country, entity),
-      { id: "directors_list", title: "List of directors and shareholders", description: "An official list, such as a CR12.", source: "upload" },
-      { id: "tax_certificate", title: "Tax certificate", description: "Your KRA PIN certificate.", source: "upload" },
-      { id: "bank_statements", title: "Business bank statements", description: "The latest three months.", source: "upload" },
-      { id: "vat", title: "VAT registration", description: "Only if you’re VAT registered.", source: "upload", optional: true },
+      {
+        id: "directors_list",
+        title: "List of directors and shareholders",
+        description: "An official list, such as a CR12.",
+        source: "upload",
+      },
+      {
+        id: "tax_certificate",
+        title: "Tax certificate",
+        description: "Your KRA PIN certificate.",
+        source: "upload",
+      },
+      {
+        id: "bank_statements",
+        title: "Business bank statements",
+        description: "The latest three months.",
+        source: "upload",
+      },
+      {
+        id: "vat",
+        title: "VAT registration",
+        description: "Only if you’re VAT registered.",
+        source: "upload",
+        optional: true,
+      },
       UBO_DECLARATION,
       stakeholders(country, entity),
       LIVENESS,
     ];
   } else if (entity === "company") {
     base = [
-      { id: "memart", title: "Memorandum and Articles of Association", description: "Or your Articles of Incorporation.", source: "upload" },
-      { id: "certificate", title: "Certificate of Incorporation", description: "Or your Certificate of Registration.", source: "upload" },
+      {
+        id: "memart",
+        title: "Memorandum and Articles of Association",
+        description: "Or your Articles of Incorporation.",
+        source: "upload",
+      },
+      {
+        id: "certificate",
+        title: "Certificate of Incorporation",
+        description: "Or your Certificate of Registration.",
+        source: "upload",
+      },
       proofOfAddress(country, entity),
-      { id: "directors_list", title: "Official list of directors", description: country === "GB" ? "We’ll check it against Companies House." : "From your provincial or federal registry.", source: "upload" },
-      { id: "shareholders", title: "Evidence of shareholders", description: "A register of members or share certificates.", source: "upload" },
-      { id: "bank_statements", title: "Business bank statements", description: "The latest three months.", source: "upload" },
-      { id: "vat", title: country === "CA" ? "GST/HST registration" : "VAT registration", description: "Only if you’re registered.", source: "upload", optional: true },
+      {
+        id: "directors_list",
+        title: "Official list of directors",
+        description:
+          country === "GB"
+            ? "We’ll check it against Companies House."
+            : "From your provincial or federal registry.",
+        source: "upload",
+      },
+      {
+        id: "shareholders",
+        title: "Evidence of shareholders",
+        description: "A register of members or share certificates.",
+        source: "upload",
+      },
+      {
+        id: "bank_statements",
+        title: "Business bank statements",
+        description: "The latest three months.",
+        source: "upload",
+      },
+      {
+        id: "vat",
+        title: country === "CA" ? "GST/HST registration" : "VAT registration",
+        description: "Only if you’re registered.",
+        source: "upload",
+        optional: true,
+      },
       UBO_DECLARATION,
       stakeholders(country, entity),
       LIVENESS,
@@ -294,10 +503,25 @@ export function requirementsFor(ctx: RequirementContext): Requirement[] {
   } else {
     // MTOs / PSPs, all jurisdictions.
     base = [
-      { id: "memart", title: "Memorandum and Articles of Association", description: "Or your Articles of Incorporation.", source: "upload" },
-      { id: "certificate", title: "Certificate of Incorporation", description: "Or your Certificate of Registration.", source: "upload" },
+      {
+        id: "memart",
+        title: "Memorandum and Articles of Association",
+        description: "Or your Articles of Incorporation.",
+        source: "upload",
+      },
+      {
+        id: "certificate",
+        title: "Certificate of Incorporation",
+        description: "Or your Certificate of Registration.",
+        source: "upload",
+      },
       proofOfAddress(country, entity),
-      { id: "directors_list", title: "Official list of directors", description: "From your company registry.", source: "upload" },
+      {
+        id: "directors_list",
+        title: "Official list of directors",
+        description: "From your company registry.",
+        source: "upload",
+      },
       {
         id: "ownership_structure",
         title: "Ownership structure",
@@ -315,7 +539,8 @@ export function requirementsFor(ctx: RequirementContext): Requirement[] {
             {
               id: "criminal_record_checks",
               title: "Criminal record checks",
-              description: "For the CEO, president, directors and anyone who owns or controls 20% or more.",
+              description:
+                "For the CEO, president, directors and anyone who owns or controls 20% or more.",
               source: "upload" as const,
               because: "Required by our MSB partners in Canada",
             },
@@ -323,19 +548,56 @@ export function requirementsFor(ctx: RequirementContext): Requirement[] {
         : []),
       ...(country === "NG"
         ? [
-            { id: "board_resolution", title: "Board resolution", description: "Authorising this business relationship and account.", source: "upload" as const },
-            { id: "status_report", title: "Status report", description: "From CAC.", source: "upload" as const },
+            {
+              id: "board_resolution",
+              title: "Board resolution",
+              description:
+                "Authorising this business relationship and account.",
+              source: "upload" as const,
+            },
+            {
+              id: "status_report",
+              title: "Status report",
+              description: "From CAC.",
+              source: "upload" as const,
+            },
           ]
         : []),
-      { id: "aml_policy", title: "AML/KYC/CDD policies", description: "Must include your client risk assessment.", source: "upload" },
-      { id: "prohibited_list", title: "Prohibited industries and countries", description: "The list you apply to your own customers.", source: "upload" },
-      { id: "monitoring_policy", title: "Transaction monitoring policy", description: "How you detect and escalate unusual activity.", source: "upload" },
-      { id: "onboarding_flow", title: "Customer onboarding flow chart", description: "How you onboard and verify your customers.", source: "upload" },
-      { id: "transaction_flow", title: "Transaction flow chart with Foren", description: "How money moves between your customers, you and Foren.", source: "upload" },
+      {
+        id: "aml_policy",
+        title: "AML/KYC/CDD policies",
+        description: "Must include your client risk assessment.",
+        source: "upload",
+      },
+      {
+        id: "prohibited_list",
+        title: "Prohibited industries and countries",
+        description: "The list you apply to your own customers.",
+        source: "upload",
+      },
+      {
+        id: "monitoring_policy",
+        title: "Transaction monitoring policy",
+        description: "How you detect and escalate unusual activity.",
+        source: "upload",
+      },
+      {
+        id: "onboarding_flow",
+        title: "Customer onboarding flow chart",
+        description: "How you onboard and verify your customers.",
+        source: "upload",
+      },
+      {
+        id: "transaction_flow",
+        title: "Transaction flow chart with Foren",
+        description: "How money moves between your customers, you and Foren.",
+        source: "upload",
+      },
       {
         id: "financials",
         title: "Audited financial accounts or business bank statements",
-        description: "The latest accounts, or bank statements for the last 3–6 months.",
+        description:
+          "The latest accounts, or bank statements for the last 3–6 months.",
         source: "upload",
         accepted: [
           "Latest audited financial accounts",
@@ -345,15 +607,35 @@ export function requirementsFor(ctx: RequirementContext): Requirement[] {
       },
       {
         id: "licence",
-        title: country === "NG" ? "Operating licence" : "Evidence of registration",
+        title:
+          country === "NG" ? "Operating licence" : "Evidence of registration",
         description:
-          country === "NG" ? "Your CBN operating licence." : country === "GB" ? "Your FCA authorisation or registration." : country === "CA" ? "Your FINTRAC MSB registration." : "Your licence or registration from your regulator.",
+          country === "NG"
+            ? "Your CBN operating licence."
+            : country === "GB"
+              ? "Your FCA authorisation or registration."
+              : country === "CA"
+                ? "Your FINTRAC MSB registration."
+                : "Your licence or registration from your regulator.",
         source: "upload",
       },
       ...(country === "GB"
-        ? [{ id: "ico", title: "ICO registration", description: "Evidence you’re registered with the Information Commissioner’s Office.", source: "upload" as const }]
+        ? [
+            {
+              id: "ico",
+              title: "ICO registration",
+              description:
+                "Evidence you’re registered with the Information Commissioner’s Office.",
+              source: "upload" as const,
+            },
+          ]
         : []),
-      { id: "aml_audit", title: "External AML audit report", description: "Your latest one.", source: "upload" },
+      {
+        id: "aml_audit",
+        title: "External AML audit report",
+        description: "Your latest one.",
+        source: "upload",
+      },
       UBO_DECLARATION,
       { ...LIVENESS, title: "Liveness check of a director" },
     ];
@@ -362,16 +644,21 @@ export function requirementsFor(ctx: RequirementContext): Requirement[] {
   return [...base, ...conditional(ctx), ...questionnaire(ctx)];
 }
 
-export const uploadRequirements = (ctx: RequirementContext) => requirementsFor(ctx).filter((r) => r.source === "upload");
+export const uploadRequirements = (ctx: RequirementContext) =>
+  requirementsFor(ctx).filter((r) => r.source === "upload");
 
 // ---------------------------------------------------------------- registration lookups
 
 /** Registration types per country and entity, for "Find your business". */
 export type RegistrationType = { code: string; label: string; hint: string };
 
-export function registrationTypes(country: CountryCode, entity: EntityType): RegistrationType[] {
+export function registrationTypes(
+  country: CountryCode,
+  entity: EntityType,
+): RegistrationType[] {
   if (country === "NG") {
-    if (entity === "sole_trader") return [{ code: "BN", label: "BN", hint: "Business name" }];
+    if (entity === "sole_trader")
+      return [{ code: "BN", label: "BN", hint: "Business name" }];
     return [
       { code: "RC", label: "RC", hint: "Limited company" },
       { code: "IT", label: "IT", hint: "Incorporated trustees" },
@@ -387,54 +674,176 @@ export function registrationTypes(country: CountryCode, entity: EntityType): Reg
 
 // ---------------------------------------------------------------- business profile
 
-export const TURNOVER_BANDS = ["Under 1M", "1M – 5M", "5M – 10M", "10M – 50M", "50M – 250M", "Above 250M"];
+export const TURNOVER_BANDS = [
+  "Under 1M",
+  "1M – 5M",
+  "5M – 10M",
+  "10M – 50M",
+  "50M – 250M",
+  "Above 250M",
+];
 
-export type Sector = { name: string; categories: { name: string; scuml?: boolean }[] };
+export type Sector = {
+  name: string;
+  categories: { name: string; scuml?: boolean }[];
+};
 
 /** Sectors and categories. `scuml` marks Nigerian DNFBP categories that need a SCUML certificate. */
 export const SECTORS: Sector[] = [
   {
     name: "Financial services",
-    categories: [{ name: "Fintech and payments" }, { name: "Microfinance" }, { name: "Bureau de change", scuml: true }, { name: "Insurance broking" }, { name: "Mortgage brokers", scuml: true }],
+    categories: [
+      { name: "Fintech and payments" },
+      { name: "Microfinance" },
+      { name: "Bureau de change", scuml: true },
+      { name: "Insurance broking" },
+      { name: "Mortgage brokers", scuml: true },
+    ],
   },
-  { name: "Healthcare", categories: [{ name: "Pharmacy and drugs" }, { name: "Hospitals and clinics" }, { name: "Medical supplies" }] },
+  {
+    name: "Healthcare",
+    categories: [
+      { name: "Pharmacy and drugs" },
+      { name: "Hospitals and clinics" },
+      { name: "Medical supplies" },
+    ],
+  },
   {
     name: "Retail and e-commerce",
-    categories: [{ name: "Online store" }, { name: "Supermarkets", scuml: true }, { name: "Jewellery and precious metals", scuml: true }, { name: "Car dealers", scuml: true }, { name: "Fashion" }],
+    categories: [
+      { name: "Online store" },
+      { name: "Supermarkets", scuml: true },
+      { name: "Jewellery and precious metals", scuml: true },
+      { name: "Car dealers", scuml: true },
+      { name: "Fashion" },
+    ],
   },
   {
     name: "Professional services",
-    categories: [{ name: "Legal practice", scuml: true }, { name: "Accounting and audit", scuml: true }, { name: "Tax consulting", scuml: true }, { name: "Consulting" }, { name: "Marketing and design" }],
+    categories: [
+      { name: "Legal practice", scuml: true },
+      { name: "Accounting and audit", scuml: true },
+      { name: "Tax consulting", scuml: true },
+      { name: "Consulting" },
+      { name: "Marketing and design" },
+    ],
   },
-  { name: "Real estate and construction", categories: [{ name: "Real estate agency", scuml: true }, { name: "Construction" }, { name: "Property management", scuml: true }] },
-  { name: "Hospitality and travel", categories: [{ name: "Hotels", scuml: true }, { name: "Travel agency" }, { name: "Restaurants" }] },
-  { name: "Technology", categories: [{ name: "Software and SaaS" }, { name: "IT services" }, { name: "Hardware" }] },
-  { name: "Logistics and manufacturing", categories: [{ name: "Freight and logistics" }, { name: "Manufacturing" }, { name: "Import and export" }] },
-  { name: "Non-profit", categories: [{ name: "NGO or charity", scuml: true }, { name: "Religious organisation", scuml: true }] },
+  {
+    name: "Real estate and construction",
+    categories: [
+      { name: "Real estate agency", scuml: true },
+      { name: "Construction" },
+      { name: "Property management", scuml: true },
+    ],
+  },
+  {
+    name: "Hospitality and travel",
+    categories: [
+      { name: "Hotels", scuml: true },
+      { name: "Travel agency" },
+      { name: "Restaurants" },
+    ],
+  },
+  {
+    name: "Technology",
+    categories: [
+      { name: "Software and SaaS" },
+      { name: "IT services" },
+      { name: "Hardware" },
+    ],
+  },
+  {
+    name: "Logistics and manufacturing",
+    categories: [
+      { name: "Freight and logistics" },
+      { name: "Manufacturing" },
+      { name: "Import and export" },
+    ],
+  },
+  {
+    name: "Non-profit",
+    categories: [
+      { name: "NGO or charity", scuml: true },
+      { name: "Religious organisation", scuml: true },
+    ],
+  },
 ];
 
-export function isScumlCategory(sector: string | undefined, category: string | undefined) {
-  return !!SECTORS.find((s) => s.name === sector)?.categories.find((c) => c.name === category)?.scuml;
+export function isScumlCategory(
+  sector: string | undefined,
+  category: string | undefined,
+) {
+  return !!SECTORS.find((s) => s.name === sector)?.categories.find(
+    (c) => c.name === category,
+  )?.scuml;
 }
 
 /** "How do you want to use Foren?" options (Figma 3035:73236). */
 export const USE_CASES = [
-  { id: "global_accounts", title: "Global Accounts", description: "Hold, swap and manage multi-currency balances from your dashboard." },
-  { id: "api", title: "API services", description: "Automate collections and payouts in any currency programmatically." },
-  { id: "payouts", title: "Global Payouts", description: "Send single or batch cross-border transfers in many currencies." },
-  { id: "payment_links", title: "Payment Links", description: "Share links to collect payments, with no code." },
-  { id: "checkout", title: "Foren Checkout", description: "Accept payments on your website with a hosted, branded checkout." },
-  { id: "cards", title: "Cards", description: "Issue virtual cards to your team and control what they spend." },
-  { id: "virtual_accounts", title: "Virtual Accounts", description: "Dedicated account numbers for collecting from customers." },
-  { id: "fx", title: "FX and conversion", description: "Convert currencies at transparent, competitive rates." },
-  { id: "insights", title: "Spend Insights", description: "See how money moves across your business in real time." },
-  { id: "team", title: "Team Management", description: "Set roles and permissions for your team." },
+  {
+    id: "global_accounts",
+    title: "Global Accounts",
+    description:
+      "Hold, swap and manage multi-currency balances from your dashboard.",
+  },
+  {
+    id: "api",
+    title: "API services",
+    description:
+      "Automate collections and payouts in any currency programmatically.",
+  },
+  {
+    id: "payouts",
+    title: "Global Payouts",
+    description:
+      "Send single or batch cross-border transfers in many currencies.",
+  },
+  {
+    id: "payment_links",
+    title: "Payment Links",
+    description: "Share links to collect payments, with no code.",
+  },
+  {
+    id: "checkout",
+    title: "Foren Checkout",
+    description:
+      "Accept payments on your website with a hosted, branded checkout.",
+  },
+  {
+    id: "cards",
+    title: "Cards",
+    description:
+      "Issue virtual cards to your team and control what they spend.",
+  },
+  {
+    id: "virtual_accounts",
+    title: "Virtual Accounts",
+    description: "Dedicated account numbers for collecting from customers.",
+  },
+  {
+    id: "fx",
+    title: "FX and conversion",
+    description: "Convert currencies at transparent, competitive rates.",
+  },
+  {
+    id: "insights",
+    title: "Spend Insights",
+    description: "See how money moves across your business in real time.",
+  },
+  {
+    id: "team",
+    title: "Team Management",
+    description: "Set roles and permissions for your team.",
+  },
 ] as const;
 
 export type UseCaseId = (typeof USE_CASES)[number]["id"];
 
 /** Is the business new (incorporated in the last 6 months), given an ISO date? */
-export function isNewBusiness(incorporatedOn: string | undefined, today = new Date()) {
+export function isNewBusiness(
+  incorporatedOn: string | undefined,
+  today = new Date(),
+) {
   if (!incorporatedOn) return false;
   const d = new Date(incorporatedOn);
   const sixMonthsAgo = new Date(today);
@@ -442,4 +851,7 @@ export function isNewBusiness(incorporatedOn: string | undefined, today = new Da
   return d > sixMonthsAgo;
 }
 
-export const nationalityName = (code: string) => (code ? (new Intl.DisplayNames(["en-GB"], { type: "region" }).of(code) ?? code) : "");
+export const nationalityName = (code: string) =>
+  code
+    ? (new Intl.DisplayNames(["en-GB"], { type: "region" }).of(code) ?? code)
+    : "";

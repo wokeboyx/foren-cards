@@ -1,10 +1,15 @@
-import { subscriptionStatus, type forecast, type SubStatus } from "@/domain/forecast";
+import {
+  subscriptionStatus,
+  type forecast,
+  type SubStatus,
+} from "@/domain/forecast";
 import type { Card, Subscription } from "@/domain/types";
 import { merchantById } from "@/fixtures/merchants";
 import { useNow } from "@/composables/useNow";
 import { useAppStore } from "@/stores/app";
 
-export const short = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+export const short = (d: Date) =>
+  d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 
 /** Returns a status function for subscriptions; call it inside a computed so it tracks the store and clock. */
 export function useSubStatus() {

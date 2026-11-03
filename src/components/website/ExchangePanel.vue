@@ -22,7 +22,11 @@ const amount = ref("200,000");
 const send = computed(() => Number(amount.value.replace(/,/g, "")) || 0);
 const receive = computed(() => send.value * rate(from.value, to.value));
 // Quote the rate the way the website does: 1 unit of the stronger currency.
-const pair = computed(() => (rate(from.value, to.value) < 1 ? [to.value, from.value] : [from.value, to.value]));
+const pair = computed(() =>
+  rate(from.value, to.value) < 1
+    ? [to.value, from.value]
+    : [from.value, to.value],
+);
 
 // Picking the other side's currency swaps the two.
 function pick(side: "from" | "to", v: string) {
@@ -43,7 +47,10 @@ function onAmount(e: Event) {
   amount.value = el.value;
 }
 function onBlur() {
-  if (send.value) amount.value = send.value.toLocaleString("en-GB", { maximumFractionDigits: 2 });
+  if (send.value)
+    amount.value = send.value.toLocaleString("en-GB", {
+      maximumFractionDigits: 2,
+    });
 }
 </script>
 
@@ -64,12 +71,21 @@ function onBlur() {
       />
       <GlassCard>
         <div class="relative flex flex-col gap-4">
-          <AmountRow label="You send" :currency="from" @update:currency="(v: string) => pick('from', v)">
+          <AmountRow
+            label="You send"
+            :currency="from"
+            @update:currency="(v: string) => pick('from', v)"
+          >
             <input
               aria-label="Amount you send"
               inputmode="decimal"
               :value="amount"
-              :class="cn('w-full bg-transparent text-right text-[30px] leading-[36px] font-semibold tracking-[-0.75px] outline-none', ink)"
+              :class="
+                cn(
+                  'w-full bg-transparent text-right text-[30px] leading-[36px] font-semibold tracking-[-0.75px] outline-none',
+                  ink,
+                )
+              "
               @input="onAmount"
               @blur="onBlur"
             />
@@ -82,12 +98,29 @@ function onBlur() {
           >
             <RiArrowUpDownLine class="size-5" aria-hidden="true" />
           </button>
-          <AmountRow label="They receive" :currency="to" @update:currency="(v: string) => pick('to', v)">
-            <p :class="cn('text-right text-[30px] leading-[36px] font-semibold tracking-[-0.75px]', ink)" aria-live="polite">{{ formatAmount(receive) }}</p>
+          <AmountRow
+            label="They receive"
+            :currency="to"
+            @update:currency="(v: string) => pick('to', v)"
+          >
+            <p
+              :class="
+                cn(
+                  'text-right text-[30px] leading-[36px] font-semibold tracking-[-0.75px]',
+                  ink,
+                )
+              "
+              aria-live="polite"
+            >
+              {{ formatAmount(receive) }}
+            </p>
           </AmountRow>
           <Panel class="flex flex-col gap-4 p-6">
             <RateRow label="Exchange rate">
-              <span :class="cn('text-[14px]', ink)">1 {{ pair[0] }} ≈ {{ formatAmount(rate(pair[0], pair[1])) }} {{ pair[1] }}</span>
+              <span :class="cn('text-[14px]', ink)"
+                >1 {{ pair[0] }} ≈ {{ formatAmount(rate(pair[0], pair[1])) }}
+                {{ pair[1] }}</span
+              >
             </RateRow>
             <RateRow label="Our fee">
               <RateBadge icon="/website/confetti.svg">Free</RateBadge>
@@ -97,7 +130,9 @@ function onBlur() {
             </RateRow>
           </Panel>
         </div>
-        <RouterLink to="/onboarding" :class="cn(primaryBtn, 'mt-8 w-full')">Send money</RouterLink>
+        <RouterLink to="/onboarding" :class="cn(primaryBtn, 'mt-8 w-full')"
+          >Send money</RouterLink
+        >
       </GlassCard>
     </div>
   </div>

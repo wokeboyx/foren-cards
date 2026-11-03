@@ -5,7 +5,12 @@
  */
 import { computed, ref, useTemplateRef, watchEffect } from "vue";
 import { useRouter } from "vue-router";
-import { MTO_QUESTIONNAIRE, unanswered, visible, type Answers } from "@/domain/questionnaires";
+import {
+  MTO_QUESTIONNAIRE,
+  unanswered,
+  visible,
+  type Answers,
+} from "@/domain/questionnaires";
 import { useSignupGuard } from "@/composables/useSignupGuard";
 import { useOnboardingStore } from "@/stores/onboarding";
 import { cn } from "@/lib/utils";
@@ -18,7 +23,11 @@ type TabKey = string;
 
 /** Earlier versions stored lists; keep only text answers. */
 function toAnswers(edd: Record<string, string | string[]>): Answers {
-  return Object.fromEntries(Object.entries(edd).filter((e): e is [string, string] => typeof e[1] === "string"));
+  return Object.fromEntries(
+    Object.entries(edd).filter(
+      (e): e is [string, string] => typeof e[1] === "string",
+    ),
+  );
 }
 
 const ready = useSignupGuard("/onboarding/compliance");
@@ -29,13 +38,14 @@ const a = ref<Answers>(toAnswers(store.edd));
 const heading = useTemplateRef<HTMLHeadingElement>("heading");
 
 watchEffect(() => {
-  if (ready.value && store.entity && store.entity !== "mto") router.replace("/onboarding/review");
+  if (ready.value && store.entity && store.entity !== "mto")
+    router.replace("/onboarding/review");
 });
 
 const valid = (key: TabKey) =>
   unanswered(
     TABS.filter((t) => t.key === key),
-    a.value
+    a.value,
   ).length === 0;
 const index = computed(() => TABS.findIndex((t) => t.key === tab.value));
 const current = computed(() => visible([TABS[index.value]], a.value)[0]);
@@ -45,9 +55,14 @@ function go(next: TabKey) {
   tab.value = next;
   requestAnimationFrame(() => heading.value?.focus());
 }
-const reachable = (i: number) => i <= index.value || TABS.slice(0, i).every((x) => valid(x.key));
+const reachable = (i: number) =>
+  i <= index.value || TABS.slice(0, i).every((x) => valid(x.key));
 
-const back = computed(() => (index.value === 0 ? "/onboarding/business/profile" : () => go(TABS[index.value - 1].key)));
+const back = computed(() =>
+  index.value === 0
+    ? "/onboarding/business/profile"
+    : () => go(TABS[index.value - 1].key),
+);
 const footer = computed(() => ({
   primary: {
     label: index.value === TABS.length - 1 ? "Continue to review" : "Continue",
@@ -80,18 +95,47 @@ const footer = computed(() => ({
             class="flex w-full flex-col gap-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed"
             @click="go(t.key)"
           >
-            <span :class="cn('h-[3px] w-full rounded-full', i <= index ? 'bg-fg' : 'bg-line-2')" aria-hidden="true" />
-            <span :class="cn('text-[12px] leading-[18px] font-medium sm:text-[13px]', t.key === tab ? 'text-fg' : i < index ? 'text-fg-2' : 'text-fg-3')">{{
-              t.title
-            }}</span>
+            <span
+              :class="
+                cn(
+                  'h-[3px] w-full rounded-full',
+                  i <= index ? 'bg-fg' : 'bg-line-2',
+                )
+              "
+              aria-hidden="true"
+            />
+            <span
+              :class="
+                cn(
+                  'text-[12px] leading-[18px] font-medium sm:text-[13px]',
+                  t.key === tab
+                    ? 'text-fg'
+                    : i < index
+                      ? 'text-fg-2'
+                      : 'text-fg-3',
+                )
+              "
+              >{{ t.title }}</span
+            >
           </button>
         </li>
       </ol>
     </nav>
 
     <FormCard>
-      <h2 ref="heading" tabindex="-1" class="text-[16px] leading-6 font-semibold text-fg outline-none">{{ current.title }}</h2>
-      <FormQuestions :questions="current.questions" :answers="a" :error-for="() => undefined" @change="(patch) => (a = { ...a, ...patch })" />
+      <h2
+        ref="heading"
+        tabindex="-1"
+        class="text-[16px] leading-6 font-semibold text-fg outline-none"
+      >
+        {{ current.title }}
+      </h2>
+      <FormQuestions
+        :questions="current.questions"
+        :answers="a"
+        :error-for="() => undefined"
+        @change="(patch) => (a = { ...a, ...patch })"
+      />
     </FormCard>
   </OnboardingFrame>
 </template>

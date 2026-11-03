@@ -7,5 +7,11 @@ const props = defineProps<{ class?: HTMLAttributes["class"] }>();
 </script>
 
 <template>
-  <div :class="cn('flex flex-col gap-8 rounded-[24px] bg-surface px-4 py-6', props.class)"><slot /></div>
+  <div
+    :class="
+      cn('flex flex-col gap-8 rounded-[24px] bg-surface px-4 py-6', props.class)
+    "
+  >
+    <slot />
+  </div>
 </template>

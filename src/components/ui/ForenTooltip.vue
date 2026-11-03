@@ -1,9 +1,21 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { cn } from "@/lib/utils";
-import { arrowPosition, arrowVariants, sideMotion, sidePosition, tooltipVariants, type ForenTooltipProps } from "./foren-tooltip";
+import {
+  arrowPosition,
+  arrowVariants,
+  sideMotion,
+  sidePosition,
+  tooltipVariants,
+  type ForenTooltipProps,
+} from "./foren-tooltip";
 
-const props = withDefaults(defineProps<ForenTooltipProps>(), { variant: "dark", size: "sm", side: "top", delay: 200 });
+const props = withDefaults(defineProps<ForenTooltipProps>(), {
+  variant: "dark",
+  size: "sm",
+  side: "top",
+  delay: 200,
+});
 const emit = defineEmits<{ action: [] }>();
 
 const open = ref(false);
@@ -33,7 +45,11 @@ function hide() {
 function onKey(e: KeyboardEvent) {
   if (e.key === "Escape") hide();
 }
-watch(mounted, (m) => (m ? window.addEventListener("keydown", onKey) : window.removeEventListener("keydown", onKey)));
+watch(mounted, (m) =>
+  m
+    ? window.addEventListener("keydown", onKey)
+    : window.removeEventListener("keydown", onKey),
+);
 onBeforeUnmount(() => {
   window.removeEventListener("keydown", onKey);
   clearTimeout(openTimer);
@@ -44,16 +60,31 @@ const motion = computed(() => sideMotion[props.side]);
 </script>
 
 <template>
-  <span class="relative inline-flex" @mouseenter="show" @mouseleave="hide" @focusin="show" @focusout="hide">
+  <span
+    class="relative inline-flex"
+    @mouseenter="show"
+    @mouseleave="hide"
+    @focusin="show"
+    @focusout="hide"
+  >
     <slot />
     <div
       v-if="mounted"
       role="tooltip"
       :data-state="open ? 'open' : 'closed'"
       style="corner-shape: squircle"
-      :class="cn(tooltipVariants({ variant, size }), sidePosition[side], motion.open, motion.closed)"
+      :class="
+        cn(
+          tooltipVariants({ variant, size }),
+          sidePosition[side],
+          motion.open,
+          motion.closed,
+        )
+      "
     >
-      <div v-if="title" class="font-semibold tracking-[0.0125em]">{{ title }}</div>
+      <div v-if="title" class="font-semibold tracking-[0.0125em]">
+        {{ title }}
+      </div>
       <div class="opacity-90">{{ description }}</div>
       <template v-if="action">
         <a
@@ -72,7 +103,10 @@ const motion = computed(() => sideMotion[props.side]);
           {{ action }}
         </button>
       </template>
-      <span aria-hidden="true" :class="cn(arrowVariants({ variant }), arrowPosition[side])" />
+      <span
+        aria-hidden="true"
+        :class="cn(arrowVariants({ variant }), arrowPosition[side])"
+      />
     </div>
   </span>
 </template>

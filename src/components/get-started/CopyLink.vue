@@ -17,5 +17,7 @@ async function copy() {
 </script>
 
 <template>
-  <ForenButton variant="outline" size="xxs" class="shrink-0" @click="copy">Copy link</ForenButton>
+  <ForenButton variant="outline" size="xxs" class="shrink-0" @click="copy"
+    >Copy link</ForenButton
+  >
 </template>

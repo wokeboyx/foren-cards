@@ -3,7 +3,14 @@ import type { HTMLAttributes } from "vue";
 import { cn } from "@/lib/utils";
 import { CURRENCIES } from "./data";
 
-const props = withDefaults(defineProps<{ code: string; size?: number; class?: HTMLAttributes["class"] }>(), { size: 24 });
+const props = withDefaults(
+  defineProps<{
+    code: string;
+    size?: number;
+    class?: HTMLAttributes["class"];
+  }>(),
+  { size: 24 },
+);
 </script>
 
 <template>

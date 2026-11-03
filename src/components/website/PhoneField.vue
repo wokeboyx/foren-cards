@@ -24,10 +24,25 @@ function onNumber(e: Event) {
     <div
       class="relative flex h-12 shrink-0 items-center gap-2 rounded-[16px] border border-[#e6e4e2] bg-white px-3 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#2f2d2b]/15"
     >
-      <img :src="current.flag" alt="" width="20" height="20" class="size-5 rounded-full" />
-      <span :class="cn('text-[15px] font-medium', ink)">{{ current.code }}</span>
-      <select aria-label="Country code" :value="dial" class="absolute inset-0 cursor-pointer opacity-0" @change="dial = ($event.target as HTMLSelectElement).value">
-        <option v-for="d in DIAL_CODES" :key="d.iso" :value="d.iso">{{ d.country }} ({{ d.code }})</option>
+      <img
+        :src="current.flag"
+        alt=""
+        width="20"
+        height="20"
+        class="size-5 rounded-full"
+      />
+      <span :class="cn('text-[15px] font-medium', ink)">{{
+        current.code
+      }}</span>
+      <select
+        aria-label="Country code"
+        :value="dial"
+        class="absolute inset-0 cursor-pointer opacity-0"
+        @change="dial = ($event.target as HTMLSelectElement).value"
+      >
+        <option v-for="d in DIAL_CODES" :key="d.iso" :value="d.iso">
+          {{ d.country }} ({{ d.code }})
+        </option>
       </select>
     </div>
     <input

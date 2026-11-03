@@ -10,10 +10,17 @@ import { useOnboardingStore, type UploadedDoc } from "@/stores/onboarding";
 import { fmtSize, MAX_KB, ACCEPT } from "./documents";
 import Note from "./Note.vue";
 
-const props = defineProps<{ req: Requirement; doc?: UploadedDoc; showError: boolean; locked: boolean }>();
+const props = defineProps<{
+  req: Requirement;
+  doc?: UploadedDoc;
+  showError: boolean;
+  locked: boolean;
+}>();
 const s = useOnboardingStore();
 const alts = ref(false);
-const uploading = ref<{ name: string; kb: number; progress: number } | null>(null);
+const uploading = ref<{ name: string; kb: number; progress: number } | null>(
+  null,
+);
 const error = ref<string | null>(null);
 const altId = useId();
 const titleId = useId();
@@ -24,8 +31,10 @@ function onFiles(files: FileList) {
   const f = files[0];
   error.value = null;
   const kb = f.size / 1024;
-  if (!/\.(pdf|jpe?g|png)$/i.test(f.name)) return (error.value = "Use a PDF, JPG or PNG file.");
-  if (kb > MAX_KB) return (error.value = `That file is ${fmtSize(kb)}. The limit is 10 MB.`);
+  if (!/\.(pdf|jpe?g|png)$/i.test(f.name))
+    return (error.value = "Use a PDF, JPG or PNG file.");
+  if (kb > MAX_KB)
+    return (error.value = `That file is ${fmtSize(kb)}. The limit is 10 MB.`);
   // Prototype: fake a short upload so the progress state is visible.
   uploading.value = { name: f.name, kb, progress: 10 };
   let p = 10;
@@ -34,8 +43,13 @@ function onFiles(files: FileList) {
     if (p >= 100) {
       window.clearInterval(timer);
       uploading.value = null;
-      s.setDocument(props.req.id, { fileName: f.name, sizeKb: Math.round(kb), status: "uploaded" });
-    } else if (uploading.value) uploading.value = { ...uploading.value, progress: p };
+      s.setDocument(props.req.id, {
+        fileName: f.name,
+        sizeKb: Math.round(kb),
+        status: "uploaded",
+      });
+    } else if (uploading.value)
+      uploading.value = { ...uploading.value, progress: p };
   }, 220);
 }
 
@@ -44,17 +58,46 @@ const remove = () => s.setDocument(props.req.id, null);
 </script>
 
 <template>
-  <section :aria-labelledby="titleId" :class="cn('overflow-hidden rounded-[16px] bg-surface', (showError || attention) && 'ring-1 ring-error/30')">
+  <section
+    :aria-labelledby="titleId"
+    :class="
+      cn(
+        'overflow-hidden rounded-[16px] bg-surface',
+        (showError || attention) && 'ring-1 ring-error/30',
+      )
+    "
+  >
     <div class="flex flex-col gap-4 px-4 py-4">
       <div class="flex flex-col gap-1">
         <div class="flex flex-wrap items-center gap-2">
-          <h2 :id="titleId" class="text-[14px] leading-[21px] font-medium text-fg">{{ req.title }}</h2>
+          <h2
+            :id="titleId"
+            class="text-[14px] leading-[21px] font-medium text-fg"
+          >
+            {{ req.title }}
+          </h2>
           <ForenBadge v-if="req.optional" size="sm">Optional</ForenBadge>
-          <ForenBadge v-if="doc?.status === 'in_review'" size="sm" color="orange">In review</ForenBadge>
-          <ForenBadge v-if="doc?.status === 'accepted'" size="sm" color="success">Accepted</ForenBadge>
+          <ForenBadge
+            v-if="doc?.status === 'in_review'"
+            size="sm"
+            color="orange"
+            >In review</ForenBadge
+          >
+          <ForenBadge
+            v-if="doc?.status === 'accepted'"
+            size="sm"
+            color="success"
+            >Accepted</ForenBadge
+          >
         </div>
-        <p class="text-[12px] leading-[18px] font-medium text-fg-3">{{ req.description }}</p>
-        <span v-if="req.because" class="mt-1 w-fit rounded-full bg-info-subtle px-2 py-0.5 text-[11px] leading-[16px] font-semibold text-info">{{ req.because }}</span>
+        <p class="text-[12px] leading-[18px] font-medium text-fg-3">
+          {{ req.description }}
+        </p>
+        <span
+          v-if="req.because"
+          class="mt-1 w-fit rounded-full bg-info-subtle px-2 py-0.5 text-[11px] leading-[16px] font-semibold text-info"
+          >{{ req.because }}</span
+        >
       </div>
 
       <Note v-if="attention && doc?.note" intent="error">{{ doc.note }}</Note>
@@ -83,12 +126,19 @@ const remove = () => s.setDocument(props.req.id, null);
           class="[&>div:first-child]:border-line [&>div:first-child]:bg-subtle"
           @files="onFiles"
         />
-        <p v-if="!error && !showError" class="text-[12px] leading-[18px] font-medium text-fg-3">Max 10 MB per file. PDF, JPG or PNG.</p>
+        <p
+          v-if="!error && !showError"
+          class="text-[12px] leading-[18px] font-medium text-fg-3"
+        >
+          Max 10 MB per file. PDF, JPG or PNG.
+        </p>
       </div>
     </div>
 
     <div v-if="req.accepted" class="bg-sunken px-4 py-3">
-      <p class="flex items-center gap-1.5 text-[12px] leading-[18px] font-medium text-fg-2">
+      <p
+        class="flex items-center gap-1.5 text-[12px] leading-[18px] font-medium text-fg-2"
+      >
         <RiQuestionLine class="size-3.5" aria-hidden="true" />
         Don’t have this document?
         <button
@@ -102,8 +152,12 @@ const remove = () => s.setDocument(props.req.id, null);
         </button>
       </p>
       <div v-if="alts" :id="altId" class="mt-2">
-        <p class="mb-1 text-[12px] leading-[18px] font-medium text-fg-3">We accept any one of these:</p>
-        <ul class="list-disc space-y-1 pl-5 text-[12px] leading-[18px] font-medium text-fg-2">
+        <p class="mb-1 text-[12px] leading-[18px] font-medium text-fg-3">
+          We accept any one of these:
+        </p>
+        <ul
+          class="list-disc space-y-1 pl-5 text-[12px] leading-[18px] font-medium text-fg-2"
+        >
           <li v-for="a in req.accepted" :key="a">{{ a }}</li>
         </ul>
       </div>

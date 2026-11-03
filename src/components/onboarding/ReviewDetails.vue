@@ -17,7 +17,9 @@ const s = useOnboardingStore();
 const submitting = ref(false);
 
 const missingProfile = computed(() => ready.value && !s.profile);
-const missingEdd = computed(() => ready.value && s.entity === "mto" && !s.edd_done);
+const missingEdd = computed(
+  () => ready.value && s.entity === "mto" && !s.edd_done,
+);
 watchEffect(() => {
   if (missingProfile.value) router.replace("/onboarding/business/profile");
   else if (missingEdd.value) router.replace("/onboarding/compliance");
@@ -26,7 +28,7 @@ watchEffect(() => {
 const useFor = computed(() =>
   USE_CASES.filter((u) => s.useCases.includes(u.id))
     .map((u) => u.title)
-    .join(", ")
+    .join(", "),
 );
 const footer = computed(() => ({
   primary: {
@@ -45,10 +47,16 @@ const footer = computed(() => ({
 
 <template>
   <OnboardingFrame
-    v-if="ready && s.business && s.profile && s.country && s.entity && !missingEdd"
+    v-if="
+      ready && s.business && s.profile && s.country && s.entity && !missingEdd
+    "
     :step="s.entity === 'mto' ? 'edd' : 'business'"
     completed
-    :back="s.entity === 'mto' ? '/onboarding/compliance' : '/onboarding/business/profile'"
+    :back="
+      s.entity === 'mto'
+        ? '/onboarding/compliance'
+        : '/onboarding/business/profile'
+    "
     title="Review your details"
     description="Review your business and account information before submitting. If something is wrong, go back and fix it."
     :footer="footer"
@@ -60,7 +68,10 @@ const footer = computed(() => ({
             { label: 'Country', value: countryInfo(s.country)?.name },
             { label: 'Entity type', value: ENTITY_LABEL[s.entity] },
             { label: 'Type', value: s.business.companyType },
-            { label: 'Incorporated', value: formatDate(s.business.incorporatedOn) },
+            {
+              label: 'Incorporated',
+              value: formatDate(s.business.incorporatedOn),
+            },
             { label: 'Address', value: s.business.address, wide: true },
           ]"
         />
@@ -69,7 +80,12 @@ const footer = computed(() => ({
         <DetailGrid
           :items="[
             { label: 'Registered name', value: s.business.name },
-            { label: 'Reg. number', value: [s.business.regType, s.business.regNumber].filter(Boolean).join('-') },
+            {
+              label: 'Reg. number',
+              value: [s.business.regType, s.business.regNumber]
+                .filter(Boolean)
+                .join('-'),
+            },
             { label: 'Using Foren for', value: useFor, wide: true },
           ]"
         />
@@ -77,10 +93,19 @@ const footer = computed(() => ({
       <ReviewSection title="Profile" edit="/onboarding/business/profile">
         <DetailGrid
           :items="[
-            { label: 'Annual turnover', value: `${countryInfo(s.country)?.currency} ${s.profile.turnover}` },
-            { label: 'Sector', value: `${s.profile.sector} · ${s.profile.category}` },
+            {
+              label: 'Annual turnover',
+              value: `${countryInfo(s.country)?.currency} ${s.profile.turnover}`,
+            },
+            {
+              label: 'Sector',
+              value: `${s.profile.sector} · ${s.profile.category}`,
+            },
             { label: 'Website', value: s.profile.website },
-            { label: 'Trading', value: s.profile.notTrading ? 'Not trading yet' : 'Trading' },
+            {
+              label: 'Trading',
+              value: s.profile.notTrading ? 'Not trading yet' : 'Trading',
+            },
           ]"
         />
       </ReviewSection>
@@ -95,10 +120,17 @@ const footer = computed(() => ({
           ]"
         />
       </ReviewSection>
-      <ReviewSection v-if="s.entity === 'mto'" title="Enhanced due diligence" edit="/onboarding/compliance">
+      <ReviewSection
+        v-if="s.entity === 'mto'"
+        title="Enhanced due diligence"
+        edit="/onboarding/compliance"
+      >
         <DetailGrid :items="[{ label: 'Questionnaire', value: 'Completed' }]" />
       </ReviewSection>
-      <Note intent="info">Check everything is right before you submit. You can update business details later in Settings.</Note>
+      <Note intent="info"
+        >Check everything is right before you submit. You can update business
+        details later in Settings.</Note
+      >
     </div>
   </OnboardingFrame>
 </template>

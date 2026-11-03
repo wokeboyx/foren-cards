@@ -11,13 +11,29 @@ const props = withDefaults(
     type?: ButtonHTMLAttributes["type"];
     class?: HTMLAttributes["class"];
   }>(),
-  { type: "button", destructive: false }
+  { type: "button", destructive: false },
 );
-defineSlots<{ default?(): unknown; leadingIcon?(): unknown; trailingIcon?(): unknown }>();
+defineSlots<{
+  default?(): unknown;
+  leadingIcon?(): unknown;
+  trailingIcon?(): unknown;
+}>();
 </script>
 
 <template>
-  <button :type="props.type" :class="cn(buttonVariants({ variant: props.variant, size: props.size, destructive: props.destructive }), props.class)">
+  <button
+    :type="props.type"
+    :class="
+      cn(
+        buttonVariants({
+          variant: props.variant,
+          size: props.size,
+          destructive: props.destructive,
+        }),
+        props.class,
+      )
+    "
+  >
     <slot name="leadingIcon" />
     <span v-if="$slots.default"><slot /></span>
     <slot name="trailingIcon" />

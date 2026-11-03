@@ -2,11 +2,23 @@
 import { computed, inject, useId, type HTMLAttributes } from "vue";
 import { cn } from "@/lib/utils";
 import ForenRadioDot from "./ForenRadioDot.vue";
-import { descTextVariants, labelTextVariants, RADIO_CTX, type ForenRadioProps } from "./foren-radio";
+import {
+  descTextVariants,
+  labelTextVariants,
+  RADIO_CTX,
+  type ForenRadioProps,
+} from "./foren-radio";
 
 defineOptions({ inheritAttrs: false });
-const props = withDefaults(defineProps<ForenRadioProps & { class?: HTMLAttributes["class"] }>(), { disabled: undefined });
-const slots = defineSlots<{ label?(): unknown; description?(): unknown; trailing?(): unknown }>();
+const props = withDefaults(
+  defineProps<ForenRadioProps & { class?: HTMLAttributes["class"] }>(),
+  { disabled: undefined },
+);
+const slots = defineSlots<{
+  label?(): unknown;
+  description?(): unknown;
+  trailing?(): unknown;
+}>();
 
 const ctx = inject(RADIO_CTX);
 if (!ctx) throw new Error("ForenRadio must be used inside ForenRadioGroup");
@@ -22,7 +34,16 @@ function onChange(e: Event) {
 </script>
 
 <template>
-  <label :for="id" :class="cn('inline-flex items-start gap-3 select-none', disabled ? 'cursor-not-allowed' : 'cursor-pointer', props.class)">
+  <label
+    :for="id"
+    :class="
+      cn(
+        'inline-flex items-start gap-3 select-none',
+        disabled ? 'cursor-not-allowed' : 'cursor-pointer',
+        props.class,
+      )
+    "
+  >
     <input
       :id="id"
       type="radio"
@@ -48,12 +69,20 @@ function onChange(e: Event) {
           'flex flex-col gap-1 flex-1 min-w-0',
           // Optical centering — pull text so label first-line midline lands on dot midline.
           size === 'sm' && '-mt-px',
-          size === 'md' && '-mt-[0.5px]'
+          size === 'md' && '-mt-[0.5px]',
         )
       "
     >
-      <span v-if="label || slots.label" :class="labelTextVariants({ size, disabled })"><slot name="label">{{ label }}</slot></span>
-      <span v-if="description || slots.description" :class="descTextVariants({ size, disabled })"><slot name="description">{{ description }}</slot></span>
+      <span
+        v-if="label || slots.label"
+        :class="labelTextVariants({ size, disabled })"
+        ><slot name="label">{{ label }}</slot></span
+      >
+      <span
+        v-if="description || slots.description"
+        :class="descTextVariants({ size, disabled })"
+        ><slot name="description">{{ description }}</slot></span
+      >
     </span>
     <span
       v-if="trailing || slots.trailing"

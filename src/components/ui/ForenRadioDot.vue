@@ -2,8 +2,14 @@
 import { computed } from "vue";
 import { dotVariants, type RadioSize } from "./foren-radio";
 
-const props = defineProps<{ checked: boolean; size: RadioSize; disabled: boolean }>();
-const innerSize = computed(() => (props.size === "sm" ? 6 : props.size === "md" ? 8 : 10));
+const props = defineProps<{
+  checked: boolean;
+  size: RadioSize;
+  disabled: boolean;
+}>();
+const innerSize = computed(() =>
+  props.size === "sm" ? 6 : props.size === "md" ? 8 : 10,
+);
 </script>
 
 <template>

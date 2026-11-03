@@ -1,10 +1,14 @@
 import { ref } from "vue";
 
 /** Wraps an async action with pending/error state. */
-export function useAction<A extends unknown[], R>(fn: (...args: A) => Promise<R>) {
+export function useAction<A extends unknown[], R>(
+  fn: (...args: A) => Promise<R>,
+) {
   const pending = ref(false);
   const error = ref<string | null>(null);
-  async function run(...args: A): Promise<{ ok: true; value: R } | { ok: false; value?: undefined }> {
+  async function run(
+    ...args: A
+  ): Promise<{ ok: true; value: R } | { ok: false; value?: undefined }> {
     pending.value = true;
     error.value = null;
     try {

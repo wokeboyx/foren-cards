@@ -8,7 +8,9 @@ const emit = defineEmits<{ "update:modelValue": [value: string] }>();
 
 <template>
   <fieldset v-if="types.length > 1" class="flex flex-col gap-2">
-    <legend class="mb-2 text-[14px] leading-[21px] font-medium text-fg">Registration type</legend>
+    <legend class="mb-2 text-[14px] leading-[21px] font-medium text-fg">
+      Registration type
+    </legend>
     <div class="flex gap-2">
       <RadioCard
         v-for="t in types"

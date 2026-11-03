@@ -3,7 +3,11 @@
 import { RiArrowLeftSLine } from "@/components/icons";
 
 defineProps<{ title?: string; description?: string; back?: string }>();
-const slots = defineSlots<{ title?(): unknown; description?(): unknown; action?(): unknown }>();
+const slots = defineSlots<{
+  title?(): unknown;
+  description?(): unknown;
+  action?(): unknown;
+}>();
 </script>
 
 <template>
@@ -21,10 +25,15 @@ const slots = defineSlots<{ title?(): unknown; description?(): unknown; action?(
       <slot name="action" />
     </div>
     <div class="flex flex-col gap-2">
-      <h1 class="font-display text-[24px] leading-[32px] font-semibold tracking-[-0.015em] text-black [font-synthesis:none]">
+      <h1
+        class="font-display text-[24px] leading-[32px] font-semibold tracking-[-0.015em] text-black [font-synthesis:none]"
+      >
         <slot name="title">{{ title }}</slot>
       </h1>
-      <p v-if="description || slots.description" class="text-[14px] leading-[21px] font-medium text-fg-2">
+      <p
+        v-if="description || slots.description"
+        class="text-[14px] leading-[21px] font-medium text-fg-2"
+      >
         <slot name="description">{{ description }}</slot>
       </p>
     </div>

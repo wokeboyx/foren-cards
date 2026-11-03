@@ -21,17 +21,28 @@ import WaitlistForm from "./WaitlistForm.vue";
 import WhyWeNeedThisModal from "./WhyWeNeedThisModal.vue";
 import { fieldCls } from "./frame";
 
-const FLAG: Record<CountryCode, string> = { NG: "🇳🇬", GB: "🇬🇧", CA: "🇨🇦", KE: "🇰🇪" };
+const FLAG: Record<CountryCode, string> = {
+  NG: "🇳🇬",
+  GB: "🇬🇧",
+  CA: "🇨🇦",
+  KE: "🇰🇪",
+};
 const WAIT_PREFIX = "wait:";
 
 /** What each entity type can do once verified. */
 function capabilities(entity: EntityType): string[] {
   if (entity === "mto")
-    return ["Pay out to your customers in many currencies", "Hold NGN, USD, GBP, CAD and more", "Collect and settle through our API"];
+    return [
+      "Pay out to your customers in many currencies",
+      "Hold NGN, USD, GBP, CAD and more",
+      "Collect and settle through our API",
+    ];
   return [
     "Send and receive domestically and internationally",
     "Hold NGN, USD, GBP, CAD and more",
-    entity === "company" ? "Collect and settle in multiple currencies" : "Collect and pay in multiple currencies",
+    entity === "company"
+      ? "Collect and settle in multiple currencies"
+      : "Collect and pay in multiple currencies",
   ];
 }
 
@@ -44,10 +55,16 @@ const expanded = ref(false);
 
 const info = computed(() => countryInfo(store.country));
 const allowed = computed(() => info.value?.entities ?? []);
-const validEntity = computed(() => (store.entity && allowed.value.includes(store.entity) ? store.entity : null));
-const ready = computed(() => !waitCountry.value && !!info.value && !!validEntity.value);
+const validEntity = computed(() =>
+  store.entity && allowed.value.includes(store.entity) ? store.entity : null,
+);
+const ready = computed(
+  () => !waitCountry.value && !!info.value && !!validEntity.value,
+);
 
-const selectValue = computed(() => (waitCountry.value ? WAIT_PREFIX + waitCountry.value : (store.country ?? "")));
+const selectValue = computed(() =>
+  waitCountry.value ? WAIT_PREFIX + waitCountry.value : (store.country ?? ""),
+);
 function onCountry(v: string) {
   if (v.startsWith(WAIT_PREFIX)) {
     waitCountry.value = v.slice(WAIT_PREFIX.length);
@@ -57,7 +74,11 @@ function onCountry(v: string) {
   waitCountry.value = null;
   const next = v as CountryCode;
   const nextAllowed = countryInfo(next)?.entities ?? [];
-  store.set({ country: next, entity: store.entity && nextAllowed.includes(store.entity) ? store.entity : null });
+  store.set({
+    country: next,
+    entity:
+      store.entity && nextAllowed.includes(store.entity) ? store.entity : null,
+  });
   expanded.value = false;
 }
 function onEntity(v: string) {
@@ -65,9 +86,19 @@ function onEntity(v: string) {
   expanded.value = false;
 }
 const entityHint = computed(() =>
-  validEntity.value ? ENTITY_HINT[validEntity.value] : store.country === "KE" ? "In Kenya we can onboard companies and licensed MTOs/PSPs for now." : undefined
+  validEntity.value
+    ? ENTITY_HINT[validEntity.value]
+    : store.country === "KE"
+      ? "In Kenya we can onboard companies and licensed MTOs/PSPs for now."
+      : undefined,
 );
-const footer = computed(() => ({ primary: { label: "Continue", disabled: !ready.value, onClick: () => router.push("/onboarding/use") } }));
+const footer = computed(() => ({
+  primary: {
+    label: "Continue",
+    disabled: !ready.value,
+    onClick: () => router.push("/onboarding/use"),
+  },
+}));
 </script>
 
 <template>
@@ -79,7 +110,11 @@ const footer = computed(() => ({ primary: { label: "Continue", disabled: !ready.
   >
     <div class="overflow-hidden rounded-[24px] bg-subtle">
       <FormCard class="gap-8">
-        <Field label="Country of incorporation or residence" description="This decides which documents and IDs we’ll ask for." html-for="ob-country">
+        <Field
+          label="Country of incorporation or residence"
+          description="This decides which documents and IDs we’ll ask for."
+          html-for="ob-country"
+        >
           <div>
             <select
               id="ob-country"
@@ -88,9 +123,21 @@ const footer = computed(() => ({ primary: { label: "Continue", disabled: !ready.
               @change="onCountry(($event.target as HTMLSelectElement).value)"
             >
               <option value="" disabled>Select your country</option>
-              <option v-for="c in ONBOARDING_COUNTRIES" :key="c.code" :value="c.code">{{ FLAG[c.code] }} {{ c.name }}</option>
+              <option
+                v-for="c in ONBOARDING_COUNTRIES"
+                :key="c.code"
+                :value="c.code"
+              >
+                {{ FLAG[c.code] }} {{ c.name }}
+              </option>
               <optgroup label="Coming soon">
-                <option v-for="c in WAITLIST_COUNTRIES" :key="c" :value="WAIT_PREFIX + c">{{ c }}</option>
+                <option
+                  v-for="c in WAITLIST_COUNTRIES"
+                  :key="c"
+                  :value="WAIT_PREFIX + c"
+                >
+                  {{ c }}
+                </option>
               </optgroup>
             </select>
           </div>
@@ -99,7 +146,11 @@ const footer = computed(() => ({ primary: { label: "Continue", disabled: !ready.
         <WaitlistForm
           v-if="waitCountry"
           :country="waitCountry"
-          :joined="store.waitlist?.country === waitCountry ? store.waitlist.email : null"
+          :joined="
+            store.waitlist?.country === waitCountry
+              ? store.waitlist.email
+              : null
+          "
         />
         <Field
           v-else
@@ -116,21 +167,41 @@ const footer = computed(() => ({ primary: { label: "Continue", disabled: !ready.
             @change="onEntity(($event.target as HTMLSelectElement).value)"
           >
             <option value="" disabled>Select your entity type</option>
-            <option v-for="e in allowed" :key="e" :value="e">{{ ENTITY_LABEL[e] }}</option>
+            <option v-for="e in allowed" :key="e" :value="e">
+              {{ ENTITY_LABEL[e] }}
+            </option>
           </select>
         </Field>
 
-        <div v-if="ready && validEntity && info" class="flex flex-col gap-3 animate-[rise-in_200ms_ease-out]">
+        <div
+          v-if="ready && validEntity && info"
+          class="flex flex-col gap-3 animate-[rise-in_200ms_ease-out]"
+        >
           <p class="text-[12px] leading-[18px] font-medium text-fg-2">
-            As a <span class="text-fg">{{ validEntity === "mto" ? "licensed MTO or PSP" : ENTITY_LABEL[validEntity].toLowerCase() }}</span> in
-            <span class="text-fg">{{ info.name }}</span> you can
+            As a
+            <span class="text-fg">{{
+              validEntity === "mto"
+                ? "licensed MTO or PSP"
+                : ENTITY_LABEL[validEntity].toLowerCase()
+            }}</span>
+            in <span class="text-fg">{{ info.name }}</span> you can
           </p>
           <ul class="flex flex-col gap-3">
-            <li v-for="c in capabilities(validEntity)" :key="c" class="flex items-center gap-2 text-[12px] leading-[18px] font-medium text-fg">
-              <RiCheckLine class="size-4 shrink-0 text-success" aria-hidden="true" />
+            <li
+              v-for="c in capabilities(validEntity)"
+              :key="c"
+              class="flex items-center gap-2 text-[12px] leading-[18px] font-medium text-fg"
+            >
+              <RiCheckLine
+                class="size-4 shrink-0 text-success"
+                aria-hidden="true"
+              />
               {{ c }}
             </li>
-            <li v-if="validEntity !== 'sole_trader'" class="flex items-center gap-2 text-[12px] leading-[18px] font-medium text-warning">
+            <li
+              v-if="validEntity !== 'sole_trader'"
+              class="flex items-center gap-2 text-[12px] leading-[18px] font-medium text-warning"
+            >
               <RiErrorWarningLine class="size-4 shrink-0" aria-hidden="true" />
               You’ll need to add directors and beneficial owners
             </li>
@@ -148,6 +219,10 @@ const footer = computed(() => ({ primary: { label: "Continue", disabled: !ready.
       />
     </div>
 
-    <WhyWeNeedThisModal v-if="ready && validEntity && info" v-model:open="whyOpen" :subtitle="`${ENTITY_LABEL[validEntity]} in ${info.name}`" />
+    <WhyWeNeedThisModal
+      v-if="ready && validEntity && info"
+      v-model:open="whyOpen"
+      :subtitle="`${ENTITY_LABEL[validEntity]} in ${info.name}`"
+    />
   </OnboardingFrame>
 </template>

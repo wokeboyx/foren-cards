@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { computed, ref, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
-import { RiCheckLine, RiCloseLine, RiEyeLine, RiEyeOffLine } from "@/components/icons";
+import {
+  RiCheckLine,
+  RiCloseLine,
+  RiEyeLine,
+  RiEyeOffLine,
+} from "@/components/icons";
 import { DIAL_CODE } from "@/domain/onboarding";
 import { useSignupGuard } from "@/composables/useSignupGuard";
 import { useOnboardingStore } from "@/stores/onboarding";
@@ -40,15 +45,33 @@ const pwRef = useTemplateRef<HTMLInputElement>("pw");
 
 const met = computed(() => CRITERIA.map(([, test]) => test(password.value)));
 const score = computed(() => met.value.filter(Boolean).length); // 0–5
-const segments = computed(() => (password.value ? Math.max(1, score.value - 1) : 0));
+const segments = computed(() =>
+  password.value ? Math.max(1, score.value - 1) : 0,
+);
 const strong = computed(() => met.value.every(Boolean));
 const emailOk = computed(() => EMAIL_RE.test(email.value.trim()));
-const emailError = computed(() => (emailTouched.value && email.value && !emailOk.value ? "Enter a valid email, like name@company.com" : undefined));
+const emailError = computed(() =>
+  emailTouched.value && email.value && !emailOk.value
+    ? "Enter a valid email, like name@company.com"
+    : undefined,
+);
 const digits = computed(() => phone.value.replace(/\D/g, ""));
-const phoneOk = computed(() => digits.value.length >= 7 && digits.value.length <= 12);
-const phoneError = computed(() => (phoneTouched.value && phone.value && !phoneOk.value ? "Enter a valid phone number" : undefined));
+const phoneOk = computed(
+  () => digits.value.length >= 7 && digits.value.length <= 12,
+);
+const phoneError = computed(() =>
+  phoneTouched.value && phone.value && !phoneOk.value
+    ? "Enter a valid phone number"
+    : undefined,
+);
 const valid = computed(
-  () => emailOk.value && !!firstName.value.trim() && !!lastName.value.trim() && !!position.value.trim() && phoneOk.value && strong.value
+  () =>
+    emailOk.value &&
+    !!firstName.value.trim() &&
+    !!lastName.value.trim() &&
+    !!position.value.trim() &&
+    phoneOk.value &&
+    strong.value,
 );
 
 function submit() {
@@ -71,7 +94,9 @@ function clearPassword() {
   password.value = "";
   pwRef.value?.focus();
 }
-const footer = computed(() => ({ primary: { label: "Continue", disabled: !valid.value, onClick: submit } }));
+const footer = computed(() => ({
+  primary: { label: "Continue", disabled: !valid.value, onClick: submit },
+}));
 </script>
 
 <template>
@@ -100,19 +125,42 @@ const footer = computed(() => ({ primary: { label: "Continue", disabled: !valid.
         </Field>
         <div class="grid gap-8 sm:grid-cols-2 sm:gap-4">
           <Field label="First name" html-for="ob-first">
-            <input id="ob-first" v-model="firstName" autocomplete="given-name" :class="fieldCls" />
+            <input
+              id="ob-first"
+              v-model="firstName"
+              autocomplete="given-name"
+              :class="fieldCls"
+            />
           </Field>
           <Field label="Last name" html-for="ob-last">
-            <input id="ob-last" v-model="lastName" autocomplete="family-name" :class="fieldCls" />
+            <input
+              id="ob-last"
+              v-model="lastName"
+              autocomplete="family-name"
+              :class="fieldCls"
+            />
           </Field>
         </div>
         <div class="grid gap-8 sm:grid-cols-2 sm:gap-4">
-          <Field label="Job title" html-for="ob-position" hint="You’re the authorised representative on the declaration.">
-            <input id="ob-position" v-model="position" autocomplete="organization-title" placeholder="e.g. Finance Director" :class="fieldCls" />
+          <Field
+            label="Job title"
+            html-for="ob-position"
+            hint="You’re the authorised representative on the declaration."
+          >
+            <input
+              id="ob-position"
+              v-model="position"
+              autocomplete="organization-title"
+              placeholder="e.g. Finance Director"
+              :class="fieldCls"
+            />
           </Field>
           <Field label="Phone number" html-for="ob-phone" :error="phoneError">
             <div class="relative">
-              <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[14px] font-medium text-fg-2">{{ dial }}</span>
+              <span
+                class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[14px] font-medium text-fg-2"
+                >{{ dial }}</span
+              >
               <input
                 id="ob-phone"
                 type="tel"
@@ -136,9 +184,17 @@ const footer = computed(() => ({ primary: { label: "Continue", disabled: !valid.
               :type="show ? 'text' : 'password'"
               autocomplete="new-password"
               aria-describedby="ob-password-rules"
-              :class="cn(fieldCls, 'pr-20', !show && password && 'text-[20px] tracking-[0.15em]')"
+              :class="
+                cn(
+                  fieldCls,
+                  'pr-20',
+                  !show && password && 'text-[20px] tracking-[0.15em]',
+                )
+              "
             />
-            <div class="absolute top-1/2 right-2 flex -translate-y-1/2 items-center gap-1">
+            <div
+              class="absolute top-1/2 right-2 flex -translate-y-1/2 items-center gap-1"
+            >
               <button
                 type="button"
                 :aria-label="show ? 'Hide password' : 'Show password'"
@@ -160,27 +216,57 @@ const footer = computed(() => ({ primary: { label: "Continue", disabled: !valid.
               </button>
             </div>
           </div>
-          <div v-if="password" class="flex items-center gap-1 px-1" aria-hidden="true">
+          <div
+            v-if="password"
+            class="flex items-center gap-1 px-1"
+            aria-hidden="true"
+          >
             <span
               v-for="i in [0, 1, 2, 3]"
               :key="i"
-              :class="cn('h-1 flex-1 rounded-[4px] transition-colors', i < segments ? (strong ? 'bg-[#4c9a4e]' : score >= 3 ? 'bg-warning' : 'bg-error') : 'bg-line')"
+              :class="
+                cn(
+                  'h-1 flex-1 rounded-[4px] transition-colors',
+                  i < segments
+                    ? strong
+                      ? 'bg-[#4c9a4e]'
+                      : score >= 3
+                        ? 'bg-warning'
+                        : 'bg-error'
+                    : 'bg-line',
+                )
+              "
             />
-            <span class="w-14 text-right text-[12px] leading-[18px] font-medium text-fg-2">{{ STRENGTH[score] }}</span>
+            <span
+              class="w-14 text-right text-[12px] leading-[18px] font-medium text-fg-2"
+              >{{ STRENGTH[score] }}</span
+            >
           </div>
-          <ul id="ob-password-rules" class="flex flex-wrap gap-2" aria-label="Password rules">
+          <ul
+            id="ob-password-rules"
+            class="flex flex-wrap gap-2"
+            aria-label="Password rules"
+          >
             <li
               v-for="([label], i) in CRITERIA"
               :key="label"
               class="inline-flex h-5 items-center gap-1.5 rounded-full bg-[var(--color-foren-bg-button-secondary)] pr-2 pl-1.5 text-[12px] leading-[18px] font-medium text-fg-2"
             >
-              <RiCheckLine v-if="met[i]" class="size-3 text-success" aria-hidden="true" />
+              <RiCheckLine
+                v-if="met[i]"
+                class="size-3 text-success"
+                aria-hidden="true"
+              />
               <span v-else class="size-3" aria-hidden="true" />
               {{ label }}
-              <span class="sr-only">{{ met[i] ? " (met)" : " (not met)" }}</span>
+              <span class="sr-only">{{
+                met[i] ? " (met)" : " (not met)"
+              }}</span>
             </li>
           </ul>
-          <p class="sr-only" aria-live="polite">{{ password ? `Password strength: ${STRENGTH[score]}` : "" }}</p>
+          <p class="sr-only" aria-live="polite">
+            {{ password ? `Password strength: ${STRENGTH[score]}` : "" }}
+          </p>
         </Field>
       </FormCard>
     </form>

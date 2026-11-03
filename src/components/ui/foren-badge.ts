@@ -6,11 +6,16 @@ export const badgeVariants = cva(
     variants: {
       color: {
         gray: "bg-[var(--color-foren-bg-button-secondary)] text-[var(--color-foren-text-secondary)]",
-        primary: "bg-[var(--color-foren-bg-primary-subtle)] text-[var(--color-foren-text-primary)]",
-        error: "bg-[var(--color-foren-bg-error-subtle)] text-[var(--color-foren-error)]",
-        success: "bg-[var(--color-foren-bg-success-subtle)] text-[var(--color-foren-success)]",
-        indigo: "bg-[var(--color-foren-bg-info-subtle)] text-[var(--color-foren-info)]",
-        orange: "bg-[var(--color-foren-bg-warning-subtle)] text-[var(--color-foren-warning)]",
+        primary:
+          "bg-[var(--color-foren-bg-primary-subtle)] text-[var(--color-foren-text-primary)]",
+        error:
+          "bg-[var(--color-foren-bg-error-subtle)] text-[var(--color-foren-error)]",
+        success:
+          "bg-[var(--color-foren-bg-success-subtle)] text-[var(--color-foren-success)]",
+        indigo:
+          "bg-[var(--color-foren-bg-info-subtle)] text-[var(--color-foren-info)]",
+        orange:
+          "bg-[var(--color-foren-bg-warning-subtle)] text-[var(--color-foren-warning)]",
       },
       size: {
         sm: "h-[22px] px-2 text-[12px] leading-[16px] tracking-[0.04em] [&_svg]:size-[12px]",
@@ -23,9 +28,12 @@ export const badgeVariants = cva(
       },
     },
     defaultVariants: { color: "gray", size: "md", iconOnly: false },
-  }
+  },
 );
-export const dotColors: Record<NonNullable<VariantProps<typeof badgeVariants>["color"]>, string> = {
+export const dotColors: Record<
+  NonNullable<VariantProps<typeof badgeVariants>["color"]>,
+  string
+> = {
   gray: "bg-[var(--color-foren-text-tertiary)]",
   primary: "bg-[var(--color-foren-primary-dot)]",
   error: "bg-[var(--color-foren-error)]",
@@ -33,4 +41,6 @@ export const dotColors: Record<NonNullable<VariantProps<typeof badgeVariants>["c
   indigo: "bg-[var(--color-foren-info)]",
   orange: "bg-[var(--color-foren-warning)]",
 };
-export type BadgeColor = NonNullable<VariantProps<typeof badgeVariants>["color"]>;
+export type BadgeColor = NonNullable<
+  VariantProps<typeof badgeVariants>["color"]
+>;

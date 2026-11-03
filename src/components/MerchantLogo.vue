@@ -4,7 +4,14 @@ import type { Merchant } from "@/domain/types";
 import { cn } from "@/lib/utils";
 
 /** Letter tile standing in for a merchant logo (prototype has no licensed logo assets). */
-const props = withDefaults(defineProps<{ merchant?: Merchant; size?: number; class?: HTMLAttributes["class"] }>(), { size: 36 });
+const props = withDefaults(
+  defineProps<{
+    merchant?: Merchant;
+    size?: number;
+    class?: HTMLAttributes["class"];
+  }>(),
+  { size: 36 },
+);
 
 function luminance(hex: string) {
   const [r, g, b] = [1, 3, 5]
@@ -19,21 +26,43 @@ function contrast(a: string, b: string) {
   return (x + 0.05) / (y + 0.05);
 }
 
-const text = computed(() => (props.merchant && contrast("#ffffff", props.merchant.tint) >= contrast("#241c15", props.merchant.tint) ? "#ffffff" : "#241c15"));
+const text = computed(() =>
+  props.merchant &&
+  contrast("#ffffff", props.merchant.tint) >=
+    contrast("#241c15", props.merchant.tint)
+    ? "#ffffff"
+    : "#241c15",
+);
 </script>
 
 <template>
   <span
     v-if="!merchant"
     aria-hidden="true"
-    :class="cn('inline-grid shrink-0 place-items-center rounded-full bg-subtle text-fg-3', props.class)"
+    :class="
+      cn(
+        'inline-grid shrink-0 place-items-center rounded-full bg-subtle text-fg-3',
+        props.class,
+      )
+    "
     :style="{ width: `${size}px`, height: `${size}px` }"
   />
   <span
     v-else
     aria-hidden="true"
-    :class="cn('inline-grid shrink-0 place-items-center rounded-full font-semibold tracking-[0.01em]', props.class)"
-    :style="{ width: `${size}px`, height: `${size}px`, background: merchant.tint, color: text, fontSize: `${Math.round(size * 0.36)}px` }"
+    :class="
+      cn(
+        'inline-grid shrink-0 place-items-center rounded-full font-semibold tracking-[0.01em]',
+        props.class,
+      )
+    "
+    :style="{
+      width: `${size}px`,
+      height: `${size}px`,
+      background: merchant.tint,
+      color: text,
+      fontSize: `${Math.round(size * 0.36)}px`,
+    }"
   >
     {{ merchant.mark }}
   </span>

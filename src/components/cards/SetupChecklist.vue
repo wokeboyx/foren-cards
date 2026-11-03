@@ -1,121 +1,175 @@
 <script setup lang="ts">
-/** First visit (AC 1.1): what Foren cards can do, and one clear way to start. */
-import { computed, type Component } from "vue";
+/** First visit (AC 1.1): one clear way to start. Laid out like the Figma "Account Card" empty state: the card illustration on the left, title, one action and three features on the right. */
+import { onBeforeUnmount, onMounted, ref, type Component } from "vue";
+import CardTermsModal from "./CardTermsModal.vue";
+import type { CardDesign } from "@/domain/types";
+import { useReducedMotion } from "motion-v";
 import {
-  RiAlarmWarningLine,
-  RiBuilding2Line,
-  RiHistoryLine,
-  RiLockLine,
-  RiSearchEyeLine,
-  RiRepeatLine,
-  RiRouteLine,
+  RiAddLine,
+  RiGlobalLine,
+  RiInformationLine,
   RiShieldCheckLine,
+  RiSnowflakeLine,
 } from "@/components/icons";
 import CardArt from "@/components/card/CardArt.vue";
 import LinkButton from "@/components/LinkButton.vue";
+import { POLICY } from "@/config/policy";
+import { format } from "@/domain/money";
 import { COMPANY } from "@/fixtures/seed";
 import { can } from "@/lib/permissions";
 import { useAppStore } from "@/stores/app";
 
-const FEATURES: { icon: Component; title: string; body: string }[] = [
-  {
-    icon: RiBuilding2Line,
-    title: "Cards for people or the company",
-    body: "Give a team member a card in their name, or create a company card for shared spend like subscriptions. You can add people who aren’t on Foren yet.",
-  },
-  {
-    icon: RiLockLine,
-    title: "Lock a card to one merchant",
-    body: "The first merchant to charge it becomes the only one that can. If the details leak, nobody else can use them.",
-  },
-  {
-    icon: RiShieldCheckLine,
-    title: "Decide where and how much",
-    body: "Set limits and allow only certain merchants or categories. Gambling, cash and crypto are blocked unless you allow them.",
-  },
-  {
-    icon: RiRouteLine,
-    title: "Pay from the cheapest balance",
-    body: "Each charge comes from the balance that costs least to convert, and one charge can be split across balances.",
-  },
-  {
-    icon: RiHistoryLine,
-    title: "Freeze, cancel and see history",
-    body: "Stop a card in one click. Every change is kept, with who made it and when.",
-  },
-  {
-    icon: RiRepeatLine,
-    title: "See subscriptions coming",
-    body: "Spot recurring charges and when they’re likely to renew, and block a merchant on one card.",
-  },
-  {
-    icon: RiSearchEyeLine,
-    title: "Check a merchant first",
-    body: "See whether a card is likely to work at a merchant before anyone pays, and fix the setting that would block it.",
-  },
-  {
-    icon: RiAlarmWarningLine,
-    title: "Help when a payment fails",
-    body: "Your team sees why a payment was declined and can ask you for a one-time approval or an emergency card.",
-  },
+const FEATURES: { icon: Component; label: string }[] = [
+  { icon: RiSnowflakeLine, label: "Freeze any time" },
+  { icon: RiShieldCheckLine, label: "Daily limits" },
+  { icon: RiGlobalLine, label: "Multi currency" },
 ];
 
+/** The flip takes 4s; the colour changes while the card is edge-on (80% in). */
+const SKINS: CardDesign[] = ["ink", "cobalt", "clay", "lime", "silver"];
+const CYCLE_MS = 4000;
+const skin = ref(0);
+let swap: ReturnType<typeof setTimeout> | undefined;
+let timer: ReturnType<typeof setInterval> | undefined;
+const reduce = useReducedMotion();
+const fee = format(POLICY.cardCreationFee);
+const terms = ref(false);
 const store = useAppStore();
-const owner = computed(() => can(store.role, "issue"));
+onMounted(() => {
+  if (reduce.value) return;
+  swap = setTimeout(() => {
+    skin.value = (skin.value + 1) % SKINS.length;
+    timer = setInterval(
+      () => (skin.value = (skin.value + 1) % SKINS.length),
+      CYCLE_MS,
+    );
+  }, CYCLE_MS * 0.8);
+});
+onBeforeUnmount(() => {
+  clearTimeout(swap);
+  clearInterval(timer);
+});
+const owner = can(store.role, "issue");
 </script>
 
 <template>
   <div v-if="!owner" class="rounded-[20px] bg-surface p-8 text-center">
     <h2 class="text-[20px] font-semibold text-fg">No cards yet</h2>
-    <p class="mt-2 text-[14px] text-fg-2">Ask your account owner for a card. Your request shows here until they approve it.</p>
+    <p class="mt-2 text-[14px] text-fg-2">
+      Cards issued to you will appear here.
+    </p>
     <LinkButton href="/cards/request" class="mt-5">Request a card</LinkButton>
   </div>
 
-  <div v-else class="space-y-8">
-    <section class="grid items-center gap-8 overflow-hidden rounded-[20px] bg-surface p-6 sm:p-8 md:grid-cols-[minmax(0,1fr)_300px]">
-      <div>
-        <p class="text-[13px] font-medium text-fg-3">Foren Cards</p>
-        <h2 class="mt-1 text-[28px] leading-[34px] font-semibold tracking-[-0.02em] text-fg">Virtual cards for every way your team spends</h2>
-        <p class="mt-3 max-w-[520px] text-[15px] leading-[23px] text-fg-2">
-          Create a card in seconds for a team member or for {{ COMPANY.name }}. Every card pays from your Foren balances, and you decide where it works and how much it can spend.
-        </p>
-        <div class="mt-6 flex flex-wrap gap-2">
-          <LinkButton href="/cards/new">Create your first card</LinkButton>
-          <LinkButton href="/cards/check-merchant" variant="secondary">Check a merchant</LinkButton>
-        </div>
+  <section
+    v-else
+    class="flex flex-col items-center gap-8 rounded-[24px] border-2 border-[#f7f7f7] bg-surface px-4 py-10 md:flex-row md:justify-between"
+    aria-labelledby="cards-empty-title"
+  >
+    <!-- A card that flips over and comes back in another colour -->
+    <div
+      class="relative grid h-[280px] w-full max-w-[380px] shrink-0 place-items-center overflow-hidden rounded-[20px] bg-gradient-to-b from-canvas to-transparent"
+      style="perspective: 900px"
+      aria-hidden="true"
+    >
+      <span
+        class="absolute top-1/2 left-1/2 size-[200px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-subtle blur-2xl"
+      />
+      <div :class="['relative', !reduce && 'card-flip']">
+        <CardArt
+          :card="{
+            design: SKINS[skin],
+            nickname: 'Team travel',
+            last4: '4821',
+            kind: 'standard',
+            status: 'active',
+          }"
+          size="md"
+          :holder-name="COMPANY.name"
+        />
       </div>
-      <div class="relative mx-auto h-[210px] w-[280px]" aria-hidden="true">
-        <div class="absolute top-0 left-6 rotate-[-8deg]">
-          <CardArt :card="{ design: 'skyline', nickname: 'Team travel', last4: '4821', kind: 'standard', status: 'active' }" size="md" holder-name="Tunde Bello" class="w-[230px]" />
-        </div>
-        <div class="absolute top-16 left-0 rotate-[4deg]">
-          <CardArt :card="{ design: 'lime', nickname: 'Figma', last4: '9054', kind: 'standard', status: 'active' }" size="md" merchant-name="Figma" :holder-name="COMPANY.name" class="w-[230px]" />
-        </div>
-      </div>
-    </section>
+    </div>
 
-    <section aria-labelledby="can-do">
-      <h2 id="can-do" class="mb-3 text-[16px] font-semibold text-fg">What you can do with Foren cards</h2>
-      <ul class="grid gap-px overflow-hidden rounded-[20px] bg-line sm:grid-cols-2 lg:grid-cols-4">
-        <li v-for="f in FEATURES" :key="f.title" class="bg-surface p-5">
-          <span class="grid size-9 place-items-center rounded-full bg-subtle text-fg [&_svg]:size-[18px]" aria-hidden="true">
-            <component :is="f.icon" />
-          </span>
-          <div class="mt-3 text-[14px] font-semibold text-fg">{{ f.title }}</div>
-          <p class="mt-1 text-[13px] leading-[19px] text-fg-2">{{ f.body }}</p>
+    <div class="w-full max-w-[564px]">
+      <div class="flex flex-col gap-3 pb-4">
+        <div class="flex flex-col gap-1">
+          <h2
+            id="cards-empty-title"
+            class="text-[14px] leading-[21px] font-medium tracking-[0.14px] text-fg"
+          >
+            Create your first card
+          </h2>
+          <p class="text-[12px] leading-[18px] tracking-[0.12px] text-fg-3">
+            Issue a virtual card for the company or a team member. Fund it from
+            your balances, set a daily limit and freeze it any time.
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <LinkButton href="/cards/new" size="xxs">
+            <template #leadingIcon><RiAddLine /></template>
+            Create card
+          </LinkButton>
+          <p
+            class="flex items-center gap-1 text-[12px] leading-[18px] text-fg-3"
+            data-testid="creation-fee"
+          >
+            <RiInformationLine class="size-3.5" aria-hidden="true" />
+            <span class="tnum">{{ fee }}</span> one-time fee per card, paid from
+            your balance
+          </p>
+        </div>
+      </div>
+      <p class="pb-4 text-[12px] leading-[18px] tracking-[0.12px] text-fg-3">
+        By creating a card you agree to the
+        <button
+          type="button"
+          class="font-medium text-fg underline underline-offset-2 outline-none focus-visible:ring-2 focus-visible:ring-focus"
+          @click="terms = true"
+        >
+          card terms and conditions</button
+        >. See the
+        <button
+          type="button"
+          class="font-medium text-fg underline underline-offset-2 outline-none focus-visible:ring-2 focus-visible:ring-focus"
+          @click="terms = true"
+        >
+          limits and fees</button
+        >.
+      </p>
+      <hr class="border-line" />
+      <ul class="mt-4 flex flex-wrap gap-x-10 gap-y-2" aria-label="Features">
+        <li
+          v-for="f in FEATURES"
+          :key="f.label"
+          class="flex items-center gap-1 text-[12px] leading-[18px] font-medium tracking-[0.12px] text-fg-2"
+        >
+          <component :is="f.icon" class="size-3.5" aria-hidden="true" />
+          {{ f.label }}
         </li>
       </ul>
-      <div class="mt-3 flex flex-wrap items-center gap-2 text-[13px] text-fg-3">
-        <span class="font-medium">Coming later:</span>
-        <span
-          v-for="x in ['Treasury Mode', 'Agent Cards']"
-          :key="x"
-          aria-disabled="true"
-          class="inline-flex h-7 items-center rounded-full border border-dashed border-line px-3 text-[12px] font-medium text-fg-3"
-        >
-          {{ x }}
-        </span>
-      </div>
-    </section>
-  </div>
+    </div>
+  </section>
+  <CardTermsModal v-model:open="terms" />
 </template>
+
+<style scoped>
+.card-flip {
+  animation: card-flip 4s ease-in-out infinite;
+}
+@keyframes card-flip {
+  0%,
+  72% {
+    transform: rotateY(0deg);
+  }
+  80% {
+    transform: rotateY(90deg);
+  }
+  80.01% {
+    transform: rotateY(-90deg);
+  }
+  88%,
+  100% {
+    transform: rotateY(0deg);
+  }
+}
+</style>

@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { computed, ref, useId, type HTMLAttributes } from "vue";
 import { cn } from "@/lib/utils";
-import { descVariants, labelVariants, sizeMap, trackVariants } from "./foren-toggle";
+import {
+  descVariants,
+  labelVariants,
+  sizeMap,
+  trackVariants,
+} from "./foren-toggle";
 
 defineOptions({ inheritAttrs: false });
 const props = withDefaults(
@@ -22,7 +27,15 @@ const props = withDefaults(
     id?: string;
     class?: HTMLAttributes["class"];
   }>(),
-  { size: "md", modelValue: undefined, defaultChecked: false, error: false, disabled: false, reverse: false, value: "on" }
+  {
+    size: "md",
+    modelValue: undefined,
+    defaultChecked: false,
+    error: false,
+    disabled: false,
+    reverse: false,
+    value: "on",
+  },
 );
 const emit = defineEmits<{ "update:modelValue": [next: boolean] }>();
 defineSlots<{ label?(): unknown; description?(): unknown }>();
@@ -30,7 +43,9 @@ defineSlots<{ label?(): unknown; description?(): unknown }>();
 const autoId = useId();
 const id = computed(() => props.id ?? autoId);
 const internal = ref(props.defaultChecked);
-const checked = computed(() => (props.modelValue !== undefined ? props.modelValue : internal.value));
+const checked = computed(() =>
+  props.modelValue !== undefined ? props.modelValue : internal.value,
+);
 const dim = computed(() => sizeMap[props.size]);
 
 function toggle() {
@@ -45,7 +60,14 @@ function toggle() {
   <label
     v-if="label || description || $slots.label || $slots.description"
     :for="id"
-    :class="cn('inline-flex items-start gap-3 select-none', reverse && 'flex-row-reverse', disabled ? 'cursor-not-allowed' : 'cursor-pointer', props.class)"
+    :class="
+      cn(
+        'inline-flex items-start gap-3 select-none',
+        reverse && 'flex-row-reverse',
+        disabled ? 'cursor-not-allowed' : 'cursor-pointer',
+        props.class,
+      )
+    "
   >
     <button
       :id="id"
@@ -59,7 +81,7 @@ function toggle() {
         cn(
           trackVariants({ checked, error, disabled }),
           'cursor-pointer disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-foren-brand-green)]',
-          props.class
+          props.class,
         )
       "
       v-bind="$attrs"
@@ -86,10 +108,23 @@ function toggle() {
       />
     </button>
     <span class="flex flex-col gap-1">
-      <span v-if="label || $slots.label" :class="labelVariants({ size, disabled })"><slot name="label">{{ label }}</slot></span>
-      <span v-if="description || $slots.description" :class="descVariants({ size, disabled })"><slot name="description">{{ description }}</slot></span>
+      <span
+        v-if="label || $slots.label"
+        :class="labelVariants({ size, disabled })"
+        ><slot name="label">{{ label }}</slot></span
+      >
+      <span
+        v-if="description || $slots.description"
+        :class="descVariants({ size, disabled })"
+        ><slot name="description">{{ description }}</slot></span
+      >
     </span>
-    <input v-if="name" type="hidden" :name="name" :value="checked ? value : ''" />
+    <input
+      v-if="name"
+      type="hidden"
+      :name="name"
+      :value="checked ? value : ''"
+    />
   </label>
   <button
     v-else
@@ -104,7 +139,7 @@ function toggle() {
       cn(
         trackVariants({ checked, error, disabled }),
         'cursor-pointer disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-foren-brand-green)]',
-        props.class
+        props.class,
       )
     "
     v-bind="$attrs"

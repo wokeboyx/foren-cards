@@ -10,9 +10,23 @@ export type GoalEval = {
   nextStep?: string;
 };
 
-const bal = (balances: Balance[], c: Currency) => balances.find((b) => b.currency === c)?.available ?? { minor: 0, currency: c };
+const bal = (balances: Balance[], c: Currency) =>
+  balances.find((b) => b.currency === c)?.available ?? {
+    minor: 0,
+    currency: c,
+  };
 
-export function goalSentence(g: Pick<AutoFxGoal, "type" | "currency" | "threshold" | "counterCurrency" | "amount" | "targetRate">): string {
+export function goalSentence(
+  g: Pick<
+    AutoFxGoal,
+    | "type"
+    | "currency"
+    | "threshold"
+    | "counterCurrency"
+    | "amount"
+    | "targetRate"
+  >,
+): string {
   switch (g.type) {
     case "keep_min":
       return `Keep at least ${g.threshold ? format(g.threshold, { code: true }) : `— ${g.currency}`}; top up from ${g.counterCurrency}.`;
@@ -32,7 +46,11 @@ export function evaluateGoal(g: AutoFxGoal, balances: Balance[]): GoalEval {
     if (b.minor >= t.minor)
       return last
         ? { status: "action_taken", progress, message: last.text }
-        : { status: "on_track", progress, message: `${format(b)} is above the ${format(t)} minimum.` };
+        : {
+            status: "on_track",
+            progress,
+            message: `${format(b)} is above the ${format(t)} minimum.`,
+          };
     const shortfall: Money = { minor: t.minor - b.minor, currency: g.currency };
     const cost = convert(shortfall, g.counterCurrency);
     if (bal(balances, g.counterCurrency).minor < cost.minor)
@@ -42,10 +60,15 @@ export function evaluateGoal(g: AutoFxGoal, balances: Balance[]): GoalEval {
         message: `${g.currency} is ${format(shortfall)} below the minimum, but there isn’t enough ${g.counterCurrency} to top it up.`,
         nextStep: `Add ${g.counterCurrency} to your account or choose another source currency.`,
       };
-    return { status: "on_track", progress, message: `Below the minimum by ${format(shortfall)}. Foren will top up from ${g.counterCurrency} on the next check.` };
+    return {
+      status: "on_track",
+      progress,
+      message: `Below the minimum by ${format(shortfall)}. Foren will top up from ${g.counterCurrency} on the next check.`,
+    };
   }
   if (g.type === "target_rate") {
-    if (g.completed && last) return { status: "action_taken", progress: 1, message: last.text };
+    if (g.completed && last)
+      return { status: "action_taken", progress: 1, message: last.text };
     const current = rate(g.currency, g.counterCurrency);
     const progress = Math.min(1, current / g.targetRate!);
     if (bal(balances, g.currency).minor < g.amount!.minor)
@@ -66,27 +89,65 @@ export function evaluateGoal(g: AutoFxGoal, balances: Balance[]): GoalEval {
   const t = g.threshold!;
   if (b.minor <= t.minor)
     return last
-      ? { status: "action_taken", progress: b.minor / t.minor, message: last.text }
-      : { status: "on_track", progress: b.minor / t.minor, message: `${format(b)} is within the ${format(t)} cap.` };
-  return { status: "on_track", progress: 1, message: `${format({ minor: b.minor - t.minor, currency: g.currency })} above the cap. Foren will move it on the next check.` };
+      ? {
+          status: "action_taken",
+          progress: b.minor / t.minor,
+          message: last.text,
+        }
+      : {
+          status: "on_track",
+          progress: b.minor / t.minor,
+          message: `${format(b)} is within the ${format(t)} cap.`,
+        };
+  return {
+    status: "on_track",
+    progress: 1,
+    message: `${format({ minor: b.minor - t.minor, currency: g.currency })} above the cap. Foren will move it on the next check.`,
+  };
 }
 
-export type GoalAction = { goalId: string; debit: Money; credit: Money; fee: Money; text: string };
+export type GoalAction = {
+  goalId: string;
+  debit: Money;
+  credit: Money;
+  fee: Money;
+  text: string;
+};
 
 /** What a check run would do right now. Pure — the store applies the result. */
-export function planGoal(g: AutoFxGoal, balances: Balance[]): GoalAction | null {
+export function planGoal(
+  g: AutoFxGoal,
+  balances: Balance[],
+): GoalAction | null {
   if (g.type === "keep_min") {
     const b = bal(balances, g.currency);
     if (b.minor >= g.threshold!.minor) return null;
-    const credit: Money = { minor: g.threshold!.minor - b.minor, currency: g.currency };
-    return conversion(g, g.counterCurrency, credit, balances, `Topped up ${g.currency}`);
+    const credit: Money = {
+      minor: g.threshold!.minor - b.minor,
+      currency: g.currency,
+    };
+    return conversion(
+      g,
+      g.counterCurrency,
+      credit,
+      balances,
+      `Topped up ${g.currency}`,
+    );
   }
   if (g.type === "target_rate") {
     if (g.completed) return null;
     if (rate(g.currency, g.counterCurrency) < g.targetRate!) return null;
     if (bal(balances, g.currency).minor < g.amount!.minor) return null;
-    const fee = { minor: Math.round((g.amount!.minor * fxFeeBps(g.currency, g.counterCurrency)) / 10_000), currency: g.currency };
-    const credit = convert({ minor: g.amount!.minor - fee.minor, currency: g.currency }, g.counterCurrency);
+    const fee = {
+      minor: Math.round(
+        (g.amount!.minor * fxFeeBps(g.currency, g.counterCurrency)) / 10_000,
+      ),
+      currency: g.currency,
+    };
+    const credit = convert(
+      { minor: g.amount!.minor - fee.minor, currency: g.currency },
+      g.counterCurrency,
+    );
     return {
       goalId: g.id,
       debit: g.amount!,
@@ -97,16 +158,48 @@ export function planGoal(g: AutoFxGoal, balances: Balance[]): GoalAction | null 
   }
   const b = bal(balances, g.currency);
   if (b.minor <= g.threshold!.minor) return null;
-  const debit: Money = { minor: b.minor - g.threshold!.minor, currency: g.currency };
-  const fee = { minor: Math.round((debit.minor * fxFeeBps(g.currency, g.counterCurrency)) / 10_000), currency: g.currency };
-  const credit = convert({ minor: debit.minor - fee.minor, currency: g.currency }, g.counterCurrency);
-  return { goalId: g.id, debit, credit, fee, text: `Moved ${format(debit)} above the cap to ${format(credit)}. Fee ${format(fee)}.` };
+  const debit: Money = {
+    minor: b.minor - g.threshold!.minor,
+    currency: g.currency,
+  };
+  const fee = {
+    minor: Math.round(
+      (debit.minor * fxFeeBps(g.currency, g.counterCurrency)) / 10_000,
+    ),
+    currency: g.currency,
+  };
+  const credit = convert(
+    { minor: debit.minor - fee.minor, currency: g.currency },
+    g.counterCurrency,
+  );
+  return {
+    goalId: g.id,
+    debit,
+    credit,
+    fee,
+    text: `Moved ${format(debit)} above the cap to ${format(credit)}. Fee ${format(fee)}.`,
+  };
 }
 
-function conversion(g: AutoFxGoal, from: Currency, credit: Money, balances: Balance[], verb: string): GoalAction | null {
+function conversion(
+  g: AutoFxGoal,
+  from: Currency,
+  credit: Money,
+  balances: Balance[],
+  verb: string,
+): GoalAction | null {
   const base = convert(credit, from);
-  const fee = { minor: Math.round((base.minor * fxFeeBps(from, credit.currency)) / 10_000), currency: from };
+  const fee = {
+    minor: Math.round((base.minor * fxFeeBps(from, credit.currency)) / 10_000),
+    currency: from,
+  };
   const debit = { minor: base.minor + fee.minor, currency: from };
   if (bal(balances, from).minor < debit.minor) return null;
-  return { goalId: g.id, debit, credit, fee, text: `${verb} by ${format(credit)} using ${format(debit)}, including a ${format(fee)} fee.` };
+  return {
+    goalId: g.id,
+    debit,
+    credit,
+    fee,
+    text: `${verb} by ${format(credit)} using ${format(debit)}, including a ${format(fee)} fee.`,
+  };
 }

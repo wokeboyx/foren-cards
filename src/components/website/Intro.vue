@@ -9,10 +9,26 @@ defineProps<{ title?: string; description: string }>();
 <template>
   <div class="flex flex-col gap-8 lg:pt-6">
     <div class="flex flex-col gap-4">
-      <h2 :class="cn('max-w-[420px] font-display text-[32px] leading-[52px] font-medium tracking-[-0.4px]', ink)">
+      <h2
+        :class="
+          cn(
+            'max-w-[420px] font-display text-[32px] leading-[52px] font-medium tracking-[-0.4px]',
+            ink,
+          )
+        "
+      >
         <slot name="title">{{ title }}</slot>
       </h2>
-      <p :class="cn('max-w-[480px] text-[16px] leading-[24px] tracking-[-0.08px]', muted)">{{ description }}</p>
+      <p
+        :class="
+          cn(
+            'max-w-[480px] text-[16px] leading-[24px] tracking-[-0.08px]',
+            muted,
+          )
+        "
+      >
+        {{ description }}
+      </p>
     </div>
     <slot />
   </div>

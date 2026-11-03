@@ -14,16 +14,19 @@ export function extensionOf(fileName: string): string {
   return dot > -1 ? fileName.slice(dot + 1).toUpperCase() : "";
 }
 
-export const fileItemVariants = cva("flex items-center gap-3 p-3 rounded-2xl w-full", {
-  variants: {
-    state: {
-      ready: "bg-[var(--color-foren-bg-subtle)]",
-      uploading: "bg-[var(--color-foren-bg-subtle)]",
-      success: "bg-[var(--color-foren-bg-success-subtle)]",
-      error: "bg-[var(--color-foren-bg-error-subtle)]",
+export const fileItemVariants = cva(
+  "flex items-center gap-3 p-3 rounded-2xl w-full",
+  {
+    variants: {
+      state: {
+        ready: "bg-[var(--color-foren-bg-subtle)]",
+        uploading: "bg-[var(--color-foren-bg-subtle)]",
+        success: "bg-[var(--color-foren-bg-success-subtle)]",
+        error: "bg-[var(--color-foren-bg-error-subtle)]",
+      },
     },
+    defaultVariants: { state: "ready" },
   },
-  defaultVariants: { state: "ready" },
-});
+);
 
 export type FileItemState = "ready" | "uploading" | "success" | "error";

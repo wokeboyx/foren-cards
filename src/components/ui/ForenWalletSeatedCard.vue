@@ -8,9 +8,26 @@
  * stays inside it and the state cannot oscillate. The tilt is randomised per hover.
  */
 import { ref } from "vue";
-import { CARD_DEPTH, CARD_HEIGHT, CARD_RADIUS, CARD_STACK_STEP, CARD_TOP, CARD_WIDTH, LIFT, metalFace, randomTilt, type ForenAccount, type ForenMetalStops } from "./foren-account-wallet";
+import {
+  CARD_DEPTH,
+  CARD_HEIGHT,
+  CARD_RADIUS,
+  CARD_STACK_STEP,
+  CARD_TOP,
+  CARD_WIDTH,
+  LIFT,
+  metalFace,
+  randomTilt,
+  type ForenAccount,
+  type ForenMetalStops,
+} from "./foren-account-wallet";
 
-defineProps<{ account: ForenAccount; metal: ForenMetalStops; depth: number; restTilt: number }>();
+defineProps<{
+  account: ForenAccount;
+  metal: ForenMetalStops;
+  depth: number;
+  restTilt: number;
+}>();
 const tilt = ref<number | null>(null);
 
 function onEnter() {
@@ -31,16 +48,35 @@ function onEnter() {
   >
     <div
       class="relative"
-      :style="{ width: `${CARD_WIDTH}px`, height: `${CARD_HEIGHT}px`, borderRadius: `${CARD_RADIUS}px`, backgroundImage: metalFace(metal), boxShadow: CARD_DEPTH }"
+      :style="{
+        width: `${CARD_WIDTH}px`,
+        height: `${CARD_HEIGHT}px`,
+        borderRadius: `${CARD_RADIUS}px`,
+        backgroundImage: metalFace(metal),
+        boxShadow: CARD_DEPTH,
+      }"
     >
-      <div class="absolute flex items-center justify-between" :style="{ inset: '14px 14px auto 14px' }">
+      <div
+        class="absolute flex items-center justify-between"
+        :style="{ inset: '14px 14px auto 14px' }"
+      >
         <span class="flex items-center gap-2">
-          <img :src="account.flagSrc" alt="" width="16" height="16" class="shrink-0 rounded-full" />
-          <span class="font-[family-name:var(--font-inter)] text-[14px] leading-[21px] font-semibold tracking-[0.14px] text-[#444]">
+          <img
+            :src="account.flagSrc"
+            alt=""
+            width="16"
+            height="16"
+            class="shrink-0 rounded-full"
+          />
+          <span
+            class="font-[family-name:var(--font-inter)] text-[14px] leading-[21px] font-semibold tracking-[0.14px] text-[#444]"
+          >
             {{ account.label }}
           </span>
         </span>
-        <span class="font-[family-name:var(--font-inter)] text-[14px] leading-[21px] font-semibold tracking-[0.14px] text-[#444] tabular-nums">
+        <span
+          class="font-[family-name:var(--font-inter)] text-[14px] leading-[21px] font-semibold tracking-[0.14px] text-[#444] tabular-nums"
+        >
           {{ account.amount }}
         </span>
       </div>

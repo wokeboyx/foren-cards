@@ -14,8 +14,7 @@ export const buttonVariants = cva(
           "bg-transparent text-[var(--color-foren-text-primary)] border border-[var(--color-foren-border-default)] hover:bg-[var(--color-foren-bg-button-secondary)] active:bg-[var(--color-foren-bg-button-secondary-active)] disabled:bg-transparent disabled:text-[var(--color-foren-text-disabled)] disabled:border-[var(--color-foren-bg-button-disabled)]",
         ghost:
           "bg-transparent text-[var(--color-foren-text-primary)] hover:bg-[var(--color-foren-bg-button-secondary)] active:bg-[var(--color-foren-bg-button-secondary-active)] disabled:bg-transparent disabled:text-[var(--color-foren-text-disabled)]",
-        link:
-          "bg-transparent text-[var(--color-foren-text-primary)] underline-offset-[3px] hover:underline px-0 disabled:text-[var(--color-foren-text-disabled)] disabled:no-underline",
+        link: "bg-transparent text-[var(--color-foren-text-primary)] underline-offset-[3px] hover:underline px-0 disabled:text-[var(--color-foren-text-disabled)] disabled:no-underline",
       },
       size: {
         xxs: "h-8 px-3 gap-1.5 text-[12px] leading-[16px] tracking-[0.04em] [&_svg]:size-[12px]",
@@ -52,7 +51,8 @@ export const buttonVariants = cva(
       {
         variant: "ghost",
         destructive: true,
-        className: "bg-transparent text-[var(--color-foren-error)] hover:bg-[var(--color-foren-bg-error-subtle)] active:bg-[var(--color-foren-bg-error-subtle-hover)]",
+        className:
+          "bg-transparent text-[var(--color-foren-error)] hover:bg-[var(--color-foren-bg-error-subtle)] active:bg-[var(--color-foren-bg-error-subtle-hover)]",
       },
       {
         variant: "link",
@@ -71,7 +71,7 @@ export const buttonVariants = cva(
       size: "md",
       destructive: false,
     },
-  }
+  },
 );
 
 export type ButtonVariants = VariantProps<typeof buttonVariants>;

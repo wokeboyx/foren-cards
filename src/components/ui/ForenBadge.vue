@@ -15,17 +15,30 @@ const props = withDefaults(
     dismissLabel?: string;
     class?: HTMLAttributes["class"];
   }>(),
-  { dismissLabel: "Dismiss" }
+  { dismissLabel: "Dismiss" },
 );
 /** `leadingIcon` slot — flag, avatar img, icon. Wins over `dot` when both are set. */
 const slots = defineSlots<{ default?(): unknown; leadingIcon?(): unknown }>();
 const live = useSlots();
-const iconOnly = computed(() => !live.default && (!!live.leadingIcon || props.dot));
+const iconOnly = computed(
+  () => !live.default && (!!live.leadingIcon || props.dot),
+);
 </script>
 
 <template>
-  <span :class="cn(badgeVariants({ color: props.color, size: props.size, iconOnly }), props.class)">
-    <span v-if="!slots.leadingIcon && dot" aria-hidden="true" :class="cn('size-1.5 rounded-full', dotColors[color ?? 'gray'])" />
+  <span
+    :class="
+      cn(
+        badgeVariants({ color: props.color, size: props.size, iconOnly }),
+        props.class,
+      )
+    "
+  >
+    <span
+      v-if="!slots.leadingIcon && dot"
+      aria-hidden="true"
+      :class="cn('size-1.5 rounded-full', dotColors[color ?? 'gray'])"
+    />
     <slot name="leadingIcon" />
     <span v-if="slots.default"><slot /></span>
     <button
@@ -36,7 +49,14 @@ const iconOnly = computed(() => !live.default && (!!live.leadingIcon || props.do
       @click.stop="onDismiss?.()"
     >
       <span class="size-3">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M18 6 6 18" />
           <path d="m6 6 12 12" />
         </svg>

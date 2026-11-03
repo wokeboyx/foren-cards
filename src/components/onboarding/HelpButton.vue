@@ -6,10 +6,16 @@ import ForenButton from "@/components/ui/ForenButton.vue";
 
 <template>
   <div class="flex flex-col items-start gap-2">
-    <ForenButton variant="secondary" size="sm" @click="toast('Support chat opens here. It isn’t part of the prototype.')">
+    <ForenButton
+      variant="secondary"
+      size="sm"
+      @click="toast('Support chat opens here. It isn’t part of the prototype.')"
+    >
       <template #leadingIcon><RiChat1Line aria-hidden="true" /></template>
       Need help?
     </ForenButton>
-    <p class="text-[12px] leading-[18px] font-medium text-fg-2">Chat with our support team</p>
+    <p class="text-[12px] leading-[18px] font-medium text-fg-2">
+      Chat with our support team
+    </p>
   </div>
 </template>

@@ -1,4 +1,5 @@
 // Seed data, generated relative to "now" so due-soon windows and limit periods always have data.
+import { expiryFrom } from "@/domain/limits";
 import { DEFAULT_BLOCKED_CATEGORIES } from "@/domain/labels";
 import { money } from "@/domain/money";
 import { route } from "@/domain/routing";
@@ -6,10 +7,7 @@ import type {
   AutoFxGoal,
   Balance,
   Card,
-  CardDraft,
   CardRequest,
-  Currency,
-  FundingConfig,
   Money,
   Notification,
   Person,
@@ -18,27 +16,46 @@ import type {
 } from "@/domain/types";
 
 export const PEOPLE: Person[] = [
-  { id: "u_amara", name: "Amara Okafor", email: "amara@kolalogistics.test", role: "owner" },
-  { id: "u_tunde", name: "Tunde Bello", email: "tunde@kolalogistics.test", role: "cardholder" },
-  { id: "u_chidi", name: "Chidi Eze", email: "chidi@kolalogistics.test", role: "finance" },
-  { id: "u_zainab", name: "Zainab Musa", email: "zainab@kolalogistics.test", role: "cardholder" },
-  { id: "u_grace", name: "Grace Adeyemi", email: "grace@kolalogistics.test", role: "cardholder" },
+  {
+    id: "u_amara",
+    name: "Amara Okafor",
+    email: "amara@kolalogistics.test",
+    role: "owner",
+  },
+  {
+    id: "u_tunde",
+    name: "Tunde Bello",
+    email: "tunde@kolalogistics.test",
+    role: "cardholder",
+  },
+  {
+    id: "u_chidi",
+    name: "Chidi Eze",
+    email: "chidi@kolalogistics.test",
+    role: "finance",
+  },
+  {
+    id: "u_zainab",
+    name: "Zainab Musa",
+    email: "zainab@kolalogistics.test",
+    role: "cardholder",
+  },
+  {
+    id: "u_grace",
+    name: "Grace Adeyemi",
+    email: "grace@kolalogistics.test",
+    role: "cardholder",
+  },
 ];
 
 export const COMPANY = { name: "Kola Logistics Ltd" };
 export const PERSONAL_USER = { id: "p_ife", name: "Ifeoma Nwosu" };
 
-
-const ADDRESS = { line1: "14 Adeola Odeku Street", city: "Lagos", postcode: "101241", country: "Nigeria" };
-
-const ALL: Currency[] = ["USD", "GBP", "EUR", "NGN", "CAD"];
-export const defaultFunding = (): FundingConfig => ({ strategy: "cheapest_fx", order: [...ALL] });
-
-/** yyyy-mm-dd, offset by whole days (negative = past). */
-const dayKey = (now: Date, offset: number) => {
-  const x = new Date(now);
-  x.setDate(x.getDate() + offset);
-  return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
+const ADDRESS = {
+  line1: "14 Adeola Odeku Street",
+  city: "Lagos",
+  postcode: "101241",
+  country: "Nigeria",
 };
 
 const daysAgo = (now: Date, d: number, h = 10) => {
@@ -48,14 +65,15 @@ const daysAgo = (now: Date, d: number, h = 10) => {
   return x.toISOString();
 };
 
-function card(partial: Partial<Card> & Pick<Card, "id" | "nickname" | "holderId" | "last4">, now: Date): Card {
+function card(
+  partial: Partial<Card> & Pick<Card, "id" | "nickname" | "holderId" | "last4">,
+  now: Date,
+): Card {
   return {
     kind: "standard",
     status: "active",
     archived: false,
-    design: "midnight",
-    expiry: "2029-09",
-    funding: defaultFunding(),
+    design: "ink",
     permissions: {
       mode: "anywhere",
       allowedMerchantIds: [],
@@ -63,10 +81,19 @@ function card(partial: Partial<Card> & Pick<Card, "id" | "nickname" | "holderId"
       blockedMerchantIds: [],
       blockedCategories: [...DEFAULT_BLOCKED_CATEGORIES],
     },
-    limit: { period: "monthly", amount: money(5000, "USD") },
+    limit: { daily: money(5000, "USD"), txn: money(2500, "USD") },
     billingAddress: ADDRESS,
     createdAt: daysAgo(now, 90),
     ...partial,
+    // Cards last 12 months from when they were created.
+    expiry:
+      partial.expiry ??
+      expiryFrom(new Date(partial.createdAt ?? daysAgo(now, 90))),
+    // Cards are prefunded: unless a card says otherwise, it holds twice its daily limit.
+    balance: partial.balance ?? {
+      minor: (partial.limit ?? { daily: money(5000, "USD") }).daily.minor * 2,
+      currency: (partial.limit ?? { daily: money(5000, "USD") }).daily.currency,
+    },
   };
 }
 
@@ -79,20 +106,29 @@ export type SeedState = {
   goals: AutoFxGoal[];
   notifications: Notification[];
   invitedPeople: Person[];
-  cardDrafts: CardDraft[];
 };
 
 export function seed(now = new Date()): SeedState {
   const cards: Card[] = [
-    card({ id: "c_ops", nickname: "Ops travel", holderId: "u_tunde", last4: "4821", design: "skyline", limit: { period: "monthly", amount: money(25000, "USD") } }, now),
+    card(
+      {
+        id: "c_ops",
+        nickname: "Ops travel",
+        holderId: "u_tunde",
+        last4: "4821",
+        design: "cobalt",
+        expiry: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`,
+        limit: { daily: money(25000, "USD"), txn: money(12500, "USD") },
+      },
+      now,
+    ),
     card(
       {
         id: "c_mkt",
         nickname: "Marketing ads",
         holderId: "u_zainab",
         last4: "7710",
-        design: "aurora",
-        funding: { strategy: "cheapest_fx", order: [...ALL] },
+        design: "clay",
         permissions: {
           mode: "merchants",
           allowedMerchantIds: ["m_linkedin", "m_meta", "m_canva"],
@@ -100,9 +136,9 @@ export function seed(now = new Date()): SeedState {
           blockedMerchantIds: [],
           blockedCategories: [...DEFAULT_BLOCKED_CATEGORIES],
         },
-        limit: { period: "monthly", amount: money(8000, "USD") },
+        limit: { daily: money(8000, "USD"), txn: money(4000, "USD") },
       },
-      now
+      now,
     ),
     card(
       {
@@ -110,10 +146,8 @@ export function seed(now = new Date()): SeedState {
         nickname: "Software & tools",
         holderId: "u_amara",
         companyCard: true,
-        contactIds: ["u_amara", "u_chidi"],
         last4: "3307",
-        design: "midnight",
-        funding: { strategy: "protect", protect: "USD", order: [...ALL] },
+        design: "ink",
         permissions: {
           mode: "categories",
           allowedMerchantIds: [],
@@ -121,21 +155,20 @@ export function seed(now = new Date()): SeedState {
           blockedMerchantIds: [],
           blockedCategories: [...DEFAULT_BLOCKED_CATEGORIES],
         },
-        limit: { period: "monthly", amount: money(3000, "USD") },
+        limit: { daily: money(3000, "USD"), txn: money(1500, "USD") },
       },
-      now
+      now,
     ),
     card(
       {
         id: "c_figma",
-        nickname: "Figma",
+        nickname: "Design team",
         holderId: "u_amara",
         last4: "9054",
         design: "lime",
-        lockedMerchantId: "m_figma",
-        limit: { period: "monthly", amount: money(200, "USD") },
+        limit: { daily: money(200, "USD"), txn: money(100, "USD") },
       },
-      now
+      now,
     ),
     card(
       {
@@ -144,90 +177,35 @@ export function seed(now = new Date()): SeedState {
         holderId: "u_tunde",
         last4: "1186",
         status: "frozen",
-        design: "cream",
-        limit: { period: "weekly", amount: money(2_500_000, "NGN") },
+        design: "chalk",
+        limit: { daily: money(2500000, "NGN"), txn: money(1250000, "NGN") },
       },
-      now
+      now,
     ),
     card(
       {
         id: "c_ent",
-        nickname: "Client entertainment",
+        nickname: "Sales team",
         holderId: "u_tunde",
         last4: "6620",
-        design: "titanium",
-        permissions: {
-          mode: "anywhere",
-          allowedMerchantIds: [],
-          allowedCategories: [],
-          blockedMerchantIds: ["m_netflix"],
-          blockedCategories: [...DEFAULT_BLOCKED_CATEGORIES],
-        },
-        limit: { period: "per_txn", amount: money(250, "GBP") },
+        design: "silver",
+        limit: { daily: money(250, "GBP"), txn: money(250, "GBP") },
+        balance: money(3_000, "GBP"),
       },
-      now
+      now,
     ),
-    card(
-      {
-        id: "c_field",
-        nickname: "Field team",
-        holderId: "u_grace",
-        last4: "2290",
-        design: "titanium",
-        limit: { period: "daily", amount: money(750_000, "NGN") },
-        // Raised for a week, then it goes back to ₦500,000 a day.
-        limitRestore: { limit: { period: "daily", amount: money(500_000, "NGN") }, at: daysAgo(now, -5) },
-      },
-      now
-    ),
-    // One merchant: waiting for its first charge, then it locks to that merchant.
+    // Growth team card.
     card(
       {
         id: "c_meta",
-        nickname: "Meta Ads",
+        nickname: "Growth team",
         holderId: "u_zainab",
         last4: "6402",
-        design: "aurora",
-        permissions: { mode: "first_merchant", allowedMerchantIds: [], allowedCategories: [], blockedMerchantIds: [], blockedCategories: [...DEFAULT_BLOCKED_CATEGORIES] },
-        limit: { period: "monthly", amount: money(2_000, "USD") },
+        design: "clay",
+        limit: { daily: money(2000, "USD"), txn: money(1000, "USD") },
         createdAt: daysAgo(now, 1),
       },
-      now
-    ),
-    // One merchant, already locked; naira only (foreign payments off); protects GBP.
-    card(
-      {
-        id: "c_power",
-        nickname: "Power bills",
-        holderId: "u_chidi",
-        last4: "5170",
-        design: "cream",
-        lockedMerchantId: "m_ikeja",
-        permissions: { mode: "first_merchant", allowedMerchantIds: [], allowedCategories: [], blockedMerchantIds: [], blockedCategories: [...DEFAULT_BLOCKED_CATEGORIES] },
-        funding: { strategy: "protect", protect: "GBP", order: [...ALL] },
-        controls: { online: true, foreignCurrency: false, non3ds: true },
-        limit: { period: "monthly", amount: money(400_000, "NGN") },
-      },
-      now
-    ),
-    // Trip card: only works between two dates, pays from EUR first (custom order), in Apple Pay.
-    card(
-      {
-        id: "c_eu",
-        nickname: "EU roadshow",
-        holderId: "u_tunde",
-        last4: "3958",
-        design: "skyline",
-        funding: { strategy: "custom", order: ["EUR", "GBP", "USD", "CAD", "NGN"] },
-        permissions: { mode: "categories", allowedMerchantIds: [], allowedCategories: ["travel", "transport", "food"], blockedMerchantIds: [], blockedCategories: [...DEFAULT_BLOCKED_CATEGORIES] },
-        activeFrom: dayKey(now, -1),
-        activeUntil: dayKey(now, 9),
-        controls: { online: true, foreignCurrency: true, non3ds: false },
-        wallets: ["apple"],
-        limit: { period: "weekly", amount: money(4_000, "EUR") },
-        createdAt: daysAgo(now, 6),
-      },
-      now
+      now,
     ),
     // Locked by an admin: the cardholder can't ask to unfreeze it.
     card(
@@ -237,25 +215,23 @@ export function seed(now = new Date()): SeedState {
         holderId: "u_grace",
         last4: "7741",
         status: "frozen",
-        design: "titanium",
-        adminLock: { by: "Amara Okafor", at: daysAgo(now, 1), reason: "Suspected fraud — card details found online" },
-        limit: { period: "monthly", amount: money(1_200_000, "NGN") },
+        design: "silver",
+        limit: { daily: money(1200000, "NGN"), txn: money(600000, "NGN") },
       },
-      now
+      now,
     ),
     // For someone invited while creating the card (not on Foren yet). CAD limit.
     card(
       {
         id: "c_supplies",
-        nickname: "Toronto supplies",
+        nickname: "Toronto office",
         holderId: "u_bisi",
         last4: "2685",
         design: "lime",
-        permissions: { mode: "merchants", allowedMerchantIds: ["m_staples"], allowedCategories: [], blockedMerchantIds: [], blockedCategories: [...DEFAULT_BLOCKED_CATEGORIES] },
-        limit: { period: "monthly", amount: money(1_500, "CAD") },
+        limit: { daily: money(1500, "CAD"), txn: money(750, "CAD") },
         createdAt: daysAgo(now, 2),
       },
-      now
+      now,
     ),
     // Emergency single-use card that has been used.
     card(
@@ -265,18 +241,39 @@ export function seed(now = new Date()): SeedState {
         holderId: "u_tunde",
         last4: "9310",
         kind: "emergency",
-        design: "cream",
+        design: "chalk",
         lockedMerchantId: "m_airpeace",
         singleUse: true,
         used: true,
         validUntil: daysAgo(now, 3, 11),
-        limit: { period: "per_txn", amount: money(180_000, "NGN") },
+        limit: { daily: money(180000, "NGN"), txn: money(180000, "NGN") },
         createdAt: daysAgo(now, 3),
       },
-      now
+      now,
     ),
-    card({ id: "c_events", nickname: "Old events", holderId: "u_zainab", last4: "5532", status: "canceled", design: "midnight" }, now),
-    card({ id: "c_offsite", nickname: "2025 offsite", holderId: "u_grace", last4: "8813", status: "canceled", archived: true, design: "skyline" }, now),
+    card(
+      {
+        id: "c_events",
+        nickname: "Old events",
+        holderId: "u_zainab",
+        last4: "5532",
+        status: "canceled",
+        design: "ink",
+      },
+      now,
+    ),
+    card(
+      {
+        id: "c_offsite",
+        nickname: "2025 offsite",
+        holderId: "u_grace",
+        last4: "8813",
+        status: "canceled",
+        archived: true,
+        design: "cobalt",
+      },
+      now,
+    ),
   ];
 
   const balances: Balance[] = [
@@ -287,22 +284,52 @@ export function seed(now = new Date()): SeedState {
     { currency: "CAD", available: money(2_100, "CAD") },
   ];
 
-  const rich: Balance[] = balances.map((b) => ({ ...b, available: { ...b.available, minor: b.available.minor * 10 } }));
   const txns: Transaction[] = [];
   let n = 0;
-  const tx = (cardId: string, merchantId: string, amount: Money, ago: number, opts: { snapshot?: Balance[]; declined?: Transaction["declineReason"]; hour?: number } = {}) => {
+  const tx = (
+    cardId: string,
+    merchantId: string,
+    amount: Money,
+    ago: number,
+    opts: { declined?: Transaction["declineReason"]; hour?: number } = {},
+  ) => {
     const c = cards.find((x) => x.id === cardId)!;
     const id = `t_${++n}`;
     if (opts.declined) {
-      txns.push({ id, cardId, merchantId, amount, status: "declined", at: daysAgo(now, ago, opts.hour), legs: [], declineReason: opts.declined });
+      txns.push({
+        id,
+        cardId,
+        merchantId,
+        amount,
+        status: "declined",
+        at: daysAgo(now, ago, opts.hour),
+        legs: [],
+        declineReason: opts.declined,
+      });
       return;
     }
-    const r = route(amount, c.funding, opts.snapshot ?? rich);
+    const r = route(amount, {
+      minor: 1_000_000_000_000,
+      currency: c.balance.currency,
+    });
     if (!r.ok) throw new Error(`seed route failed for ${id}`);
     const at = daysAgo(now, ago, opts.hour);
     // Older charges already have receipts; the last few days are still missing theirs.
-    const receipt = ago > 5 ? { name: `receipt-${id}.pdf`, size: 84_000 + n * 1_000, at } : undefined;
-    txns.push({ id, cardId, merchantId, amount, status: "approved", at, legs: r.legs, feeAvoided: r.feeAvoided, receipt });
+    const receipt =
+      ago > 5
+        ? { name: `receipt-${id}.pdf`, size: 84_000 + n * 1_000, at }
+        : undefined;
+    txns.push({
+      id,
+      cardId,
+      merchantId,
+      amount,
+      status: "approved",
+      at,
+      legs: r.legs,
+      feeAvoided: r.feeAvoided,
+      receipt,
+    });
   };
 
   // Ops travel
@@ -310,16 +337,6 @@ export function seed(now = new Date()): SeedState {
   tx("c_ops", "m_ba", money(1_240, "GBP"), 2);
   tx("c_ops", "m_airpeace", money(412_000, "NGN"), 5);
   tx("c_ops", "m_bolt", money(9_800, "NGN"), 6);
-  // Split across balances: GBP was low at the time
-  tx("c_ops", "m_ba", money(2_860, "GBP"), 9, {
-    snapshot: [
-      { currency: "USD", available: money(30_000, "USD") },
-      { currency: "GBP", available: money(1_900, "GBP") },
-      { currency: "EUR", available: money(800, "EUR") },
-      { currency: "NGN", available: money(0, "NGN") },
-      { currency: "CAD", available: money(0, "CAD") },
-    ],
-  });
   tx("c_ops", "m_marriott", money(640, "EUR"), 12);
   tx("c_ops", "m_uber", money(22_300, "NGN"), 14);
   tx("c_ops", "m_spotify", money(11.99, "GBP"), 27);
@@ -329,7 +346,9 @@ export function seed(now = new Date()): SeedState {
   tx("c_mkt", "m_meta", money(980, "USD"), 4);
   tx("c_mkt", "m_canva", money(119.99, "USD"), 160);
   tx("c_mkt", "m_meta", money(1_120, "USD"), 18);
-  tx("c_mkt", "m_jumia", money(85_000, "NGN"), 3, { declined: "merchant_not_allowed" });
+  tx("c_mkt", "m_jumia", money(85_000, "NGN"), 3, {
+    declined: "merchant_not_allowed",
+  });
   // Software (USD charges paid with USD protected -> converted from other balances)
   tx("c_sw", "m_notion", money(96, "USD"), 27);
   tx("c_sw", "m_notion", money(96, "USD"), 57);
@@ -340,46 +359,67 @@ export function seed(now = new Date()): SeedState {
   tx("c_sw", "m_aws", money(412.18, "USD"), 10);
   tx("c_sw", "m_aws", money(388.92, "USD"), 40);
   tx("c_sw", "m_adobe", money(65.99, "GBP"), 8);
-  // Figma auto card
+  // Design team
   tx("c_figma", "m_figma", money(45, "USD"), 29);
   tx("c_figma", "m_figma", money(45, "USD"), 59);
   // Lagos office (before freeze)
   tx("c_lagos", "m_jumia", money(126_400, "NGN"), 7);
   tx("c_lagos", "m_ikeja", money(85_000, "NGN"), 16);
   tx("c_lagos", "m_spotify", money(11.99, "GBP"), 2, { declined: "frozen" });
-  // Client entertainment
+  // Sales team
   tx("c_ent", "m_chowdeck", money(64_500, "NGN"), 1);
-  tx("c_ent", "m_netflix", money(15.49, "USD"), 6, { declined: "merchant_blocked" });
   tx("c_ent", "m_chowdeck", money(38_200, "NGN"), 11);
-  // Power bills (locked to Ikeja Electric; a foreign charge was declined by Card controls)
-  tx("c_power", "m_ikeja", money(92_000, "NGN"), 13);
-  tx("c_power", "m_ikeja", money(88_500, "NGN"), 43);
-  tx("c_power", "m_aws", money(20, "USD"), 4, { declined: "card_control" });
-  // EU roadshow
-  tx("c_eu", "m_marriott", money(780, "EUR"), 0, { hour: 7 });
-  tx("c_eu", "m_ba", money(310, "GBP"), 1);
   // Kano depot (before the admin lock)
   tx("c_kano", "m_jumia", money(214_000, "NGN"), 9);
-  tx("c_kano", "m_binance", money(500, "USD"), 1, { declined: "category_blocked" });
-  // Toronto supplies
+  tx("c_kano", "m_binance", money(500, "USD"), 1, {
+    declined: "category_blocked",
+  });
+  // Toronto office
   tx("c_supplies", "m_staples", money(236.4, "CAD"), 1);
   // Emergency card (used once)
   tx("c_emerg", "m_airpeace", money(168_000, "NGN"), 3, { hour: 12 });
-  // Field team
-  tx("c_field", "m_bolt", money(42_000, "NGN"), 0, { hour: 9 });
   // Old canceled card
   tx("c_events", "m_marriott", money(220, "EUR"), 70);
 
+  // Money added to cards from the account balances, so each card's history starts with it
+  const fund = (
+    cardId: string,
+    amount: Money,
+    from: Transaction["fundedFrom"],
+    ago: number,
+  ) =>
+    txns.push({
+      id: `t_fund_${cardId}_${ago}`,
+      cardId,
+      merchantId: "",
+      amount,
+      status: "approved",
+      at: daysAgo(now, ago, 9),
+      legs: [],
+      kind: "funding",
+      fundedFrom: from,
+    });
+  fund("c_ops", money(50_000, "USD"), "USD", 30);
+  fund("c_ops", money(25_000, "USD"), "USD", 9);
+  fund("c_mkt", money(16_000, "USD"), "USD", 20);
+  fund("c_sw", money(10_000, "USD"), "USD", 15);
+
   const transactions = txns.sort((a, b) => b.at.localeCompare(a.at));
 
-  const sub = (id: string, merchantId: string, cardId: string, usualAmount: Money, chargesAgo: number[], extra: Partial<Subscription> = {}): Subscription => ({
+  const sub = (
+    id: string,
+    merchantId: string,
+    cardId: string,
+    usualAmount: Money,
+    chargesAgo: number[],
+    extra: Partial<Subscription> = {},
+  ): Subscription => ({
     id,
     merchantId,
     cardId,
     usualAmount,
     frequency: "monthly",
     chargeDates: chargesAgo.map((d) => daysAgo(now, d)),
-    blocked: false,
     reminders: { owner: true, cardholder: false, daysBefore: 3 },
     ...extra,
   });
@@ -392,15 +432,21 @@ export function seed(now = new Date()): SeedState {
     sub("s_adobe", "m_adobe", "c_sw", money(65.99, "GBP"), [8]),
     sub("s_figma", "m_figma", "c_figma", money(45, "USD"), [29, 59]),
     sub("s_linkedin", "m_linkedin", "c_mkt", money(1_500, "USD"), [26, 56]),
-    sub("s_canva", "m_canva", "c_mkt", money(119.99, "USD"), [160, 525], { frequency: "yearly" }),
+    sub("s_canva", "m_canva", "c_mkt", money(119.99, "USD"), [160, 525], {
+      frequency: "yearly",
+    }),
     sub("s_spotify_ops", "m_spotify", "c_ops", money(11.99, "GBP"), [27, 57]),
-    sub("s_spotify_lagos", "m_spotify", "c_lagos", money(11.99, "GBP"), [32, 62], {
-      lastDecline: { at: daysAgo(now, 2), reason: "frozen" },
-    }),
-    sub("s_netflix", "m_netflix", "c_ent", money(15.49, "USD"), [36, 66], {
-      blocked: true,
-      lastDecline: { at: daysAgo(now, 6), reason: "merchant_blocked" },
-    }),
+    sub(
+      "s_spotify_lagos",
+      "m_spotify",
+      "c_lagos",
+      money(11.99, "GBP"),
+      [32, 62],
+      {
+        lastDecline: { at: daysAgo(now, 2), reason: "frozen" },
+      },
+    ),
+    sub("s_netflix", "m_netflix", "c_ent", money(15.49, "USD"), [36, 66]),
   ];
 
   const requests: CardRequest[] = [
@@ -421,8 +467,8 @@ export function seed(now = new Date()): SeedState {
       kind: "limit_increase",
       requesterId: "u_zainab",
       cardId: "c_mkt",
-      newLimit: { period: "monthly", amount: money(12_000, "USD") },
-      oldLimit: { period: "monthly", amount: money(8_000, "USD") },
+      newLimit: { daily: money(12000, "USD"), txn: money(6000, "USD") },
+      oldLimit: { daily: money(8000, "USD"), txn: money(4000, "USD") },
       note: "Q4 campaign launch on LinkedIn and Meta.",
       state: "pending",
       createdAt: daysAgo(now, 0, 8),
@@ -431,7 +477,12 @@ export function seed(now = new Date()): SeedState {
       id: "r_seed3",
       kind: "new_card",
       requesterId: "u_grace",
-      newCard: { nickname: "Site visits", limit: { period: "monthly", amount: money(300_000, "NGN") }, oneMerchant: false, design: "titanium" },
+      newCard: {
+        nickname: "Warehouse team",
+        limit: { daily: money(300000, "NGN"), txn: money(150000, "NGN") },
+        oneMerchant: false,
+        design: "silver",
+      },
       note: "Fuel and transport for weekly warehouse site visits.",
       state: "pending",
       createdAt: daysAgo(now, 1, 15),
@@ -444,7 +495,7 @@ export function seed(now = new Date()): SeedState {
       at: daysAgo(now, 0, 9),
       forRole: "owner",
       title: "Approval requested",
-      body: "Tunde Bello asked to approve £620.00 at British Airways on Client entertainment.",
+      body: "Tunde Bello asked to approve £620.00 at British Airways on Sales team.",
       href: "/requests",
       read: false,
     },
@@ -462,27 +513,32 @@ export function seed(now = new Date()): SeedState {
       at: daysAgo(now, 1, 15),
       forRole: "owner",
       title: "New card requested",
-      body: "Grace Adeyemi asked for a card: “Site visits”, up to ₦300,000.00 a month.",
+      body: "Grace Adeyemi asked for a card: “Warehouse team”, up to ₦300,000.00 a month.",
       href: "/cards",
       read: false,
     },
   ];
 
-  const invitedPeople: Person[] = [{ id: "u_bisi", name: "Bisi Adewale", email: "bisi@kolalogistics.test", role: "cardholder", invited: true }];
-
-  const cardDrafts: CardDraft[] = [
+  const invitedPeople: Person[] = [
     {
-      id: "d_seed1",
-      savedAt: daysAgo(now, 0, 7),
-      step: 2,
-      names: [],
-      amountText: "1500",
-      years: 1,
-      card: card({ id: "d_seed1", nickname: "Lagos tech summit", holderId: "u_zainab", last4: "", design: "aurora", limit: { period: "monthly", amount: money(1_500, "USD") }, createdAt: daysAgo(now, 0, 7) }, now),
+      id: "u_bisi",
+      name: "Bisi Adewale",
+      email: "bisi@kolalogistics.test",
+      role: "cardholder",
+      invited: true,
     },
   ];
 
-  return { cards, balances, transactions, subscriptions, requests, goals: [], notifications, invitedPeople, cardDrafts };
+  return {
+    cards,
+    balances,
+    transactions,
+    subscriptions,
+    requests,
+    goals: [],
+    notifications,
+    invitedPeople,
+  };
 }
 
 export function sampleGoals(now = new Date()): AutoFxGoal[] {

@@ -13,7 +13,11 @@ import { merchantById } from "@/fixtures/merchants";
 import SubStatusBadge from "./SubStatusBadge.vue";
 import { short, type SubRow } from "./subscriptions-page";
 
-const props = defineProps<{ groups: [string, SubRow[]][]; compact: boolean; selectedId: string | null }>();
+const props = defineProps<{
+  groups: [string, SubRow[]][];
+  compact: boolean;
+  selectedId: string | null;
+}>();
 const emit = defineEmits<{ select: [id: string] }>();
 const cols = computed(() => (props.compact ? 3 : 5));
 </script>
@@ -33,8 +37,15 @@ const cols = computed(() => (props.compact ? 3 : 5));
       <template v-for="[title, rows] in groups" :key="title">
         <ForenTableBody v-if="rows.length">
           <tr>
-            <th :colspan="cols" scope="colgroup" class="bg-sunken px-4 py-1.5 text-left text-[12px] font-semibold text-fg-2">
-              {{ title }} <span class="tnum font-normal text-fg-3">· {{ rows.length }}</span>
+            <th
+              :colspan="cols"
+              scope="colgroup"
+              class="bg-sunken px-4 py-1.5 text-left text-[12px] font-semibold text-fg-2"
+            >
+              {{ title }}
+              <span class="tnum font-normal text-fg-3"
+                >· {{ rows.length }}</span
+              >
             </th>
           </tr>
           <ForenTableRow
@@ -46,23 +57,38 @@ const cols = computed(() => (props.compact ? 3 : 5));
           >
             <td class="px-4 py-2.5">
               <div class="flex items-center gap-2.5">
-                <MerchantLogo :merchant="merchantById(r.s.merchantId)" :size="28" />
-                <button class="min-w-0 truncate text-left text-[13px] font-medium text-fg outline-none focus-visible:underline" @click.stop="emit('select', r.s.id)">
+                <MerchantLogo
+                  :merchant="merchantById(r.s.merchantId)"
+                  :size="28"
+                />
+                <button
+                  class="min-w-0 truncate text-left text-[13px] font-medium text-fg outline-none focus-visible:underline"
+                  @click.stop="emit('select', r.s.id)"
+                >
                   {{ merchantById(r.s.merchantId)?.name }}
-                  <span class="block text-[12px] font-normal text-fg-3">{{ FREQUENCY_LABEL[r.s.frequency] }}</span>
+                  <span class="block text-[12px] font-normal text-fg-3">{{
+                    FREQUENCY_LABEL[r.s.frequency]
+                  }}</span>
                 </button>
               </div>
             </td>
             <td v-if="!compact" class="tnum px-4 py-2.5 text-[13px] text-fg-2">
-              •• {{ r.card.last4 }} <span class="text-fg">{{ r.card.nickname }}</span>
+              •• {{ r.card.last4 }}
+              <span class="text-fg">{{ r.card.nickname }}</span>
             </td>
             <td class="tnum px-4 py-2.5 text-[13px] text-fg">
-              <span v-if="r.s.blocked" class="text-fg-3">No more charges</span>
-              <template v-else-if="r.f.kind === 'estimate'">{{ short(r.f.date) }}</template>
+              <template v-if="r.f.kind === 'estimate'">{{
+                short(r.f.date)
+              }}</template>
               <span v-else class="text-fg-3">Not enough history</span>
             </td>
-            <td v-if="!compact" class="tnum px-4 py-2.5 text-right text-[13px] text-fg">
-              <Money :value="r.f.kind === 'estimate' ? r.f.amount : r.s.usualAmount" />
+            <td
+              v-if="!compact"
+              class="tnum px-4 py-2.5 text-right text-[13px] text-fg"
+            >
+              <Money
+                :value="r.f.kind === 'estimate' ? r.f.amount : r.s.usualAmount"
+              />
             </td>
             <td class="px-4 py-2.5 text-right">
               <SubStatusBadge :st="r.st" />
@@ -77,20 +103,36 @@ const cols = computed(() => (props.compact ? 3 : 5));
     <template v-for="[title, rows] in groups" :key="title">
       <section v-if="rows.length" :aria-label="title">
         <h2 class="mb-1 text-[12px] font-semibold text-fg-2">
-          {{ title }} <span class="tnum font-normal text-fg-3">· {{ rows.length }}</span>
+          {{ title }}
+          <span class="tnum font-normal text-fg-3">· {{ rows.length }}</span>
         </h2>
         <ul class="divide-y divide-line">
           <li v-for="r in rows" :key="r.s.id">
-            <button class="flex w-full items-center gap-3 py-3 text-left outline-none focus-visible:bg-subtle" @click="emit('select', r.s.id)">
-              <MerchantLogo :merchant="merchantById(r.s.merchantId)" :size="36" />
+            <button
+              class="flex w-full items-center gap-3 py-3 text-left outline-none focus-visible:bg-subtle"
+              @click="emit('select', r.s.id)"
+            >
+              <MerchantLogo
+                :merchant="merchantById(r.s.merchantId)"
+                :size="36"
+              />
               <span class="min-w-0 flex-1">
-                <span class="block truncate text-[14px] font-semibold text-fg">{{ merchantById(r.s.merchantId)?.name }}</span>
+                <span
+                  class="block truncate text-[14px] font-semibold text-fg"
+                  >{{ merchantById(r.s.merchantId)?.name }}</span
+                >
                 <span class="tnum block truncate text-[12px] text-fg-3">
-                  {{ r.f.kind === "estimate" && !r.s.blocked ? `${short(r.f.date)} · ` : "" }}•• {{ r.card.last4 }} {{ r.card.nickname }}
+                  {{ r.f.kind === "estimate" ? `${short(r.f.date)} · ` : "" }}••
+                  {{ r.card.last4 }} {{ r.card.nickname }}
                 </span>
               </span>
               <span class="flex flex-col items-end gap-1">
-                <Money :value="r.f.kind === 'estimate' ? r.f.amount : r.s.usualAmount" class="tnum text-[14px] font-semibold text-fg" />
+                <Money
+                  :value="
+                    r.f.kind === 'estimate' ? r.f.amount : r.s.usualAmount
+                  "
+                  class="tnum text-[14px] font-semibold text-fg"
+                />
                 <SubStatusBadge :st="r.st" />
               </span>
             </button>

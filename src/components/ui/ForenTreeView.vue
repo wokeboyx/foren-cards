@@ -37,7 +37,7 @@ const props = withDefaults(
     showIcons: true,
     indent: 20,
     animateExpand: true,
-  }
+  },
 );
 const emit = defineEmits<{
   "update:expandedIds": [next: string[]];
@@ -47,8 +47,12 @@ const emit = defineEmits<{
 
 const internalExpanded = ref<string[]>(props.defaultExpandedIds);
 const internalSelected = ref<string[]>(props.defaultSelectedIds);
-const currentExpanded = computed(() => props.expandedIds ?? internalExpanded.value);
-const currentSelected = computed(() => props.selectedIds ?? internalSelected.value);
+const currentExpanded = computed(
+  () => props.expandedIds ?? internalExpanded.value,
+);
+const currentSelected = computed(
+  () => props.selectedIds ?? internalSelected.value,
+);
 
 function setExpanded(next: string[]) {
   if (props.expandedIds === undefined) internalExpanded.value = next;
@@ -79,7 +83,15 @@ const onNodeClick = (node: TreeNode) => emit("nodeClick", node);
 </script>
 
 <template>
-  <div :class="cn('w-full rounded-xl border border-[var(--color-foren-border-muted)] bg-[var(--color-foren-bg-default)] p-1.5', props.class)" role="tree">
+  <div
+    :class="
+      cn(
+        'w-full rounded-xl border border-[var(--color-foren-border-muted)] bg-[var(--color-foren-bg-default)] p-1.5',
+        props.class,
+      )
+    "
+    role="tree"
+  >
     <ForenTreeRow
       v-for="(node, i) in data"
       :key="node.id"

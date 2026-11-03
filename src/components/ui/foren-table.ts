@@ -16,14 +16,39 @@ import type { BadgeColor } from "./foren-badge";
 export type ForenTableAlign = "left" | "right";
 
 /** The 13 documented types, in Figma order. Handy for docs and pickers. */
-export const FOREN_TABLE_CELL_TYPES = ["text", "badge", "tag", "progress", "trend", "amount", "date", "link", "button", "avatar", "toggle", "checkbox", "icon"] as const;
-export type ForenTableCellType = (typeof FOREN_TABLE_CELL_TYPES)[number] | "custom";
+export const FOREN_TABLE_CELL_TYPES = [
+  "text",
+  "badge",
+  "tag",
+  "progress",
+  "trend",
+  "amount",
+  "date",
+  "link",
+  "button",
+  "avatar",
+  "toggle",
+  "checkbox",
+  "icon",
+] as const;
+export type ForenTableCellType =
+  (typeof FOREN_TABLE_CELL_TYPES)[number] | "custom";
 
-export type ForenTablePerson = { initials?: string; src?: string; name?: string };
-export type ForenTableCellBadge = { label: string; color?: BadgeColor; dot?: boolean };
+export type ForenTablePerson = {
+  initials?: string;
+  src?: string;
+  name?: string;
+};
+export type ForenTableCellBadge = {
+  label: string;
+  color?: BadgeColor;
+  dot?: boolean;
+};
 
-export const CELL_TITLE = "text-[14px] font-medium leading-[21px] tracking-[0.01em] text-[var(--color-foren-text-primary)]";
-export const CELL_SUB = "text-[12px] font-medium leading-[18px] tracking-[0.01em] text-[var(--color-foren-text-tertiary)]";
+export const CELL_TITLE =
+  "text-[14px] font-medium leading-[21px] tracking-[0.01em] text-[var(--color-foren-text-primary)]";
+export const CELL_SUB =
+  "text-[12px] font-medium leading-[18px] tracking-[0.01em] text-[var(--color-foren-text-tertiary)]";
 
 /** Cells whose width is fixed by the control they hold. */
 export const FIXED_WIDTH: Partial<Record<ForenTableCellType, number>> = {
@@ -37,11 +62,13 @@ export function inferDirection(value: unknown): "up" | "down" | "flat" {
     if (value.trim().startsWith("-")) return "down";
     if (value.trim().startsWith("+")) return "up";
   }
-  if (typeof value === "number") return value < 0 ? "down" : value > 0 ? "up" : "flat";
+  if (typeof value === "number")
+    return value < 0 ? "down" : value > 0 ? "up" : "flat";
   return "up";
 }
 
-export const cssSize = (v: number | string) => (typeof v === "number" ? `${v}px` : v);
+export const cssSize = (v: number | string) =>
+  typeof v === "number" ? `${v}px` : v;
 
 /* Pagination — Figma component set 556:98, 3 layouts × 3 sizes */
 export type ForenPaginationLayout = "compact" | "desktop" | "mobile";
@@ -56,9 +83,30 @@ export type ForenPaginationSize = "sm" | "md" | "lg";
  *   height   compact bar height (36 / 44 / 52)
  */
 export const PAGINATION_SIZES = {
-  sm: { control: 28, icon: 12, gap: 4, navGap: 8, height: 36, text: "text-[12px] leading-[18px] tracking-[0.01em]" },
-  md: { control: 36, icon: 14, gap: 6, navGap: 12, height: 44, text: "text-[14px] leading-[21px] tracking-[0.01em]" },
-  lg: { control: 44, icon: 16, gap: 8, navGap: 16, height: 52, text: "text-[16px] leading-[24px] tracking-[0.005em]" },
+  sm: {
+    control: 28,
+    icon: 12,
+    gap: 4,
+    navGap: 8,
+    height: 36,
+    text: "text-[12px] leading-[18px] tracking-[0.01em]",
+  },
+  md: {
+    control: 36,
+    icon: 14,
+    gap: 6,
+    navGap: 12,
+    height: 44,
+    text: "text-[14px] leading-[21px] tracking-[0.01em]",
+  },
+  lg: {
+    control: 44,
+    icon: 16,
+    gap: 8,
+    navGap: 16,
+    height: 52,
+    text: "text-[16px] leading-[24px] tracking-[0.005em]",
+  },
 } as const;
 
 /**
@@ -67,6 +115,7 @@ export const PAGINATION_SIZES = {
  */
 export function buildPages(page: number, pageCount: number): (number | null)[] {
   if (pageCount <= 7) return Array.from({ length: pageCount }, (_, i) => i + 1);
-  if (page <= 3 || page >= pageCount - 2) return [1, 2, 3, null, pageCount - 2, pageCount - 1, pageCount];
+  if (page <= 3 || page >= pageCount - 2)
+    return [1, 2, 3, null, pageCount - 2, pageCount - 1, pageCount];
   return [1, null, page - 1, page, page + 1, null, pageCount];
 }

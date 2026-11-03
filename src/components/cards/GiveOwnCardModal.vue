@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { limitSummary } from "@/domain/limits";
 // Payments happen at the merchant's checkout, not in Foren, so moving a merchant to its own card needs the
 // customer to update their card with that merchant.
 
@@ -13,7 +14,6 @@ import ForenButton from "@/components/ui/ForenButton.vue";
 import ForenToggle from "@/components/ui/ForenToggle.vue";
 import CardArt from "@/components/card/CardArt.vue";
 import Modal from "@/components/Modal.vue";
-import { format } from "@/domain/money";
 import type { Card, Merchant } from "@/domain/types";
 import { giveMerchantOwnCard } from "@/services";
 import { useAction } from "@/composables/useAction";
@@ -29,9 +29,18 @@ const blockOld = ref(true);
 const created = ref<Card | null>(null);
 const create = useAction(giveMerchantOwnCard);
 const holder = computed(() => personById(props.card.holderId));
-const preview = computed<Card>(() => created.value ?? { ...props.card, nickname: props.merchant.name, lockedMerchantId: props.merchant.id, last4: "••••" });
+const preview = computed<Card>(
+  () =>
+    created.value ?? {
+      ...props.card,
+      nickname: props.merchant.name,
+      last4: "••••",
+    },
+);
 const limitNote = computed(() =>
-  props.card.limit.amount.minor < 1_000_000_000 ? ` (${format(props.card.limit.amount)} ${props.card.limit.period === "per_txn" ? "per charge" : props.card.limit.period})` : ""
+  props.card.limit.daily.minor < 1_000_000_000
+    ? ` (${limitSummary(props.card.limit)})`
+    : "",
 );
 const STEPS = ["Create the card", "Update it at the merchant"];
 
@@ -47,22 +56,38 @@ async function submit() {
 <template>
   <Modal
     :open="true"
-    :title="step === 1 ? `Give ${merchant.name} its own card` : `Update your card at ${merchant.name}`"
+    :title="
+      step === 1
+        ? `Give ${merchant.name} its own card`
+        : `Update your card at ${merchant.name}`
+    "
     class="max-w-[480px]"
     @update:open="(o) => !o && emit('close')"
   >
-    <ol class="-mt-2 mb-4 flex items-center gap-2 text-[12px] font-medium" aria-label="Steps">
+    <ol
+      class="-mt-2 mb-4 flex items-center gap-2 text-[12px] font-medium"
+      aria-label="Steps"
+    >
       <li
         v-for="(label, i) in STEPS"
         :key="label"
-        :class="cn('flex items-center gap-2', i + 1 === step ? 'text-fg' : 'text-fg-3')"
+        :class="
+          cn(
+            'flex items-center gap-2',
+            i + 1 === step ? 'text-fg' : 'text-fg-3',
+          )
+        "
         :aria-current="i + 1 === step ? 'step' : undefined"
       >
         <span
           :class="
             cn(
               'tnum grid size-5 place-items-center rounded-full text-[11px]',
-              i + 1 < step ? 'bg-success text-white' : i + 1 === step ? 'bg-[var(--color-foren-bg-button-primary)] text-[var(--color-foren-text-inverse)]' : 'bg-subtle'
+              i + 1 < step
+                ? 'bg-success text-white'
+                : i + 1 === step
+                  ? 'bg-[var(--color-foren-bg-button-primary)] text-[var(--color-foren-text-inverse)]'
+                  : 'bg-subtle',
             )
           "
         >
@@ -75,16 +100,31 @@ async function submit() {
     </ol>
     <div v-if="step === 1" class="space-y-4">
       <div class="flex justify-center rounded-[16px] bg-subtle py-5">
-        <CardArt :card="preview" size="md" :merchant-name="merchant.name" :holder-name="holder?.name" />
+        <CardArt
+          :card="preview"
+          size="md"
+          :merchant-name="merchant.name"
+          :holder-name="holder?.name"
+        />
       </div>
       <ul class="space-y-2 text-[14px] leading-[20px] text-fg">
-        <li class="flex gap-2.5 [&_svg]:mt-0.5 [&_svg]:size-[18px] [&_svg]:shrink-0 [&_svg]:text-fg-2">
+        <li
+          class="flex gap-2.5 [&_svg]:mt-0.5 [&_svg]:size-[18px] [&_svg]:shrink-0 [&_svg]:text-fg-2"
+        >
           <RiLockLine />
-          <span>Only {{ merchant.name }} can charge it. Every other merchant is declined.</span>
+          <span
+            >Only {{ merchant.name }} can charge it. Every other merchant is
+            declined.</span
+          >
         </li>
-        <li class="flex gap-2.5 [&_svg]:mt-0.5 [&_svg]:size-[18px] [&_svg]:shrink-0 [&_svg]:text-fg-2">
+        <li
+          class="flex gap-2.5 [&_svg]:mt-0.5 [&_svg]:size-[18px] [&_svg]:shrink-0 [&_svg]:text-fg-2"
+        >
           <RiStore2Line />
-          <span>Same cardholder, funding and limit as {{ card.nickname }}{{ limitNote }}. You can change them later.</span>
+          <span
+            >Same cardholder and limits as {{ card.nickname }}{{ limitNote }}.
+            You can change them later.</span
+          >
         </li>
       </ul>
       <ForenToggle
@@ -94,14 +134,31 @@ async function submit() {
         :label="`Block ${merchant.name} on ${card.nickname} once it switches`"
         :description="`When ${merchant.name} first charges its new card, we’ll stop it charging ${card.nickname}.`"
       />
-      <p v-if="create.error.value" role="alert" class="rounded-[12px] bg-error-subtle px-3 py-2 text-[13px] text-error">We couldn’t create the card. Nothing was changed. Try again.</p>
+      <p
+        v-if="create.error.value"
+        role="alert"
+        class="rounded-[12px] bg-error-subtle px-3 py-2 text-[13px] text-error"
+      >
+        We couldn’t create the card. Nothing was changed. Try again.
+      </p>
       <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <ForenButton variant="secondary" size="sm" @click="emit('close')">Not now</ForenButton>
+        <ForenButton variant="secondary" size="sm" @click="emit('close')"
+          >Not now</ForenButton
+        >
         <ForenButton size="sm" :disabled="create.pending.value" @click="submit">
-          {{ create.pending.value ? "Creating…" : `Create ${merchant.name} card` }}
+          {{
+            create.pending.value ? "Creating…" : `Create ${merchant.name} card`
+          }}
         </ForenButton>
       </div>
     </div>
-    <UpdateAtMerchant v-else-if="created" :card="created" :merchant="merchant" :old-card="card" :block-old="blockOld" @done="emit('close')" />
+    <UpdateAtMerchant
+      v-else-if="created"
+      :card="created"
+      :merchant="merchant"
+      :old-card="card"
+      :block-old="blockOld"
+      @done="emit('close')"
+    />
   </Modal>
 </template>

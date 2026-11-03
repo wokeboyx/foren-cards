@@ -1,4 +1,18 @@
-export type DialogKind = null | "freeze" | "unfreeze" | "request-unfreeze" | "cancel" | "archive" | "copy" | "limit" | "nickname" | "history" | "limit-request" | "lock" | "unlock" | "period" | "wallet";
+export type DialogKind =
+  | null
+  | "freeze"
+  | "unfreeze"
+  | "request-unfreeze"
+  | "cancel"
+  | "archive"
+  | "copy"
+  | "limit"
+  | "nickname"
+  | "history"
+  | "limit-request"
+  | "expiring"
+  | "fund"
+  | "topup-request";
 
 export function countdown(ms: number) {
   const t = Math.max(0, Math.floor(ms / 1000));

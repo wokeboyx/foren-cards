@@ -25,9 +25,16 @@ export type Business = {
   source: "registry" | "manual";
 };
 
-export type Profile = { turnover: string; sector: string; category: string; website: string; notTrading: boolean };
+export type Profile = {
+  turnover: string;
+  sector: string;
+  category: string;
+  website: string;
+  notTrading: boolean;
+};
 
-export type StakeholderStatus = "not_sent" | "pending" | "action_required" | "verified";
+export type StakeholderStatus =
+  "not_sent" | "pending" | "action_required" | "verified";
 export type Stakeholder = {
   id: string;
   /** A person, or a company that holds shares (indirect ownership). Companies aren't sent a verification link. */
@@ -64,15 +71,28 @@ export type Stakeholder = {
   note?: string;
 };
 
-export type DocStatus = "uploaded" | "in_review" | "needs_attention" | "accepted";
-export type UploadedDoc = { fileName: string; sizeKb: number; status: DocStatus; note?: string };
+export type DocStatus =
+  "uploaded" | "in_review" | "needs_attention" | "accepted";
+export type UploadedDoc = {
+  fileName: string;
+  sizeKb: number;
+  status: DocStatus;
+  note?: string;
+};
 
-export type TaskStatus = "not_started" | "in_progress" | "submitted" | "action_required" | "verified";
+export type TaskStatus =
+  "not_started" | "in_progress" | "submitted" | "action_required" | "verified";
 
 export type Edd = Record<string, string | string[]>;
 
 /** The digital Director and UBO declaration, confirmed with a tick instead of a signature. */
-export type Declaration = { confirmedAt: string; name: string; email: string; position: string; phone: string };
+export type Declaration = {
+  confirmedAt: string;
+  name: string;
+  email: string;
+  position: string;
+  phone: string;
+};
 
 /** Prototype-only switches for outcomes we can't produce for real. */
 export type OnboardingDemo = {
@@ -119,7 +139,8 @@ type State = {
   demo: OnboardingDemo;
 };
 
-export type OnboardingPreset = "signed_up" | "in_review" | "changes_requested" | "approved";
+export type OnboardingPreset =
+  "signed_up" | "in_review" | "changes_requested" | "approved";
 
 const INITIAL: State = {
   country: null,
@@ -152,18 +173,48 @@ const INITIAL: State = {
 };
 
 /** Sample business returned by the registry lookup, per country. */
-export function registryBusiness(country: CountryCode, regType: string | undefined, regNumber: string): Business {
-  const byCountry: Record<CountryCode, Omit<Business, "regNumber" | "regType" | "source">> = {
-    NG: { name: "Karaya Pharmaceuticals Limited", incorporatedOn: "2019-03-12", companyType: "Private Limited Company", address: "14 Marina Road, Lagos Island, Lagos" },
-    GB: { name: "Karaya Pharmaceuticals Ltd", incorporatedOn: "2019-03-12", companyType: "Private Limited Company", address: "20 Wenlock Road, London N1 7GU" },
-    CA: { name: "Karaya Pharmaceuticals Inc.", incorporatedOn: "2019-03-12", companyType: "Federal corporation", address: "100 King Street West, Toronto, ON M5X 1A9" },
-    KE: { name: "Karaya Pharmaceuticals Limited", incorporatedOn: "2019-03-12", companyType: "Private company", address: "Westlands Road, Nairobi" },
+export function registryBusiness(
+  country: CountryCode,
+  regType: string | undefined,
+  regNumber: string,
+): Business {
+  const byCountry: Record<
+    CountryCode,
+    Omit<Business, "regNumber" | "regType" | "source">
+  > = {
+    NG: {
+      name: "Karaya Pharmaceuticals Limited",
+      incorporatedOn: "2019-03-12",
+      companyType: "Private Limited Company",
+      address: "14 Marina Road, Lagos Island, Lagos",
+    },
+    GB: {
+      name: "Karaya Pharmaceuticals Ltd",
+      incorporatedOn: "2019-03-12",
+      companyType: "Private Limited Company",
+      address: "20 Wenlock Road, London N1 7GU",
+    },
+    CA: {
+      name: "Karaya Pharmaceuticals Inc.",
+      incorporatedOn: "2019-03-12",
+      companyType: "Federal corporation",
+      address: "100 King Street West, Toronto, ON M5X 1A9",
+    },
+    KE: {
+      name: "Karaya Pharmaceuticals Limited",
+      incorporatedOn: "2019-03-12",
+      companyType: "Private company",
+      address: "Westlands Road, Nairobi",
+    },
   };
   return { ...byCountry[country], regType, regNumber, source: "registry" };
 }
 
 /** Defaults for a new person stakeholder. */
-export const PERSON: Omit<Stakeholder, "id" | "firstName" | "lastName" | "email" | "position" | "source" | "status"> = {
+export const PERSON: Omit<
+  Stakeholder,
+  "id" | "firstName" | "lastName" | "email" | "position" | "source" | "status"
+> = {
   kind: "person",
   regNumber: "",
   regCountry: "",
@@ -181,8 +232,38 @@ export const PERSON: Omit<Stakeholder, "id" | "firstName" | "lastName" | "email"
 /** Directors on the registry record, offered as stakeholders. Ownership, date of birth and nationality are missing until the user adds them. */
 export function registryStakeholders(): Stakeholder[] {
   return [
-    { ...PERSON, id: "sh_david", firstName: "David", lastName: "Oyelowo", email: "david@karayapharma.com", position: "Director", dob: "", nationality: "", director: true, shareholder: true, ownership: 0, signatory: true, source: "registry", status: "not_sent" },
-    { ...PERSON, id: "sh_mariam", firstName: "Mariam", lastName: "Odunwale", email: "mariam@karayapharma.com", position: "Director", dob: "", nationality: "", director: true, shareholder: true, ownership: 0, signatory: false, source: "registry", status: "not_sent" },
+    {
+      ...PERSON,
+      id: "sh_david",
+      firstName: "David",
+      lastName: "Oyelowo",
+      email: "david@karayapharma.com",
+      position: "Director",
+      dob: "",
+      nationality: "",
+      director: true,
+      shareholder: true,
+      ownership: 0,
+      signatory: true,
+      source: "registry",
+      status: "not_sent",
+    },
+    {
+      ...PERSON,
+      id: "sh_mariam",
+      firstName: "Mariam",
+      lastName: "Odunwale",
+      email: "mariam@karayapharma.com",
+      position: "Director",
+      dob: "",
+      nationality: "",
+      director: true,
+      shareholder: true,
+      ownership: 0,
+      signatory: false,
+      source: "registry",
+      status: "not_sent",
+    },
   ];
 }
 
@@ -196,14 +277,20 @@ export const useOnboardingStore = defineStore("onboarding", {
       this.demo = { ...this.demo, ...patch };
     },
     upsertStakeholder(s: Stakeholder) {
-      this.stakeholders = this.stakeholders.some((x) => x.id === s.id) ? this.stakeholders.map((x) => (x.id === s.id ? s : x)) : [...this.stakeholders, s];
+      this.stakeholders = this.stakeholders.some((x) => x.id === s.id)
+        ? this.stakeholders.map((x) => (x.id === s.id ? s : x))
+        : [...this.stakeholders, s];
     },
     /** Removing a company also removes the people listed as its owners. */
     removeStakeholder(id: string) {
-      this.stakeholders = this.stakeholders.filter((x) => x.id !== id && x.parentId !== id);
+      this.stakeholders = this.stakeholders.filter(
+        (x) => x.id !== id && x.parentId !== id,
+      );
     },
     patchStakeholder(id: string, patch: Partial<Stakeholder>) {
-      this.stakeholders = this.stakeholders.map((x) => (x.id === id ? { ...x, ...patch } : x));
+      this.stakeholders = this.stakeholders.map((x) =>
+        x.id === id ? { ...x, ...patch } : x,
+      );
     },
     setDocument(reqId: string, doc: UploadedDoc | null) {
       const documents = { ...this.documents };
@@ -228,33 +315,105 @@ export const useOnboardingStore = defineStore("onboarding", {
         emailVerified: true,
         identityVerified: true,
         business: registryBusiness("NG", "RC", "1234567"),
-        profile: { turnover: "1M – 5M", sector: "Healthcare", category: "Pharmacy and drugs", website: "https://karayapharma.com", notTrading: false },
+        profile: {
+          turnover: "1M – 5M",
+          sector: "Healthcare",
+          category: "Pharmacy and drugs",
+          website: "https://karayapharma.com",
+          notTrading: false,
+        },
         signedUpAt: new Date().toISOString(),
       };
-      if (preset === "signed_up") return this.set({ ...structuredClone(INITIAL), ...base, demo: this.demo });
+      if (preset === "signed_up")
+        return this.set({
+          ...structuredClone(INITIAL),
+          ...base,
+          demo: this.demo,
+        });
       const ctx = contextOf({ ...INITIAL, ...base } as State)!;
       const docs: Record<string, UploadedDoc> = {};
-      for (const r of requirementsFor(ctx).filter((r) => r.source === "upload" && !r.optional))
-        docs[r.id] = { fileName: `${r.id.replace(/_/g, "-")}.pdf`, sizeKb: 420, status: preset === "approved" ? "accepted" : "in_review" };
+      for (const r of requirementsFor(ctx).filter(
+        (r) => r.source === "upload" && !r.optional,
+      ))
+        docs[r.id] = {
+          fileName: `${r.id.replace(/_/g, "-")}.pdf`,
+          sizeKb: 420,
+          status: preset === "approved" ? "accepted" : "in_review",
+        };
       const people: Stakeholder[] = [
-        { ...registryStakeholders()[0], dob: "1978-06-14", nationality: "NG", ownership: 30, control: ["shares", "voting"], status: "verified" },
-        { ...registryStakeholders()[1], dob: "1985-02-03", nationality: "NG", ownership: 20, control: ["shares", "voting"], status: preset === "changes_requested" ? "action_required" : "verified", note: preset === "changes_requested" ? "The ID photo was too blurry to read. Ask Mariam to retake it in good light." : undefined },
-        { ...PERSON, id: "sh_ryan", firstName: "Ryan", lastName: "Adeyemi", email: "ryan@karayapharma.com", position: "Investor", dob: "1990-11-21", nationality: "GB", shareholder: true, ownership: 50, control: ["shares"], source: "added", status: "verified" },
+        {
+          ...registryStakeholders()[0],
+          dob: "1978-06-14",
+          nationality: "NG",
+          ownership: 30,
+          control: ["shares", "voting"],
+          status: "verified",
+        },
+        {
+          ...registryStakeholders()[1],
+          dob: "1985-02-03",
+          nationality: "NG",
+          ownership: 20,
+          control: ["shares", "voting"],
+          status:
+            preset === "changes_requested" ? "action_required" : "verified",
+          note:
+            preset === "changes_requested"
+              ? "The ID photo was too blurry to read. Ask Mariam to retake it in good light."
+              : undefined,
+        },
+        {
+          ...PERSON,
+          id: "sh_ryan",
+          firstName: "Ryan",
+          lastName: "Adeyemi",
+          email: "ryan@karayapharma.com",
+          position: "Investor",
+          dob: "1990-11-21",
+          nationality: "GB",
+          shareholder: true,
+          ownership: 50,
+          control: ["shares"],
+          source: "added",
+          status: "verified",
+        },
       ];
       if (preset === "changes_requested")
-        docs.cac_certificate = { fileName: "cac-certificate.pdf", sizeKb: 380, status: "needs_attention", note: "This certificate is no longer valid. Upload a current, certified true copy." };
+        docs.cac_certificate = {
+          fileName: "cac-certificate.pdf",
+          sizeKb: 380,
+          status: "needs_attention",
+          note: "This certificate is no longer valid. Upload a current, certified true copy.",
+        };
       this.set({
         ...structuredClone(INITIAL),
         ...base,
         stakeholders: people,
         stakeholdersSubmitted: true,
-        declaration: { confirmedAt: new Date().toISOString(), name: "Ayodele Owoetoni", email: "ayodele@karayapharma.com", position: "Finance Director", phone: "+234 803 555 0142" },
+        declaration: {
+          confirmedAt: new Date().toISOString(),
+          name: "Ayodele Owoetoni",
+          email: "ayodele@karayapharma.com",
+          position: "Finance Director",
+          phone: "+234 803 555 0142",
+        },
         invitesSentAt: new Date().toISOString(),
         documents: docs,
         documentsSubmitted: true,
-        questionnaire: { volume: "NGN 2 million", frequency: "1–100", hasWebsite: "Yes", website: "https://karayapharma.com", use: "Paying suppliers and staff salaries" },
+        questionnaire: {
+          volume: "NGN 2 million",
+          frequency: "1–100",
+          hasWebsite: "Yes",
+          website: "https://karayapharma.com",
+          use: "Paying suppliers and staff salaries",
+        },
         questionnaireSubmitted: true,
-        review: preset === "approved" ? "approved" : preset === "changes_requested" ? "changes_requested" : "in_review",
+        review:
+          preset === "approved"
+            ? "approved"
+            : preset === "changes_requested"
+              ? "changes_requested"
+              : "in_review",
         demo: this.demo,
       });
     },
@@ -262,7 +421,14 @@ export const useOnboardingStore = defineStore("onboarding", {
   persist: {
     key: "foren-onboarding-v2",
     // Saved sign-ups from before newer stakeholder fields existed: fill the gaps so they show as missing, not crash.
-    merge: (saved, initial) => ({ ...initial, ...saved, stakeholders: (saved.stakeholders ?? []).map((p) => ({ ...PERSON, ...p })) }),
+    merge: (saved, initial) => ({
+      ...initial,
+      ...saved,
+      stakeholders: (saved.stakeholders ?? []).map((p) => ({
+        ...PERSON,
+        ...p,
+      })),
+    }),
   },
 });
 
@@ -272,25 +438,36 @@ export const useOnboardingStore = defineStore("onboarding", {
 export function effectiveOwnership(p: Stakeholder, all: Stakeholder[]): number {
   if (p.parentId) {
     const parent = all.find((x) => x.id === p.parentId);
-    return parent ? Math.round(((parent.ownership * p.ownership) / 100) * 100) / 100 : 0;
+    return parent
+      ? Math.round(((parent.ownership * p.ownership) / 100) * 100) / 100
+      : 0;
   }
   return p.shareholder || p.kind === "company" ? p.ownership : 0;
 }
 
 /** Individuals who are ultimate beneficial owners: own the threshold or more, directly or indirectly. */
-export const ubosOf = (all: Stakeholder[], threshold: number) => all.filter((p) => p.kind === "person" && effectiveOwnership(p, all) >= threshold);
+export const ubosOf = (all: Stakeholder[], threshold: number) =>
+  all.filter(
+    (p) => p.kind === "person" && effectiveOwnership(p, all) >= threshold,
+  );
 
 /** People who get a verification link (companies don't). */
-export const peopleOf = (all: Stakeholder[]) => all.filter((p) => p.kind === "person");
+export const peopleOf = (all: Stakeholder[]) =>
+  all.filter((p) => p.kind === "person");
 
-export function contextOf(s: Pick<State, "country" | "entity" | "business" | "profile" | "useCases">): RequirementContext | null {
+export function contextOf(
+  s: Pick<State, "country" | "entity" | "business" | "profile" | "useCases">,
+): RequirementContext | null {
   if (!s.country || !s.entity) return null;
   const api = s.useCases.includes("api");
   return {
     country: s.country,
     entity: s.entity,
-    newBusiness: isNewBusiness(s.business?.incorporatedOn) || !!s.profile?.notTrading,
-    scuml: s.country === "NG" && isScumlCategory(s.profile?.sector, s.profile?.category),
+    newBusiness:
+      isNewBusiness(s.business?.incorporatedOn) || !!s.profile?.notTrading,
+    scuml:
+      s.country === "NG" &&
+      isScumlCategory(s.profile?.sector, s.profile?.category),
     api,
     banking: !api || s.useCases.length > 1,
   };
@@ -319,9 +496,16 @@ export function checklist(s: State): ChecklistItem[] {
     items.push({
       id: "stakeholders",
       title: "Stakeholders and structure",
-      description: "Add your directors, owners and signatories, then confirm the declaration.",
+      description:
+        "Add your directors, owners and signatories, then confirm the declaration.",
       href: "/get-started/stakeholders",
-      status: s.stakeholdersSubmitted ? (s.review === "approved" ? "verified" : "submitted") : s.stakeholders.length ? "in_progress" : "not_started",
+      status: s.stakeholdersSubmitted
+        ? s.review === "approved"
+          ? "verified"
+          : "submitted"
+        : s.stakeholders.length
+          ? "in_progress"
+          : "not_started",
     });
     const people = peopleOf(s.stakeholders);
     items.push({
@@ -338,7 +522,9 @@ export function checklist(s: State): ChecklistItem[] {
             : "in_progress",
     });
   }
-  const docs = requirementsFor(ctx).filter((r) => r.source === "upload" && !r.optional);
+  const docs = requirementsFor(ctx).filter(
+    (r) => r.source === "upload" && !r.optional,
+  );
   const uploaded = docs.filter((r) => s.documents[r.id]);
   items.push({
     id: "documents",
@@ -359,12 +545,22 @@ export function checklist(s: State): ChecklistItem[] {
     items.push({
       id: "questionnaire",
       title: "Onboarding questionnaire",
-      description: ctx.api && !ctx.banking ? "Tell us what you’ll build with our API." : "A few questions about how you’ll use your account.",
+      description:
+        ctx.api && !ctx.banking
+          ? "Tell us what you’ll build with our API."
+          : "A few questions about how you’ll use your account.",
       href: "/get-started/questionnaire",
-      status: s.questionnaireSubmitted ? (s.review === "approved" ? "verified" : "submitted") : Object.keys(s.questionnaire).length ? "in_progress" : "not_started",
+      status: s.questionnaireSubmitted
+        ? s.review === "approved"
+          ? "verified"
+          : "submitted"
+        : Object.keys(s.questionnaire).length
+          ? "in_progress"
+          : "not_started",
     });
   return items;
 }
 
 /** Whether the account is still in onboarding (show "Get started" in the sidebar). */
-export const isOnboarding = (s: Pick<State, "signedUpAt" | "review">) => !!s.signedUpAt && s.review !== "approved";
+export const isOnboarding = (s: Pick<State, "signedUpAt" | "review">) =>
+  !!s.signedUpAt && s.review !== "approved";

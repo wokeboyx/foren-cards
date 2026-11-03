@@ -3,14 +3,26 @@ import { DECLINE } from "@/content/copy";
 import type { ExpenseCategory, Transaction } from "@/domain/types";
 import { useAppStore } from "@/stores/app";
 
-export const dt = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+export const dt = (iso: string) =>
+  new Date(iso).toLocaleString("en-GB", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
 /** Receipts are expected on approved business charges (Mercury / Revolut expense reporting). */
 export function needsReceipt(t: Transaction) {
-  return t.status === "approved" && !t.receipt && !!useAppStore().cards.find((c) => c.id === t.cardId && !c.personal);
+  return (
+    t.kind !== "funding" &&
+    t.status === "approved" &&
+    !t.receipt &&
+    !!useAppStore().cards.find((c) => c.id === t.cardId && !c.personal)
+  );
 }
 
 export function txStatus(t: Transaction): { label: string; color: BadgeColor } {
+  if (t.kind === "funding") return { label: "Funded", color: "success" };
   if (t.status === "declined") return { label: "Declined", color: "error" };
   if (t.status === "pending") return { label: "Pending", color: "gray" };
   if (t.status === "refunded") return { label: "Refunded", color: "gray" };
@@ -32,7 +44,7 @@ export function ownerNext(t: Transaction) {
     case "spend_limit":
       return "Review the card’s spending limit if this charge was expected.";
     case "insufficient_balance":
-      return "Top up an eligible balance, or allow more balances in the card’s funding.";
+      return "Fund the card. It only spends what’s on it.";
     default:
       return DECLINE[t.declineReason ?? "unknown"].next;
   }
@@ -47,3 +59,18 @@ export const EXPENSE: Record<ExpenseCategory, string> = {
   transport: "Local transport",
   other: "Other",
 };
+
+/** A short reference shown in the first column, as on the Global account history. */
+export const txRef = (t: Transaction) =>
+  `TX-${t.id
+    .replace(/[^a-z0-9]/gi, "")
+    .slice(-8)
+    .toUpperCase()}`;
+
+/** Card payments are debits; refunds come back as credits. */
+export const txType = (
+  t: Transaction,
+): { label: "Debit" | "Credit"; color: BadgeColor } =>
+  t.status === "refunded" || t.kind === "funding"
+    ? { label: "Credit", color: "success" }
+    : { label: "Debit", color: "gray" };

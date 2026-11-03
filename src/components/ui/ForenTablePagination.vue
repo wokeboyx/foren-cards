@@ -2,7 +2,12 @@
 import { computed, type HTMLAttributes } from "vue";
 import { RiArrowLeftSLine, RiArrowRightSLine } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import { buildPages, PAGINATION_SIZES, type ForenPaginationLayout, type ForenPaginationSize } from "./foren-table";
+import {
+  buildPages,
+  PAGINATION_SIZES,
+  type ForenPaginationLayout,
+  type ForenPaginationSize,
+} from "./foren-table";
 
 const props = withDefaults(
   defineProps<{
@@ -27,19 +32,26 @@ const props = withDefaults(
     pages?: (number | null)[];
     class?: HTMLAttributes["class"];
   }>(),
-  { layout: "compact", size: "md", fluid: true }
+  { layout: "compact", size: "md", fluid: true },
 );
 const emit = defineEmits<{ "update:page": [next: number] }>();
-defineSlots<{ label?(): unknown; position?(): unknown; pageInfo?(): unknown }>();
+defineSlots<{
+  label?(): unknown;
+  position?(): unknown;
+  pageInfo?(): unknown;
+}>();
 
 const s = computed(() => PAGINATION_SIZES[props.size]);
 const canPrev = computed(() => props.page > 1);
 const canNext = computed(() => props.page < props.pageCount);
-const list = computed(() => props.pages ?? buildPages(props.page, props.pageCount));
+const list = computed(
+  () => props.pages ?? buildPages(props.page, props.pageCount),
+);
 const prev = () => canPrev.value && emit("update:page", props.page - 1);
 const next = () => canNext.value && emit("update:page", props.page + 1);
 
-const FOCUS = "focus-visible:ring-2 focus-visible:ring-[var(--color-foren-border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-foren-bg-default)]";
+const FOCUS =
+  "focus-visible:ring-2 focus-visible:ring-[var(--color-foren-border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-foren-bg-default)]";
 // The design drops the border on the disabled state rather than dimming it, and fades the chevron instead.
 const navClass = (disabled: boolean) =>
   cn(
@@ -47,7 +59,7 @@ const navClass = (disabled: boolean) =>
     FOCUS,
     disabled
       ? "cursor-default opacity-30"
-      : "cursor-pointer border border-[var(--color-foren-border-muted)] text-[var(--color-foren-text-primary)] hover:bg-[var(--color-foren-bg-sunken)]"
+      : "cursor-pointer border border-[var(--color-foren-border-muted)] text-[var(--color-foren-text-primary)] hover:bg-[var(--color-foren-bg-sunken)]",
   );
 const pageClass = (active: boolean) =>
   cn(
@@ -56,10 +68,16 @@ const pageClass = (active: boolean) =>
     s.value.text,
     active
       ? "cursor-default bg-[var(--color-foren-bg-button-primary,#1e1711)] text-[var(--color-foren-text-inverse)]"
-      : "cursor-pointer border border-[var(--color-foren-border-muted)] bg-[var(--color-foren-bg-default)] text-[var(--color-foren-text-primary)] hover:bg-[var(--color-foren-bg-sunken)]"
+      : "cursor-pointer border border-[var(--color-foren-border-muted)] bg-[var(--color-foren-bg-default)] text-[var(--color-foren-text-primary)] hover:bg-[var(--color-foren-bg-sunken)]",
   );
-const controlStyle = computed(() => ({ width: `${s.value.control}px`, height: `${s.value.control}px` }));
-const iconStyle = computed(() => ({ width: `${s.value.icon}px`, height: `${s.value.icon}px` }));
+const controlStyle = computed(() => ({
+  width: `${s.value.control}px`,
+  height: `${s.value.control}px`,
+}));
+const iconStyle = computed(() => ({
+  width: `${s.value.icon}px`,
+  height: `${s.value.icon}px`,
+}));
 </script>
 
 <template>
@@ -67,34 +85,103 @@ const iconStyle = computed(() => ({ width: `${s.value.icon}px`, height: `${s.val
     v-if="layout === 'compact'"
     aria-label="Pagination"
     role="navigation"
-    :class="cn('flex items-center justify-between', fluid ? 'w-full px-6' : 'px-4', props.class)"
+    :class="
+      cn(
+        'flex items-center justify-between',
+        fluid ? 'w-full px-6' : 'px-4',
+        props.class,
+      )
+    "
     :style="{ height: `${s.height}px`, width: fluid ? undefined : '600px' }"
   >
-    <span :class="cn('font-semibold uppercase tabular-nums text-[var(--color-foren-text-tertiary)]', s.text)">
-      <slot name="label">{{ label ?? (shown != null && total != null ? `Showing: ${shown} of ${total} items` : null) }}</slot>
+    <span
+      :class="
+        cn(
+          'font-semibold uppercase tabular-nums text-[var(--color-foren-text-tertiary)]',
+          s.text,
+        )
+      "
+    >
+      <slot name="label">{{
+        label ??
+        (shown != null && total != null
+          ? `Showing: ${shown} of ${total} items`
+          : null)
+      }}</slot>
     </span>
     <div class="flex shrink-0 items-center" :style="{ gap: `${s.navGap}px` }">
-      <button type="button" :disabled="!canPrev" aria-label="Previous page" :style="controlStyle" :class="navClass(!canPrev)" @click="prev">
+      <button
+        type="button"
+        :disabled="!canPrev"
+        aria-label="Previous page"
+        :style="controlStyle"
+        :class="navClass(!canPrev)"
+        @click="prev"
+      >
         <RiArrowLeftSLine aria-hidden="true" :style="iconStyle" />
       </button>
-      <span :class="cn('font-medium tabular-nums text-[var(--color-foren-text-primary)]', s.text)">
+      <span
+        :class="
+          cn(
+            'font-medium tabular-nums text-[var(--color-foren-text-primary)]',
+            s.text,
+          )
+        "
+      >
         <slot name="position">{{ position ?? `${page}/${pageCount}` }}</slot>
       </span>
-      <button type="button" :disabled="!canNext" aria-label="Next page" :style="controlStyle" :class="navClass(!canNext)" @click="next">
+      <button
+        type="button"
+        :disabled="!canNext"
+        aria-label="Next page"
+        :style="controlStyle"
+        :class="navClass(!canNext)"
+        @click="next"
+      >
         <RiArrowRightSLine aria-hidden="true" :style="iconStyle" />
       </button>
     </div>
   </div>
-  <div v-else aria-label="Pagination" role="navigation" :class="cn('flex items-center px-4', props.class)" :style="{ gap: `${s.gap}px` }">
-    <button type="button" :disabled="!canPrev" aria-label="Previous page" :style="controlStyle" :class="navClass(!canPrev)" @click="prev">
+  <div
+    v-else
+    aria-label="Pagination"
+    role="navigation"
+    :class="cn('flex items-center px-4', props.class)"
+    :style="{ gap: `${s.gap}px` }"
+  >
+    <button
+      type="button"
+      :disabled="!canPrev"
+      aria-label="Previous page"
+      :style="controlStyle"
+      :class="navClass(!canPrev)"
+      @click="prev"
+    >
       <RiArrowLeftSLine aria-hidden="true" :style="iconStyle" />
     </button>
-    <span v-if="layout === 'mobile'" :class="cn('font-medium whitespace-nowrap tabular-nums text-[var(--color-foren-text-primary)]', s.text)">
-      <slot name="pageInfo">{{ pageInfo ?? `Page ${page} of ${pageCount}` }}</slot>
+    <span
+      v-if="layout === 'mobile'"
+      :class="
+        cn(
+          'font-medium whitespace-nowrap tabular-nums text-[var(--color-foren-text-primary)]',
+          s.text,
+        )
+      "
+    >
+      <slot name="pageInfo">{{
+        pageInfo ?? `Page ${page} of ${pageCount}`
+      }}</slot>
     </span>
     <template v-else>
       <template v-for="(p, i) in list" :key="p === null ? `gap-${i}` : p">
-        <span v-if="p === null" aria-hidden="true" :class="cn('font-medium text-[var(--color-foren-text-tertiary)]', s.text)">&hellip;</span>
+        <span
+          v-if="p === null"
+          aria-hidden="true"
+          :class="
+            cn('font-medium text-[var(--color-foren-text-tertiary)]', s.text)
+          "
+          >&hellip;</span
+        >
         <button
           v-else
           type="button"
@@ -108,7 +195,14 @@ const iconStyle = computed(() => ({ width: `${s.value.icon}px`, height: `${s.val
         </button>
       </template>
     </template>
-    <button type="button" :disabled="!canNext" aria-label="Next page" :style="controlStyle" :class="navClass(!canNext)" @click="next">
+    <button
+      type="button"
+      :disabled="!canNext"
+      aria-label="Next page"
+      :style="controlStyle"
+      :class="navClass(!canNext)"
+      @click="next"
+    >
       <RiArrowRightSLine aria-hidden="true" :style="iconStyle" />
     </button>
   </div>

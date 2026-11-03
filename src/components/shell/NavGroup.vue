@@ -8,9 +8,20 @@ const emit = defineEmits<{ navigate: [] }>();
 
 <template>
   <div class="space-y-1">
-    <div v-if="title" class="flex h-6 items-center px-3 text-[12px] font-semibold tracking-[0.01em] text-fg-3 uppercase">{{ title }}</div>
+    <div
+      v-if="title"
+      class="flex h-6 items-center px-3 text-[12px] font-semibold tracking-[0.01em] text-fg-3 uppercase"
+    >
+      {{ title }}
+    </div>
     <ul class="space-y-1">
-      <NavEntry v-for="it in items" :key="it.label" :item="it" :pathname="pathname" @navigate="emit('navigate')" />
+      <NavEntry
+        v-for="it in items"
+        :key="it.label"
+        :item="it"
+        :pathname="pathname"
+        @navigate="emit('navigate')"
+      />
     </ul>
   </div>
 </template>

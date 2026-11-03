@@ -39,7 +39,7 @@ const props = withDefaults(
     placeholder: "Choose file…",
     disabled: false,
     forceDragover: false,
-  }
+  },
 );
 /** Emitted with the chosen/dropped files. */
 const emit = defineEmits<{ files: [files: FileList] }>();
@@ -54,7 +54,7 @@ const borderColor = computed(() =>
       ? "border-[var(--color-foren-border-strong)]"
       : props.disabled
         ? "border-[var(--color-foren-border-disabled)]"
-        : "border-[var(--color-foren-border-muted)]"
+        : "border-[var(--color-foren-border-muted)]",
 );
 
 function openPicker() {
@@ -78,7 +78,13 @@ function onDragOver(e: DragEvent) {
 <template>
   <div v-if="variant === 'compact'" :class="cn('w-full', props.class)">
     <div
-      :class="cn('flex items-center gap-3 w-full h-12 pl-4 pr-1.5 rounded-xl border bg-[var(--color-foren-bg-default)] transition-colors', borderColor, disabled && 'opacity-60')"
+      :class="
+        cn(
+          'flex items-center gap-3 w-full h-12 pl-4 pr-1.5 rounded-xl border bg-[var(--color-foren-bg-default)] transition-colors',
+          borderColor,
+          disabled && 'opacity-60',
+        )
+      "
       @drop="onDrop"
       @dragover="onDragOver"
       @dragleave="dragging = false"
@@ -87,20 +93,38 @@ function onDragOver(e: DragEvent) {
         :class="
           cn(
             'flex-1 min-w-0 truncate text-[14px] leading-[21px]',
-            fileName ? 'text-[var(--color-foren-text-primary)] font-medium' : 'text-[var(--color-foren-text-tertiary)]'
+            fileName
+              ? 'text-[var(--color-foren-text-primary)] font-medium'
+              : 'text-[var(--color-foren-text-tertiary)]',
           )
         "
       >
         {{ fileName ?? placeholder }}
       </span>
-      <ForenButton size="xs" variant="primary" :disabled="disabled" @click="openPicker">
+      <ForenButton
+        size="xs"
+        variant="primary"
+        :disabled="disabled"
+        @click="openPicker"
+      >
         {{ fileName ? "Change" : browseLabel }}
       </ForenButton>
     </div>
-    <p v-if="error" class="mt-1.5 text-[12px] leading-[18px] font-medium text-[var(--color-foren-error)]">
+    <p
+      v-if="error"
+      class="mt-1.5 text-[12px] leading-[18px] font-medium text-[var(--color-foren-error)]"
+    >
       {{ error }}
     </p>
-    <input ref="input" type="file" :accept="accept" :multiple="multiple" :disabled="disabled" class="sr-only" @change="handleFiles(($event.target as HTMLInputElement).files)" />
+    <input
+      ref="input"
+      type="file"
+      :accept="accept"
+      :multiple="multiple"
+      :disabled="disabled"
+      class="sr-only"
+      @change="handleFiles(($event.target as HTMLInputElement).files)"
+    />
   </div>
   <div v-else :class="cn('w-full', props.class)">
     <div
@@ -113,7 +137,7 @@ function onDragOver(e: DragEvent) {
           'focus-visible:border-[var(--color-foren-border-strong)]',
           borderColor,
           active && 'bg-[var(--color-foren-bg-subtle)]',
-          disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+          disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
         )
       "
       @click="openPicker"
@@ -123,24 +147,46 @@ function onDragOver(e: DragEvent) {
       @dragover="onDragOver"
       @dragleave="dragging = false"
     >
-      <span class="size-12 rounded-full bg-[var(--color-foren-bg-subtle)] flex items-center justify-center text-[var(--color-foren-text-secondary)]">
+      <span
+        class="size-12 rounded-full bg-[var(--color-foren-bg-subtle)] flex items-center justify-center text-[var(--color-foren-text-secondary)]"
+      >
         <RiUploadCloud2Line width="20" height="20" />
       </span>
       <div class="flex flex-col gap-2 items-center">
-        <p class="text-[14px] leading-[21px] font-semibold tracking-[0.0125em] text-[var(--color-foren-text-primary)]">
+        <p
+          class="text-[14px] leading-[21px] font-semibold tracking-[0.0125em] text-[var(--color-foren-text-primary)]"
+        >
           {{ fileName ?? title }}
         </p>
-        <p class="text-[12px] leading-[18px] font-medium tracking-[0.01em] text-[var(--color-foren-text-tertiary)]">
+        <p
+          class="text-[12px] leading-[18px] font-medium tracking-[0.01em] text-[var(--color-foren-text-tertiary)]"
+        >
           {{ description }}
         </p>
       </div>
-      <ForenButton size="xs" variant="primary" :disabled="disabled" :tabindex="-1">
+      <ForenButton
+        size="xs"
+        variant="primary"
+        :disabled="disabled"
+        :tabindex="-1"
+      >
         {{ browseLabel }}
       </ForenButton>
     </div>
-    <p v-if="error" class="mt-2 text-[12px] leading-[18px] font-medium text-[var(--color-foren-error)]">
+    <p
+      v-if="error"
+      class="mt-2 text-[12px] leading-[18px] font-medium text-[var(--color-foren-error)]"
+    >
       {{ error }}
     </p>
-    <input ref="input" type="file" :accept="accept" :multiple="multiple" :disabled="disabled" class="sr-only" @change="handleFiles(($event.target as HTMLInputElement).files)" />
+    <input
+      ref="input"
+      type="file"
+      :accept="accept"
+      :multiple="multiple"
+      :disabled="disabled"
+      class="sr-only"
+      @change="handleFiles(($event.target as HTMLInputElement).files)"
+    />
   </div>
 </template>

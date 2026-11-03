@@ -14,13 +14,13 @@ component ──reads──▶ Pinia store ◀──fills── service ──ht
 
 ## Files
 
-| File | What |
-|---|---|
-| `http.ts` | `http<T>(path, init)`: a fetch wrapper that sends JSON, includes credentials and throws `ApiError` on non-2xx. Reads `VITE_API_BASE_URL`. |
-| `cards.ts`, `requests.ts`, `payments.ts`, `subscriptions.ts`, `people.ts` | One exported function per user action, with its signature and a comment saying what it must do. Today each one delegates to `mock/backend.ts`. |
-| `index.ts` | The barrel that components import from. |
-| `mock/backend.ts` | The mock backend: business rules (authorisation, approvals, history, notifications) applied to the store. **Delete it once every service is real.** |
-| `mock/call.ts` | Simulated latency and failures, driven by the demo panel. |
+| File                                                                      | What                                                                                                                                                |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `http.ts`                                                                 | `http<T>(path, init)`: a fetch wrapper that sends JSON, includes credentials and throws `ApiError` on non-2xx. Reads `VITE_API_BASE_URL`.           |
+| `cards.ts`, `requests.ts`, `payments.ts`, `subscriptions.ts`, `people.ts` | One exported function per user action, with its signature and a comment saying what it must do. Today each one delegates to `mock/backend.ts`.      |
+| `index.ts`                                                                | The barrel that components import from.                                                                                                             |
+| `mock/backend.ts`                                                         | The mock backend: business rules (authorisation, approvals, history, notifications) applied to the store. **Delete it once every service is real.** |
+| `mock/call.ts`                                                            | Simulated latency and failures, driven by the demo panel.                                                                                           |
 
 ## Switching a write over
 
@@ -36,6 +36,7 @@ export async function freezeCard(id: string): Promise<void> {
 ```
 
 Rules the UI relies on:
+
 - **Throw on failure, and leave the store unchanged when you do.** `useAction` turns the error into the inline "couldn't save, nothing changed" message.
 - **Resolve with the value shown in the signature** (for example `issueCard` resolves to the created `Card`). Screens navigate using it.
 - Keep the exported name and parameter list. If the API needs a different shape, adapt it inside the function.
@@ -46,6 +47,7 @@ Rules the UI relies on:
 Screens call `useLoad(key)` (`src/composables/useLoad.ts`) to show skeletons, load errors and Retry. Today it only waits a simulated delay, because the store is seeded from `src/fixtures/`.
 
 To use real data:
+
 1. Add `load*` functions here (e.g. `loadCards()`), each fetching and writing into the store (`useAppStore().$patch({ cards })`).
 2. Have `useLoad` call the loader for its key instead of the mock `call`. The keys screens pass today are `"cards"`, `"requests"`, `"subs"`, `` `tx-${cardId}` `` and `"global"`.
 3. Remove the fixture seed from the store's `state()` and its `persist` option. Server data shouldn't live in localStorage.

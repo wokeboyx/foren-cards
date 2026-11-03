@@ -4,14 +4,31 @@ import type { Stakeholder } from "@/stores/onboarding";
 import { fullName } from "./shared";
 import StakeholderRow from "./StakeholderRow.vue";
 
-defineProps<{ items: Stakeholder[]; all: Stakeholder[]; threshold: number; locked: boolean }>();
-const emit = defineEmits<{ edit: [p: Stakeholder]; remove: [p: Stakeholder]; addOwner: [company: Stakeholder] }>();
+defineProps<{
+  items: Stakeholder[];
+  all: Stakeholder[];
+  threshold: number;
+  locked: boolean;
+}>();
+const emit = defineEmits<{
+  edit: [p: Stakeholder];
+  remove: [p: Stakeholder];
+  addOwner: [company: Stakeholder];
+}>();
 </script>
 
 <template>
   <ul class="flex flex-col gap-3">
     <li v-for="p in items" :key="p.id" class="flex flex-col gap-2">
-      <StakeholderRow :person="p" :all="all" :threshold="threshold" :locked="locked" :nested="false" @edit="emit('edit', $event)" @remove="emit('remove', $event)" />
+      <StakeholderRow
+        :person="p"
+        :all="all"
+        :threshold="threshold"
+        :locked="locked"
+        :nested="false"
+        @edit="emit('edit', $event)"
+        @remove="emit('remove', $event)"
+      />
       <template v-if="p.kind === 'company'">
         <StakeholderRow
           v-for="o in all.filter((o) => o.parentId === p.id)"

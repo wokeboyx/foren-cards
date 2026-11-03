@@ -22,15 +22,24 @@ const WHY: [string, string][] = [
 </script>
 
 <template>
-  <Modal :open="open" class="sm:max-w-[476px]" @update:open="emit('update:open', $event)">
+  <Modal
+    :open="open"
+    class="sm:max-w-[476px]"
+    @update:open="emit('update:open', $event)"
+  >
     <template #title>
       <span class="flex items-center gap-2">
-        <RiInformationFill class="size-5 shrink-0 text-[#f0b232]" aria-hidden="true" />
+        <RiInformationFill
+          class="size-5 shrink-0 text-[#f0b232]"
+          aria-hidden="true"
+        />
         Why we need this
       </span>
     </template>
     <template #description>
-      <span class="text-[12px] leading-[18px] font-medium text-fg-2">{{ subtitle }}</span>
+      <span class="text-[12px] leading-[18px] font-medium text-fg-2">{{
+        subtitle
+      }}</span>
     </template>
     <div class="flex flex-col gap-8 rounded-[16px] bg-sunken px-3 py-5">
       <div v-for="[h, b] in WHY" :key="h" class="flex flex-col gap-2">

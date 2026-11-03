@@ -12,7 +12,11 @@ const emit = defineEmits<{ copy: [] }>();
   <div class="flex items-center justify-between gap-3 py-2.5">
     <div class="min-w-0">
       <div class="text-[12px] text-fg-3">{{ label }}</div>
-      <div class="tnum truncate text-[14px] font-medium tracking-[0.02em] text-fg">{{ value }}</div>
+      <div
+        class="tnum truncate text-[14px] font-medium tracking-[0.02em] text-fg"
+      >
+        {{ value }}
+      </div>
     </div>
     <ForenButton
       variant="ghost"

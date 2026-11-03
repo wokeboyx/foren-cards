@@ -24,7 +24,9 @@ function onChange(e: Event) {
       class="h-7 rounded-full bg-subtle pr-7 pl-3 text-[12px] font-medium text-fg outline-none focus-visible:ring-2 focus-visible:ring-focus"
       @change="onChange"
     >
-      <option v-for="r in roles" :key="r" :value="r">{{ ROLE_LABEL[r] }}</option>
+      <option v-for="r in roles" :key="r" :value="r">
+        {{ ROLE_LABEL[r] }}
+      </option>
     </select>
   </label>
 </template>

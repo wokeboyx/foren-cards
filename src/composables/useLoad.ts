@@ -7,7 +7,10 @@ export type LoadStatus = "loading" | "error" | "ready";
  * Loading state for a view, so skeletons and load errors are demonstrable.
  * With the real API, swap the mock `call` for the view's fetch (it should fill the store).
  */
-export function useLoad(key: MaybeRefOrGetter<string>): { status: Ref<LoadStatus>; retry: () => void } {
+export function useLoad(key: MaybeRefOrGetter<string>): {
+  status: Ref<LoadStatus>;
+  retry: () => void;
+} {
   const status = ref<LoadStatus>("loading");
   const attempt = ref(0);
   watch(
@@ -20,7 +23,7 @@ export function useLoad(key: MaybeRefOrGetter<string>): { status: Ref<LoadStatus
         .then(() => alive && id && (status.value = "ready"))
         .catch(() => alive && (status.value = "error"));
     },
-    { immediate: true }
+    { immediate: true },
   );
   return { status, retry: () => attempt.value++ };
 }

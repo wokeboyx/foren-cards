@@ -5,7 +5,10 @@ defineProps<{ title: string; edit: string }>();
 </script>
 
 <template>
-  <section class="flex flex-col gap-4 rounded-[12px] bg-surface p-4" :aria-label="title">
+  <section
+    class="flex flex-col gap-4 rounded-[12px] bg-surface p-4"
+    :aria-label="title"
+  >
     <div class="flex items-center justify-between gap-3">
       <h2 class="text-[16px] leading-6 font-medium text-fg">{{ title }}</h2>
       <RouterLink

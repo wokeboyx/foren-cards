@@ -13,7 +13,7 @@ const props = withDefaults(
     onClick?: (e: MouseEvent) => void;
     class?: HTMLAttributes["class"];
   }>(),
-  { selected: false, interactive: undefined, last: false }
+  { selected: false, interactive: undefined, last: false },
 );
 const isInteractive = computed(() => props.interactive ?? !!props.onClick);
 </script>
@@ -24,9 +24,11 @@ const isInteractive = computed(() => props.interactive ?? !!props.onClick);
       cn(
         'h-16 transition-colors duration-150',
         !last && 'border-b border-[var(--color-foren-border-muted)]',
-        selected ? 'bg-[var(--color-foren-bg-subtle)]' : isInteractive && 'hover:bg-[var(--color-foren-bg-sunken)]',
+        selected
+          ? 'bg-[var(--color-foren-bg-subtle)]'
+          : isInteractive && 'hover:bg-[var(--color-foren-bg-sunken)]',
         isInteractive && 'cursor-pointer',
-        props.class
+        props.class,
       )
     "
     @click="onClick?.($event)"

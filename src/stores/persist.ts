@@ -29,7 +29,9 @@ export function persistPlugin({ store, options }: PiniaPluginContext) {
     if (!raw) return;
     try {
       const saved = JSON.parse(raw) as StateTree;
-      const next = opts.merge ? opts.merge(saved, { ...store.$state }) : { ...store.$state, ...saved };
+      const next = opts.merge
+        ? opts.merge(saved, { ...store.$state })
+        : { ...store.$state, ...saved };
       store.$patch((s) => Object.assign(s, next));
       opts.afterLoad?.(store.$state);
     } catch {
@@ -53,7 +55,7 @@ export function persistPlugin({ store, options }: PiniaPluginContext) {
         /* quota or unavailable */
       }
     },
-    { detached: true }
+    { detached: true },
   );
 
   window.addEventListener("storage", (e) => {
