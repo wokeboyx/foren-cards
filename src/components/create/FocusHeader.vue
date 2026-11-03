@@ -9,7 +9,7 @@ const emit = defineEmits<{ close: [] }>();
 
 <template>
   <header
-    class="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between border-b border-[var(--color-foren-border-muted)] bg-canvas px-5"
+    class="z-40 flex h-16 shrink-0 items-center justify-between border-b border-[var(--color-foren-border-muted)] bg-canvas px-5"
   >
     <img
       :src="asset('/onboarding/foren-wordmark.svg')"

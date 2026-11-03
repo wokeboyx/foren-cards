@@ -83,7 +83,7 @@ const reference = (r: CardRequest) =>
     <DialogPortal>
       <DialogOverlay class="fixed inset-0 z-[60] bg-surface" />
       <DialogContent
-        class="fixed inset-0 z-[70] overflow-y-auto bg-surface outline-none"
+        class="fixed inset-0 z-[70] overflow-hidden bg-surface outline-none"
         @open-auto-focus.prevent
       >
         <SendingOverlay

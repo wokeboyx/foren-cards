@@ -12,7 +12,7 @@ defineProps<{ title: string; description?: string }>();
 </script>
 
 <template>
-  <div class="fixed inset-0 z-[90] overflow-y-auto bg-surface">
+  <div class="fixed inset-0 z-[90] overflow-hidden bg-surface">
     <FocusFrame center :closable="false">
       <SuccessGlow />
       <div
