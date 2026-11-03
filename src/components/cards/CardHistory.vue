@@ -210,7 +210,11 @@ const setOpen = (id: string | null) => {
     <Sheet
       :open="!!open"
       :title="
-        open ? (merchantById(open.merchantId)?.name ?? 'Transaction') : ''
+        open
+          ? open.kind === 'funding'
+            ? 'Card funded'
+            : (merchantById(open.merchantId)?.name ?? 'Transaction')
+          : ''
       "
       :description="open ? dt(open.at) : undefined"
       @update:open="(o) => !o && setOpen(null)"

@@ -183,6 +183,9 @@ export type Transaction = {
   kind?: "funding";
   /** For a funding entry: the balance it was taken from. */
   fundedFrom?: Currency;
+  /** For a funding entry: the funding fee (in the card's currency) and the total taken from the balance (in that balance's currency). */
+  fee?: Money;
+  debit?: Money;
   feeAvoided?: FeeAvoided;
   declineReason?: DeclineReason;
   /** Set when the charge came through on a one-time approval */
