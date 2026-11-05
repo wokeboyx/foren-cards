@@ -15,7 +15,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "bg-[var(--color-foren-bg-button-primary,#1e1711)] text-[var(--color-foren-text-on-primary)] shadow-[inset_0_-1px_0_0_rgba(255,255,255,0.05)] hover:bg-[var(--color-foren-bg-button-primary-hover)] disabled:bg-[var(--color-foren-bg-button-disabled)] disabled:text-[var(--color-foren-text-disabled)] disabled:shadow-none",
+          "bg-[var(--color-foren-bg-button-primary,#1e1711)] text-[var(--color-foren-text-on-primary)] shadow-[inset_0_-1px_0_0_rgba(255,255,255,0.05)] hover:bg-[var(--color-foren-bg-button-primary-hover)] active:bg-[var(--color-foren-bg-button-primary-pressed)] disabled:bg-[var(--color-foren-bg-button-disabled)] disabled:text-[var(--color-foren-text-disabled)] disabled:shadow-none",
         secondary:
           "bg-[var(--color-foren-bg-button-secondary)] text-[var(--color-foren-text-secondary)] hover:bg-[var(--color-foren-bg-button-secondary-hover)] active:bg-[var(--color-foren-bg-button-secondary)] disabled:bg-[var(--color-foren-bg-button-disabled)] disabled:text-[var(--color-foren-text-disabled)]",
         outline:

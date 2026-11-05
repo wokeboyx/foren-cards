@@ -15,6 +15,7 @@ import {
   type RequirementContext,
   type UseCaseId,
 } from "@/domain/onboarding";
+import { textAnswers, type SignUpData } from "@/domain/questionnaires";
 
 export type Business = {
   name: string;
@@ -28,7 +29,11 @@ export type Business = {
   source: "registry" | "manual";
 };
 
-export type Profile = { turnover: string; sector: string; category: string; website: string; notTrading: boolean };
+/**
+ * "A few more things". `website` is no longer asked there (the questionnaires ask it); it's kept optional so
+ * sign-ups saved before still load, and their website prefills the questionnaire.
+ */
+export type Profile = { turnover: string; sector: string; category: string; website?: string; notTrading: boolean };
 
 /** `action_required`: their check failed and they can retry with a new link. `rejected`: it failed and only support can resolve it. */
 export type StakeholderStatus = "not_sent" | "pending" | "action_required" | "rejected" | "verified";
@@ -271,7 +276,7 @@ export const useOnboarding = create<State & Actions>()(
           emailVerified: true,
           identityVerified: true,
           business: registryBusiness("NG", "RC", "1234567"),
-          profile: { turnover: "1M – 5M", sector: "Healthcare", category: "Pharmacy and drugs", website: "https://karayapharma.com", notTrading: false },
+          profile: { turnover: "1M – 5M", sector: "Healthcare", category: "Pharmacy and drugs", notTrading: false },
           signedUpAt: new Date().toISOString(),
         };
         if (preset === "signed_up") return set({ ...INITIAL, ...base, demo: get().demo });
@@ -341,6 +346,19 @@ export function contextOf(s: Pick<State, "country" | "entity" | "category" | "bu
     scuml: s.country === "NG" && isScumlCategory(s.profile?.sector, s.profile?.category),
     api,
     banking: !api || s.useCases.length > 1,
+    financialServices: s.profile?.sector === "Financial services",
+  };
+}
+
+/** What sign-up collected that the questionnaires use, so they prefill it or leave it out instead of asking again. */
+export function signUpData(s: Pick<State, "profile" | "useCases" | "kraPin" | "edd">): SignUpData {
+  return {
+    sector: s.profile?.sector,
+    sectorCategory: s.profile?.category,
+    useCases: s.useCases,
+    kraPin: s.kraPin,
+    website: s.profile?.website,
+    edd: textAnswers(s.edd),
   };
 }
 

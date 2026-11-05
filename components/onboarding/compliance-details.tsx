@@ -2,8 +2,8 @@
 import { useSignupGuard } from "./guard";
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { MTO_QUESTIONNAIRE, unanswered, visible, type Answers } from "@/domain/questionnaires";
-import { useOnboarding } from "@/lib/onboarding-store";
+import { formatError, mtoQuestionnaire, unanswered, visible, withPrefills, textAnswers, type Answers } from "@/domain/questionnaires";
+import { signUpData, useOnboarding } from "@/lib/onboarding-store";
 import { CheckBoldIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { FormCard, OnboardingFrame } from "./frame";
@@ -11,25 +11,22 @@ import { FormQuestions } from "./form-questions";
 
 /**
  * Step 5, MTOs and PSPs only: "Regulatory & Compliance Details" (Figma 3035:75359–75690). The questions are
- * the "Client Onboarding Questionnaire MTO" Google Form, split into three tabs.
+ * the "Client Onboarding Questionnaire MTO" Google Form, split into three tabs, without what sign-up already asked.
  */
 
-const TABS = MTO_QUESTIONNAIRE;
 type TabKey = string;
-
-/** Earlier versions stored lists; keep only text answers. */
-function toAnswers(edd: Record<string, string | string[]>): Answers {
-  return Object.fromEntries(Object.entries(edd).filter((e): e is [string, string] => typeof e[1] === "string"));
-}
 
 export function ComplianceDetails() {
   const ready = useSignupGuard("/onboarding/compliance");
   const router = useRouter();
   const entity = useOnboarding((s) => s.entity);
   const saved = useOnboarding((s) => s.edd);
+  const profile = useOnboarding((s) => s.profile);
+  const useCases = useOnboarding((s) => s.useCases);
   const set = useOnboarding((s) => s.set);
+  const TABS = React.useMemo(() => mtoQuestionnaire(signUpData({ profile, useCases, kraPin: null, edd: {} })), [profile, useCases]);
   const [tab, setTab] = React.useState<TabKey>(TABS[0].key);
-  const [a, setA] = React.useState<Answers>(() => toAnswers(saved));
+  const [a, setA] = React.useState<Answers>(() => withPrefills(TABS, textAnswers(saved)));
   const headingRef = React.useRef<HTMLHeadingElement>(null);
 
   React.useEffect(() => {
@@ -88,7 +85,7 @@ export function ComplianceDetails() {
         <h2 ref={headingRef} tabIndex={-1} className="text-[16px] leading-6 font-semibold text-fg outline-none">
           {current.title}
         </h2>
-        <FormQuestions questions={current.questions} answers={a} onChange={(patch) => setA((p) => ({ ...p, ...patch }))} errorFor={() => undefined} />
+        <FormQuestions questions={current.questions} answers={a} onChange={(patch) => setA((p) => ({ ...p, ...patch }))} errorFor={(q) => formatError(q, a[q.id])} />
       </FormCard>
     </OnboardingFrame>
   );

@@ -266,7 +266,7 @@ function DocumentsPanel({
                         {r.title}
                         {r.optional && <span className="rounded-full bg-subtle px-2 text-[11px] leading-[18px] font-medium text-fg-2">If applicable</span>}
                       </span>
-                      <span className="text-[12px] leading-[18px] font-medium text-fg-2">{r.description}</span>
+                      <span className="text-[12px] leading-[18px] font-medium text-fg-2">{r.summary ?? r.description}</span>
                     </span>
                   </li>
                 ))}

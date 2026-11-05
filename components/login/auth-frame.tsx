@@ -44,7 +44,7 @@ function BrandPanel() {
     <>
       {/* Desktop: sticky full-height panel. The artwork is scaled to two thirds of Figma's and pinned to the bottom, so it stays clear of the copy. */}
       <aside aria-label="Foren" className={cn("sticky top-0 hidden h-dvh w-[min(546px,38vw)] shrink-0 overflow-hidden px-10 pt-10 lg:block", PANEL_BG)}>
-        <Image src={asset("/login/foren-wordmark-light.svg")} alt="Foren" width={100} height={24} preload />
+        <Image src={asset("/login/foren-fka-leatherback-light.svg")} alt="Foren, formerly Leatherback" width={100} height={39} preload />
         <div className="relative z-10 mt-20 flex flex-col gap-4 text-[var(--color-foren-text-inverse)]">
           <p className="font-display text-[32px] leading-[56px] font-medium tracking-[-0.4px] [font-synthesis:none]">Global payments and accessibility on one platform.</p>
           <p className="text-[20px] leading-[36px] font-medium opacity-80">We offer global accounts, transfers, and infrastructure for people and businesses that don’t stop at borders.</p>
@@ -54,7 +54,7 @@ function BrandPanel() {
 
       {/* Phones and tablets: image banner. */}
       <div className={cn("relative h-[221px] overflow-hidden lg:hidden", PANEL_BG)}>
-        <Image src={asset("/login/foren-wordmark-light.svg")} alt="Foren" width={100} height={24} preload className="absolute top-10 left-10 z-10" />
+        <Image src={asset("/login/foren-fka-leatherback-light.svg")} alt="Foren, formerly Leatherback" width={100} height={39} preload className="absolute top-10 left-10 z-10" />
         <Image src={asset("/login/coin-artwork-banner.png")} alt="" width={621} height={621} sizes="621px" className="pointer-events-none absolute top-0 left-[52px] size-[621px] max-w-none select-none" />
       </div>
     </>

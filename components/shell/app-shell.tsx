@@ -1,8 +1,7 @@
 "use client";
 import * as React from "react";
+import { APP_SCROLL_ID } from "@/lib/scroll";
 import Link from "next/link";
-import Image from "next/image";
-import { asset } from "@/lib/base-path";
 import { usePathname, useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
 import { ArrowDownIcon, ArrowsLeftRightBoldIcon, CaretRightIcon, CaretUpDownIcon, ChartLineIcon, CoinIcon, CreditCardIcon, GearFineIcon, GearSixIcon, GlobeIcon, HouseIcon, KeyIcon, ListIcon, PaperPlaneTiltIcon, SparkleIcon, SquaresFourIcon, StarIcon, UserGearIcon, UsersThreeIcon, XIcon, LockIcon } from "@/components/icons";
@@ -43,6 +42,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
 function Shell({ children }: { children: React.ReactNode }) {
   const role = useStore((s) => s.role);
+  const workspaceName = useOnboarding((s) => (isOnboarding(s) && s.business?.name) || COMPANY.name);
   const now = useNow(5000);
   const [navOpen, setNavOpen] = React.useState(false);
   // The GitHub Pages build uses trailingSlash (/cards/new/); route checks below expect no trailing slash.
@@ -87,7 +87,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   const sidebar = <Sidebar pathname={pathname} onNavigate={() => setNavOpen(false)} />;
 
   return (
-    <div className="min-h-dvh bg-surface lg:pl-[230px]">
+    <div className="min-h-dvh bg-surface lg:h-dvh lg:overflow-hidden lg:pl-[230px]">
       {/* Desktop sidebar (Foren Business Banking "NEW IA") */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[230px] bg-surface lg:block">{sidebar}</aside>
 
@@ -114,17 +114,16 @@ function Shell({ children }: { children: React.ReactNode }) {
         </Dialog.Portal>
       </Dialog.Root>
 
-      {/* Content sits in an inset panel on the sunken background, like the Figma frames. */}
-      <div className="min-h-dvh bg-canvas lg:m-2 lg:min-h-[calc(100dvh-16px)] lg:rounded-[20px]">
+      {/* Content sits in an inset panel on the sunken background, like the Figma frames. On desktop the panel is one
+          screen tall and scrolls inside, so the white frame stays visible on every side, including the top. */}
+      <div id={APP_SCROLL_ID} className="min-h-dvh bg-canvas lg:m-2 lg:h-[calc(100dvh-16px)] lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:rounded-[20px] lg:[scrollbar-color:var(--color-line-2)_transparent] lg:[scrollbar-width:thin]">
         {/* Phone/tablet top bar (Figma responsive screens): workspace pill with an outlined Menu button. */}
         <header className="sticky top-0 z-20 bg-surface px-5 py-3 lg:hidden">
           <div className="flex items-center justify-between gap-3 rounded-[12px] bg-canvas py-1.5 pr-2.5 pl-3 shadow-[0_1px_1px_rgba(36,28,21,0.05)]">
             <div className="flex min-w-0 items-center gap-3">
-              <span className="grid size-8 shrink-0 place-items-center rounded-full bg-surface ring-1 ring-line">
-                <Image src={asset("/foren-logo.svg")} alt="" width={16} height={16} />
-              </span>
+              <BusinessMark name={workspaceName} size={32} />
               <div className="min-w-0">
-                <div className="truncate text-[14px] leading-[21px] font-medium text-fg">{COMPANY.name}</div>
+                <div className="truncate text-[14px] leading-[21px] font-medium text-fg">{workspaceName}</div>
                 <div className="truncate text-[12px] leading-[18px] text-fg-2">{ROLE_LABEL[role as keyof typeof ROLE_LABEL]}</div>
               </div>
             </div>
@@ -264,14 +263,33 @@ function Sidebar({ pathname, onNavigate }: { pathname: string; onNavigate: () =>
   );
 }
 
+/** The workspace's mark: the business's initials (no uploaded logo yet), not the Foren logo. */
+function BusinessMark({ name, size }: { name: string; size: number }) {
+  const initials =
+    name
+      .replace(/\b(ltd|limited|inc|plc|llc)\.?$/i, "")
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase())
+      .join("") || "F";
+  return (
+    <span
+      aria-hidden
+      style={{ width: size, height: size, fontSize: size * 0.42 }}
+      className="grid shrink-0 place-items-center rounded-full bg-[var(--color-foren-bg-button-primary)] leading-none font-semibold text-[var(--color-foren-text-inverse)]"
+    >
+      {initials}
+    </span>
+  );
+}
+
 function Workspace() {
   // While a sign-up is being activated, the workspace is the business that just signed up.
   const name = useOnboarding((s) => (isOnboarding(s) && s.business?.name) || COMPANY.name);
   return (
     <div className="flex h-10 items-center gap-3 rounded-[12px] bg-canvas pr-2.5 pl-3 shadow-[0_1px_1px_rgba(36,28,21,0.05)]">
-      <span className="grid size-5 shrink-0 place-items-center overflow-hidden rounded-full bg-surface ring-1 ring-line">
-        <Image src={asset("/foren-logo.svg")} alt="" width={12} height={12} />
-      </span>
+      <BusinessMark name={name} size={20} />
       <span className="min-w-0 flex-1 truncate text-[14px] font-medium tracking-[0.01em] text-fg-2">{name}</span>
       <CaretUpDownIcon className="size-4 shrink-0 text-fg-3" aria-hidden />
     </div>
@@ -391,7 +409,13 @@ function Breadcrumb({ pathname }: { pathname: string }) {
   } else {
     const page = PAGE_TITLES.find(([re]) => re.test(pathname));
     if (pathname.startsWith("/global-account")) crumbs.push({ label: "Global accounts" });
-    else if (pathname.startsWith("/get-started")) crumbs.push({ label: "Get started", href: pathname === "/get-started" ? undefined : "/get-started" }, ...(GET_STARTED[pathname] ? [{ label: GET_STARTED[pathname] }] : []));
+    else if (pathname.startsWith("/get-started")) {
+      crumbs.push({ label: "Get started", href: pathname === "/get-started" ? undefined : "/get-started" });
+      // Pages under Stakeholders (add/edit, declaration) keep Stakeholders as a link back.
+      const sub = GET_STARTED_SUB[pathname.replace(/\/$/, "")];
+      if (sub) crumbs.push({ label: "Stakeholders", href: "/get-started/stakeholders" }, { label: sub });
+      else if (GET_STARTED[pathname.replace(/\/$/, "")]) crumbs.push({ label: GET_STARTED[pathname.replace(/\/$/, "")] });
+    }
     else if (page && page[1] !== "Cards") crumbs.push({ label: "Cards", href: "/cards" }, { label: page[1] });
     else crumbs.push({ label: page?.[1] ?? "Cards" });
   }
@@ -428,6 +452,11 @@ const GET_STARTED: Record<string, string> = {
   "/get-started/verification": "Stakeholder verification",
   "/get-started/documents": "Business documents",
   "/get-started/questionnaire": "Questionnaire",
+};
+
+const GET_STARTED_SUB: Record<string, string> = {
+  "/get-started/stakeholders/edit": "Stakeholder details",
+  "/get-started/stakeholders/declaration": "Declaration",
 };
 
 const PAGE_TITLES: [RegExp, string][] = [
@@ -482,9 +511,9 @@ function UserBadge() {
 
 function ShellSkeleton() {
   return (
-    <div className="min-h-dvh bg-surface lg:pl-[230px]">
+    <div className="min-h-dvh bg-surface lg:h-dvh lg:overflow-hidden lg:pl-[230px]">
       <aside className="fixed inset-y-0 left-0 hidden w-[230px] bg-surface lg:block" />
-      <div className="min-h-dvh bg-canvas lg:m-2 lg:min-h-[calc(100dvh-16px)] lg:rounded-[20px]">
+      <div className="min-h-dvh bg-canvas lg:m-2 lg:h-[calc(100dvh-16px)] lg:min-h-0 lg:overflow-y-auto lg:rounded-[20px]">
         <main className="mx-auto max-w-[1195px] space-y-4 px-4 pt-20 sm:px-6 lg:px-10">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-4 w-80" />

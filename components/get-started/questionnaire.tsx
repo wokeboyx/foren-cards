@@ -4,13 +4,15 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { FormQuestions, answerError } from "@/components/onboarding/form-questions";
 import { ForenButton } from "@/components/ui/foren-button";
-import { bankingQuestionnaire, fusionQuestionnaire, unanswered, visible, type Answers, type Question, type QuestionGroup } from "@/domain/questionnaires";
-import { useOnboarding, useRequirementContext } from "@/lib/onboarding-store";
+import { asksBanking, formatError, questionnaireFor, unanswered, visible, withPrefills, type Answers, type Question, type QuestionGroup } from "@/domain/questionnaires";
+import { signUpData, useOnboarding, useRequirementContext } from "@/lib/onboarding-store";
+import { scrollPageTo } from "@/lib/scroll";
 import { cn } from "@/lib/utils";
 import { Note, SetupColumn, SetupHeader } from "./shared";
 
 /**
- * The onboarding questionnaire (domain/questionnaires.ts): business banking, Fusion API, or both.
+ * The onboarding questionnaire (domain/questionnaires.ts): business banking, Fusion API, or both, for this
+ * country, entity and business type. Answers sign-up already gave start filled in.
  * One topic per step with a progress bar, then a review of every answer before submitting
  * (patterns from Mercury's and Airwallex's business onboarding). Answers save as you type.
  */
@@ -26,20 +28,20 @@ export function QuestionnairePage() {
       </SetupColumn>
     );
 
-  const banking = ctx.entity !== "mto" && ctx.banking !== false;
-  const api = !!ctx.api;
-  const financialServices = ctx.entity === "mto" || s.profile?.sector === "Financial services";
-  const groups = [...(banking ? bankingQuestionnaire(ctx.country) : []), ...(api ? fusionQuestionnaire(financialServices) : [])];
+  const banking = asksBanking(ctx);
+  const groups = questionnaireFor(ctx, signUpData(s));
+  const answers = withPrefills(groups, s.questionnaire);
 
   return (
     <Steps
       groups={groups}
-      answers={s.questionnaire}
+      answers={answers}
       locked={s.questionnaireSubmitted}
       title={banking ? "Onboarding questionnaire" : "API onboarding"}
       onChange={(patch) => s.set({ questionnaire: { ...s.questionnaire, ...patch } })}
       onSubmit={() => {
-        s.set({ questionnaireSubmitted: true });
+        // Prefilled answers they kept are submitted with the rest.
+        s.set({ questionnaire: answers, questionnaireSubmitted: true });
         toast.success("Questionnaire submitted");
         router.push("/get-started");
       }}
@@ -75,14 +77,15 @@ function Steps({
 
   const go = (n: number) => {
     setStep(n);
-    window.scrollTo({ top: 0 });
+    scrollPageTo(0);
     // Move focus to the new step's heading so screen readers announce it.
     requestAnimationFrame(() => headingRef.current?.focus());
   };
 
   const group = shown[step];
   const missing = group ? unanswered([group], answers) : [];
-  const errorFor = (q: Question) => (tried.has(step) && missing.includes(q) ? answerError(q) : undefined);
+  // Shown once they try to continue: a malformed answer (such as a website) says what's wrong with it.
+  const errorFor = (q: Question) => (tried.has(step) && missing.includes(q) ? (formatError(q, answers[q.id]) ?? answerError(q)) : undefined);
 
   const next = () => {
     if (missing.length) {

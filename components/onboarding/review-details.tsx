@@ -76,7 +76,6 @@ export function ReviewDetails() {
             items={[
               { label: "Annual turnover", value: `${countryInfo(s.country)?.currency} ${p.turnover}` },
               { label: "Sector", value: `${p.sector} · ${p.category}` },
-              { label: "Website", value: p.website },
               { label: "Trading", value: p.notTrading ? "Not trading yet" : "Trading" },
             ]}
           />

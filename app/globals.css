@@ -29,7 +29,8 @@
   --color-foren-error-hover: #a51e1e;
   --color-foren-info: #4f46e5;
   --color-foren-bg-button-primary: #1e1711;
-  --color-foren-bg-button-primary-hover: #17120d;
+  /* DS says #17120d, which is indistinguishable from #1e1711; lightened so hover is visible (product request). */
+  --color-foren-bg-button-primary-hover: #3a322b;
   --color-foren-bg-button-primary-pressed: #100c09;
   --color-foren-bg-button-secondary: #f2f2f2;
   --color-foren-bg-button-secondary-hover: #e3e3e3;
@@ -90,7 +91,7 @@
   --color-foren-error-hover: #f06a67;
   --color-foren-info: #8b80f7;
   --color-foren-bg-button-primary: #f0ece6;
-  --color-foren-bg-button-primary-hover: #e0dbd5;
+  --color-foren-bg-button-primary-hover: #d2ccc5;
   --color-foren-bg-button-primary-pressed: #cfc9c1;
   --color-foren-bg-button-secondary: #2a2624;
   --color-foren-bg-button-secondary-hover: #3a3633;

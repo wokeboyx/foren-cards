@@ -57,11 +57,11 @@ function Banner() {
     <div className="relative mb-8 aspect-[470/257] w-full overflow-hidden rounded-[28px]">
       <Image src={asset("/onboarding/setup-banner.png")} alt="" fill priority sizes="(min-width: 640px) 470px, 100vw" className="object-cover" />
       <Image
-        src={asset("/onboarding/foren-wordmark.svg")}
-        alt="Foren"
+        src={asset("/login/foren-fka-leatherback-light.svg")}
+        alt="Foren, formerly Leatherback"
         width={100}
-        height={24}
-        className="absolute top-[13.2%] left-1/2 h-auto w-[28.5%] -translate-x-1/2 brightness-0 invert"
+        height={39}
+        className="absolute top-[11%] left-1/2 h-auto w-[28.5%] -translate-x-1/2"
       />
     </div>
   );

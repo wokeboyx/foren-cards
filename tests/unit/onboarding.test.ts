@@ -20,7 +20,22 @@ import {
   type EntityType,
   type RequirementContext,
 } from "@/domain/onboarding";
-import { MTO_QUESTIONNAIRE, unanswered } from "@/domain/questionnaires";
+import {
+  MTO_QUESTIONNAIRE,
+  bankingForm,
+  bankingQuestionnaire,
+  businessKind,
+  fusionQuestionnaire,
+  mtoQuestionnaire,
+  prefillAnswers,
+  questionnaireFor,
+  unanswered,
+  visible,
+  withPrefills,
+  type Answers,
+  type QuestionGroup,
+  type SignUpData,
+} from "@/domain/questionnaires";
 
 const reqs = (ctx: RequirementContext) => requirementsFor(ctx);
 const ids = (ctx: RequirementContext) => reqs(ctx).map((r) => r.id);
@@ -270,6 +285,146 @@ describe("MTO questionnaire", () => {
     expect(missing({ hasWebsite: "No", hasApp: "No" })).not.toContain("website");
     expect(missing({ hasWebsite: "No", hasApp: "No" })).not.toContain("app");
     expect(missing({ hasWebsite: "Yes", hasApp: "Yes" })).toEqual(expect.arrayContaining(["website", "app"]));
+  });
+});
+
+describe("onboarding questionnaires", () => {
+  const qids = (groups: QuestionGroup[], a: Answers = {}) => visible(groups, a).flatMap((g) => g.questions.map((q) => q.id));
+  const all = (groups: QuestionGroup[]) => groups.flatMap((g) => g.questions);
+  const q = (groups: QuestionGroup[], id: string) => all(groups).find((x) => x.id === id);
+  const KNOWN: SignUpData = { sector: "Healthcare", sectorCategory: "Pharmacy and drugs", useCases: ["global_accounts", "payouts"], kraPin: "A012345678Z" };
+  const NG_CO: RequirementContext = { country: "NG", entity: "company", category: "private", banking: true };
+
+  // Question sets from "Onboarding Questionnaire" (NGA, COR and Kenya forms), plus the in-app outflow question.
+  const NGA = ["volume", "outflow", "frequency", "nature", "hasWebsite", "use", "nin", "bvn"];
+  const COR = ["volume", "outflow", "frequency", "nature", "hasWebsite", "use", "vat"];
+
+  it("uses the form for each country and business type", () => {
+    expect(bankingForm({ country: "NG", entity: "sole_trader" })).toBe("NGA sole trader");
+    expect(bankingForm({ country: "NG", entity: "company" })).toBe("NGA companies");
+    expect(bankingForm({ country: "GB", entity: "sole_trader" })).toBe("COR UK and Canada sole trader");
+    expect(bankingForm({ country: "CA", entity: "company" })).toBe("COR UK and Canada companies");
+    expect(bankingForm({ country: "KE", entity: "sole_trader" })).toBe("COR Kenya non-financial institution");
+  });
+
+  it("asks each business type its country's questions", () => {
+    for (const ctx of ALL.filter((c) => c.entity !== "mto")) {
+      const ids = qids(bankingQuestionnaire(ctx));
+      expect(ids, `${ctx.country} ${ctx.entity} ${ctx.category}`).toEqual(ctx.country === "NG" ? NGA : COR);
+    }
+  });
+
+  it("knows who the questions are about", () => {
+    expect(businessKind({ country: "NG", entity: "sole_trader", category: "sole_proprietor" })).toBe("sole_proprietor");
+    expect(businessKind({ country: "NG", entity: "sole_trader", category: "partnership" })).toBe("partnership");
+    expect(businessKind({ country: "KE", entity: "sole_trader", category: "partnership" })).toBe("partnership");
+    expect(businessKind({ country: "NG", entity: "company", category: "private" })).toBe("company");
+    expect(businessKind({ country: "NG", entity: "company", category: "trustees" })).toBe("organisation");
+    expect(businessKind({ country: "GB", entity: "sole_trader" })).toBe("sole_proprietor");
+    expect(businessKind({ country: "CA", entity: "company" })).toBe("company");
+  });
+
+  it("asks a sole trader about themselves and nothing about directors, boards or shareholders", () => {
+    for (const ctx of ALL.filter((c) => c.entity === "sole_trader" && c.category !== "partnership")) {
+      const text = JSON.stringify(bankingQuestionnaire(ctx).map((g) => [g.title, g.intro, g.questions.map((x) => [x.label, x.description, x.example])]));
+      expect(text, `${ctx.country}`).not.toMatch(/director|board|shareholder|partner/i);
+    }
+    expect(bankingQuestionnaire({ country: "NG", entity: "sole_trader", category: "sole_proprietor" }).find((g) => g.key === "banking_tax")?.intro).toMatch(/owner of the business/);
+    expect(bankingQuestionnaire({ country: "NG", entity: "sole_trader", category: "partnership" }).find((g) => g.key === "banking_tax")?.intro).toMatch(/partner opening/);
+    expect(bankingQuestionnaire(NG_CO).find((g) => g.key === "banking_tax")?.intro).toMatch(/opening the account for the business/);
+  });
+
+  it("gives organisations examples that fit them", () => {
+    const groups = bankingQuestionnaire({ country: "NG", entity: "company", category: "trustees" });
+    expect(groups.find((g) => g.key === "banking_business")?.title).toBe("About your organisation");
+    expect(q(groups, "use")?.example).toMatch(/donations/);
+  });
+
+  it("follows each form on what's required", () => {
+    const ng = bankingQuestionnaire(NG_CO);
+    const gb = bankingQuestionnaire({ country: "GB", entity: "company" });
+    expect(q(ng, "nature")?.optional).toBe(true);
+    expect(q(gb, "nature")?.optional).toBeFalsy();
+    // "If no, provide a business social media link": required on NGA, optional on COR.
+    expect(unanswered(ng, { hasWebsite: "No" }).map((x) => x.id)).toContain("social");
+    expect(unanswered(gb, { hasWebsite: "No" }).map((x) => x.id)).not.toContain("social");
+  });
+
+  it("keeps NIN and BVN for Nigeria, VAT elsewhere and GST/HST for Canada", () => {
+    expect(qids(bankingQuestionnaire({ country: "NG", entity: "sole_trader", category: "sole_proprietor" }))).toEqual(expect.arrayContaining(["nin", "bvn"]));
+    expect(q(bankingQuestionnaire({ country: "CA", entity: "company" }), "vat")?.label).toMatch(/GST\/HST/);
+    expect(q(bankingQuestionnaire({ country: "CA", entity: "company" }), "vatNumber")?.label).toBe("GST/HST number");
+    expect(q(bankingQuestionnaire({ country: "GB", entity: "sole_trader" }), "vat")?.label).toBe("Are you VAT registered?");
+  });
+
+  it("doesn't ask again what sign-up collected", () => {
+    const signUp = /business name|registered name|registration number|incorporat|address|turnover|sector|which (foren )?products/i;
+    for (const ctx of ALL.filter((c) => c.entity !== "mto")) for (const x of all(bankingQuestionnaire(ctx, KNOWN))) expect(x.label).not.toMatch(signUp);
+    for (const x of all(mtoQuestionnaire(KNOWN))) expect(x.label).not.toMatch(signUp);
+    // Purpose of the account, not a product picker: the products they chose are acknowledged, not asked for.
+    const use = q(bankingQuestionnaire(NG_CO, KNOWN), "use")!;
+    expect(use.label).toBe("What will you use the account for?");
+    expect(use.type).toBe("long");
+    expect(use.description).toMatch(/Global Accounts, Global Payouts/);
+    expect(q(bankingQuestionnaire(NG_CO, KNOWN), "nature")?.description).toMatch(/Healthcare \(Pharmacy and drugs\)/);
+  });
+
+  it("asks for the website on its own, and checks it", () => {
+    const groups = bankingQuestionnaire({ country: "GB", entity: "company" });
+    expect(unanswered(groups, { hasWebsite: "Yes" }).map((x) => x.id)).toContain("website");
+    expect(unanswered(groups, { hasWebsite: "Yes", website: "not a link" }).map((x) => x.id)).toContain("website");
+    expect(unanswered(groups, { hasWebsite: "Yes", website: "karayapharma.com" }).map((x) => x.id)).not.toContain("website");
+    expect(unanswered(groups, { hasWebsite: "Yes", website: "https://karayapharma.com/shop" }).map((x) => x.id)).not.toContain("website");
+    expect(unanswered(MTO_QUESTIONNAIRE, { hasWebsite: "Yes", website: "nope" }).map((x) => x.id)).toContain("website");
+  });
+
+  it("prefills a website saved on the old profile step", () => {
+    const groups = bankingQuestionnaire(NG_CO, { website: "https://karayapharma.com" });
+    expect(prefillAnswers(groups)).toEqual({ hasWebsite: "Yes", website: "https://karayapharma.com" });
+    expect(q(groups, "website")?.description).toMatch(/from your sign-up/);
+    // A prefilled answer they cleared stays cleared.
+    expect(withPrefills(groups, { website: "" }).website).toBe("");
+    expect(prefillAnswers(mtoQuestionnaire({ website: "https://remit.example" }))).toEqual({ hasWebsite: "Yes", website: "https://remit.example" });
+  });
+
+  it("prefills a Kenyan sole proprietor's VAT number with their KRA PIN, and no one else's", () => {
+    expect(prefillAnswers(bankingQuestionnaire({ country: "KE", entity: "sole_trader", category: "sole_proprietor" }, KNOWN))).toEqual({ vatNumber: "A012345678Z" });
+    expect(prefillAnswers(bankingQuestionnaire({ country: "KE", entity: "sole_trader", category: "partnership" }, KNOWN))).toEqual({});
+    expect(prefillAnswers(bankingQuestionnaire({ country: "KE", entity: "company", category: "limited" }, KNOWN))).toEqual({});
+  });
+
+  it("asks API-only customers the Fusion forms, with their own website question", () => {
+    const ctx: RequirementContext = { country: "GB", entity: "company", api: true, banking: false };
+    const groups = questionnaireFor(ctx, KNOWN);
+    expect(groups.map((g) => g.key)).toEqual(["api", "collections", "payouts"]);
+    expect(qids(groups)).toEqual(expect.arrayContaining(["apiNature", "apiWebsite", "apiProductsOffered"]));
+    expect(qids(groups)).not.toContain("apiSars");
+    expect(qids(questionnaireFor({ ...ctx, financialServices: true }))).toContain("apiSars");
+  });
+
+  it("asks the shared questions once when a customer gets both questionnaires", () => {
+    const ids = all(questionnaireFor({ ...NG_CO, api: true, banking: true }, KNOWN)).map((x) => x.id);
+    expect(ids).toContain("nature");
+    expect(ids).toContain("website");
+    expect(ids).not.toContain("apiNature");
+    expect(ids).not.toContain("apiProductsOffered");
+    expect(ids).not.toContain("apiWebsite");
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("fills an MTO's API forms from its sign-up questionnaire", () => {
+    const edd = { nature: "Remittances UK to Nigeria", website: "https://remit.example", uboWealth: "Salary and business sale", sars: "None" };
+    const groups = fusionQuestionnaire({ country: "GB", entity: "mto", api: true }, { edd });
+    expect(prefillAnswers(groups)).toEqual({ apiNature: edd.nature, apiWebsite: edd.website, apiUboWealth: edd.uboWealth, apiSars: edd.sars });
+    expect(questionnaireFor({ country: "GB", entity: "mto", api: true, banking: true }).map((g) => g.key)).toEqual(["api", "collections", "payouts"]);
+  });
+
+  it("keeps the MTO form's questions, with the account's purpose apart from the products picked", () => {
+    const groups = mtoQuestionnaire(KNOWN);
+    expect(all(groups).map((x) => x.id)).toEqual(all(MTO_QUESTIONNAIRE).map((x) => x.id));
+    expect(all(groups)).toHaveLength(34);
+    expect(q(groups, "purpose")?.description).toMatch(/Global Accounts, Global Payouts/);
+    expect(q(groups, "products")?.description).toMatch(/your own customers/);
   });
 });
 

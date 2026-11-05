@@ -9,12 +9,14 @@ import { toast } from "sonner";
 import { ConfirmDialog, Modal } from "@/components/overlay";
 import { ForenButton } from "@/components/ui/foren-button";
 import { ForenCheckbox } from "@/components/ui/foren-checkbox";
+import { ForenBadge } from "@/components/ui/foren-badge";
 import { LinkButton } from "@/components/link-button";
 import { formatDate } from "@/components/onboarding/shared";
-import { controlLabel, countryInfo, hasStakeholders, minDirectors, nationalityName, sumPct, uboThreshold } from "@/domain/onboarding";
+import { countryInfo, hasStakeholders, sumPct, uboThreshold } from "@/domain/onboarding";
 import { asset } from "@/lib/base-path";
-import { effectiveOwnership, peopleOf, registryStakeholders, ubosOf, useOnboarding, type Stakeholder } from "@/lib/onboarding-store";
+import { effectiveOwnership, peopleOf, registryStakeholders, useOnboarding, type Stakeholder } from "@/lib/onboarding-store";
 import { cn } from "@/lib/utils";
+import { DECLARATION_HREF, stakeholderProblems, type Problem } from "./declaration";
 import { stakeholderHref } from "./stakeholder-form";
 import { GroupLabel, Note, PersonAvatar, SetupColumn, SetupHeader, cardCls, fullName, roleLine, rowButtonCls, verificationLink } from "./shared";
 
@@ -42,6 +44,8 @@ export function StakeholdersPage() {
       </SetupColumn>
     );
 
+  // Once the declaration is confirmed the list is locked, so this page becomes the "Invitations sent" screen.
+  if (s.stakeholdersSubmitted) return <InvitationsSent />;
   if (!started && s.stakeholders.length === 0)
     return (
       <Intro
@@ -114,73 +118,28 @@ function Controllers() {
   const country = s.country!;
   const entity = s.entity!;
   const threshold = uboThreshold(country, entity, s.category)!;
-  const needDirectors = minDirectors(entity);
   const registry = countryInfo(country)?.registry ?? "registry";
 
   const [removing, setRemoving] = React.useState<Stakeholder | null>(null);
-  const [sent, setSent] = React.useState(false);
   const [tried, setTried] = React.useState(false);
-  const [declaring, setDeclaring] = React.useState(false);
-  const [viewing, setViewing] = React.useState(false);
 
   const all = s.stakeholders;
   const people = peopleOf(all);
   const top = all.filter((p) => !p.parentId);
   const fromRegistry = top.filter((p) => p.source === "registry");
   const added = top.filter((p) => p.source === "added");
-  const companies = all.filter((p) => p.kind === "company");
-  const ubos = ubosOf(all, threshold);
-  const controllers = people.filter((p) => p.controller);
   const total = sumPct(top.filter((p) => p.shareholder || p.kind === "company").map((p) => p.ownership));
-  const directors = people.filter((p) => p.director).length;
-  const signatories = people.filter((p) => p.signatory).length;
   const missingOwnership = all.filter((p) => (p.shareholder || p.kind === "company" || p.parentId) && !p.ownership);
   const kra = country === "KE";
-  const missingNationality = people.filter((p) => !p.nationality);
-  const missingKra = kra ? people.filter((p) => !p.kraPin) : [];
-  const missingControl = people.filter((p) => (ubos.includes(p) || p.controller) && !p.control.length);
-  const locked = s.stakeholdersSubmitted;
+  const problems = stakeholderProblems(s);
 
-  // Each problem has a short title and an explanation, shown in the Figma "Error Stakeholder" dialog.
-  const problems: Problem[] = [];
-  const add = (title: string, body: string) => problems.push({ title, body });
-  if (people.length === 0) add("No stakeholders added", "Add at least one person.");
-  if (directors < needDirectors) add("Not enough directors", `Add at least ${needDirectors} directors. You have ${directors}.`);
-  if (people.length && signatories === 0) add("No authorised signatory", "Add at least one authorised signatory.");
-  if (missingOwnership.length) add("Ownership percentage missing", `Set an ownership percentage for ${missingOwnership.map(fullName).join(" and ")}.`);
-  if (missingNationality.length) add("Nationality missing", `Add the nationality for ${missingNationality.map(fullName).join(" and ")}.`);
-  if (missingKra.length) add("KRA PIN missing", `Add the KRA PIN for ${missingKra.map(fullName).join(" and ")}.`);
-  if (missingControl.length) add("Nature of control missing", `Add the nature of control for ${missingControl.map(fullName).join(" and ")}.`);
-  if (total > 100) add(`Total ownership is ${total}%`, `Current allocated total is ${total}%. Adjust shareholder percentages so it’s no more than 100%.`);
-  for (const c of companies) {
-    const owners = all.filter((p) => p.parentId === c.id);
-    const held = sumPct(owners.map((p) => p.ownership));
-    if (c.ownership >= threshold && owners.length === 0) add("Company owners missing", `Add the people who own ${fullName(c)}.`);
-    if (held > 100) add(`Owners of ${fullName(c)} add up to ${held}%`, "Adjust their percentages so they’re no more than 100%.");
-  }
-  if (people.length && !ubos.length && !s.noMajorOwner)
-    add(`No individual owns ${threshold}% or more`, "Tick “No individual owns " + threshold + "% or more” and add the person with significant control.");
-  if (s.noMajorOwner && ubos.length) add(`Someone owns ${threshold}% or more`, `${ubos.map(fullName).join(" and ")} own ${threshold}% or more. Untick “No individual owns ${threshold}% or more”.`);
-  if (s.noMajorOwner && !ubos.length && !controllers.length) add("Significant control missing", "Add the person with significant control, and tick “Has significant control” for them.");
-
-  // Checks first, then the declaration, built from this list. Confirming it sends the invitations.
+  // Checks first, then the declaration page, built from this list. Confirming it there sends the invitations.
   const review = () => {
     setTried(true);
     if (problems.length) return;
-    setDeclaring(true);
+    router.push(DECLARATION_HREF);
   };
   const showProblems = tried && problems.length > 0;
-  const confirm = () => {
-    const now = new Date().toISOString();
-    setDeclaring(false);
-    s.set({
-      stakeholdersSubmitted: true,
-      declaration: { confirmedAt: now, name: `${s.firstName} ${s.lastName}`.trim(), email: s.email, position: s.position, phone: s.phone },
-      invitesSentAt: now,
-      stakeholders: all.map((p) => (p.kind === "company" || p.status === "verified" || p.status === "rejected" ? p : { ...p, status: "pending" as const })),
-    });
-    setSent(true);
-  };
 
   const list = (items: Stakeholder[]) => (
     <PeopleList
@@ -188,7 +147,6 @@ function Controllers() {
       all={all}
       threshold={threshold}
       kra={kra}
-      locked={locked}
       onRemove={setRemoving}
     />
   );
@@ -205,29 +163,10 @@ function Controllers() {
         }
       />
 
-      {!locked && (
-        <div className="mb-6 flex flex-col sm:flex-row sm:gap-3">
-          <AddButton href={stakeholderHref({ kind: "person" })}>Add a person</AddButton>
-          <AddButton href={stakeholderHref({ kind: "company" })}>Add a company that owns shares</AddButton>
-        </div>
-      )}
-      {locked && (
-        <Note intent="success" className="mb-8" title="Declaration confirmed and invitations sent">
-          {s.declaration && (
-            <>
-              {s.declaration.name} confirmed the declaration on {formatDate(s.declaration.confirmedAt)}.{" "}
-              <button type="button" onClick={() => setViewing(true)} className="font-semibold underline underline-offset-2 outline-none focus-visible:ring-2 focus-visible:ring-focus">
-                View declaration
-              </button>
-              <br />
-            </>
-          )}
-          You can follow each person’s progress on the verification page.{" "}
-          <LinkButton href="/get-started/verification" variant="link" size="xs" className="text-success underline">
-            View verification
-          </LinkButton>
-        </Note>
-      )}
+      <div className="mb-6 flex flex-col sm:flex-row sm:gap-3">
+        <AddButton href={stakeholderHref({ kind: "person" })}>Add a person</AddButton>
+        <AddButton href={stakeholderHref({ kind: "company" })}>Add a company that owns shares</AddButton>
+      </div>
 
       {added.length > 0 && (
         <section className="mb-6">
@@ -262,7 +201,6 @@ function Controllers() {
         <div className={cn(cardCls, "mb-3 rounded-[20px]")}>
           <ForenCheckbox
             checked={s.noMajorOwner}
-            disabled={locked}
             onCheckedChange={(c) => s.set({ noMajorOwner: c === true })}
             label={`No individual owns ${threshold}% or more`}
             description="Then add the person with significant management control, such as the CEO or managing director, and tick “Has significant control” for them."
@@ -270,18 +208,14 @@ function Controllers() {
         </div>
       )}
 
-      {!locked && (
-        <>
-          <Note intent="info" className="mb-10">
-            Each person gets a unique link to verify their ID, upload proof of address and take a liveness check. Links expire in 72 hours, so ask them to
-            finish before then. Companies don’t get a link: their owners do.
-          </Note>
-          <ForenButton size="md" className="w-full" onClick={review}>
-            Review declaration
-          </ForenButton>
-          <ProblemsDialog open={showProblems} problems={problems} onClose={() => setTried(false)} />
-        </>
-      )}
+      <Note intent="info" className="mb-10">
+        Each person gets a unique link to verify their ID, upload proof of address and take a liveness check. Links expire in 72 hours, so ask them to finish
+        before then. Companies don’t get a link: their owners do.
+      </Note>
+      <ForenButton size="md" className="w-full" onClick={review}>
+        Review declaration
+      </ForenButton>
+      <ProblemsDialog open={showProblems} problems={problems} onClose={() => setTried(false)} />
 
       <ConfirmDialog
         open={!!removing}
@@ -302,26 +236,6 @@ function Controllers() {
         }}
       />
 
-      {(declaring || viewing) && (
-        <DeclarationDialog
-          threshold={threshold}
-          readOnly={viewing}
-          onClose={() => {
-            setDeclaring(false);
-            setViewing(false);
-          }}
-          onConfirm={confirm}
-        />
-      )}
-
-      <SentDialog
-        open={sent}
-        people={peopleOf(s.stakeholders)}
-        onDone={() => {
-          setSent(false);
-          router.push("/get-started");
-        }}
-      />
     </SetupColumn>
   );
 }
@@ -340,8 +254,6 @@ function AddButton({ href, children }: { href: string; children: React.ReactNode
     </Link>
   );
 }
-
-type Problem = { title: string; body: string };
 
 /** Figma "Error Stakeholder": a red X, the problem and an Okay button. Several problems are listed together. */
 function ProblemsDialog({ open, problems, onClose }: { open: boolean; problems: Problem[]; onClose: () => void }) {
@@ -394,7 +306,6 @@ function PeopleList({
   all,
   threshold,
   kra,
-  locked,
   onRemove,
 }: {
   items: Stakeholder[];
@@ -402,7 +313,6 @@ function PeopleList({
   threshold: number;
   /** Kenya: everyone needs a KRA PIN. */
   kra: boolean;
-  locked: boolean;
   onRemove: (p: Stakeholder) => void;
 }) {
   const row = (p: Stakeholder, nested: boolean) => {
@@ -431,7 +341,7 @@ function PeopleList({
             <p className="text-[12px] leading-[18px] font-medium tracking-[0.01em] text-fg-2">{line}</p>
           )}
         </div>
-        {!locked && <RowMenu person={p} onRemove={() => onRemove(p)} />}
+        <RowMenu person={p} onRemove={() => onRemove(p)} />
       </div>
     );
   };
@@ -447,15 +357,13 @@ function PeopleList({
                 .map((o) => (
                   <React.Fragment key={o.id}>{row(o, true)}</React.Fragment>
                 ))}
-              {!locked && (
-                <Link
-                  href={stakeholderHref({ kind: "person", parent: p.id })}
-                  className="ml-6 flex h-10 w-fit items-center gap-2 rounded-[12px] px-2 text-[13px] font-medium text-fg outline-none hover:bg-surface focus-visible:ring-2 focus-visible:ring-focus sm:ml-10"
-                >
-                  <PlusIcon className="size-4 text-fg-2" aria-hidden />
-                  Add a person who owns {fullName(p)}
-                </Link>
-              )}
+              <Link
+                href={stakeholderHref({ kind: "person", parent: p.id })}
+                className="ml-6 flex h-10 w-fit items-center gap-2 rounded-[12px] px-2 text-[13px] font-medium text-fg outline-none hover:bg-surface focus-visible:ring-2 focus-visible:ring-focus sm:ml-10"
+              >
+                <PlusIcon className="size-4 text-fg-2" aria-hidden />
+                Add a person who owns {fullName(p)}
+              </Link>
             </>
           )}
         </li>
@@ -506,210 +414,119 @@ function RowMenu({ person, onRemove }: { person: Stakeholder; onRemove: () => vo
   );
 }
 
-/** Figma dialog titles are Megafield 20/30; the shared Modal title is Inter, so set it here. */
-function DialogTitle({ children }: { children: React.ReactNode }) {
-  return <span className="font-display text-[20px] leading-[30px] font-semibold tracking-[-0.015em] [font-synthesis:none]">{children}</span>;
-}
-
 /**
- * The Director and UBO self-declaration, digital only. Sections 1–4 are filled in from sign-up and the
- * stakeholder list; Section 5 is the form's statement, confirmed with a tick instead of a signature.
+ * After the declaration is confirmed: a full-page success state in place of the old "Verification emails sent"
+ * dialog (Figma "Email sent") and the confirmation card. It leads with the envelope and who confirmed it,
+ * says what happens next, lists who was emailed (with their link to share privately) and offers the next moves.
+ * The editable list isn't shown: it's locked now, and the full structure lives on the declaration page.
  */
-function DeclarationDialog({
-  threshold,
-  readOnly,
-  onClose,
-  onConfirm,
-}: {
-  threshold: number;
-  readOnly: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-}) {
+function InvitationsSent() {
   const s = useOnboarding();
-  const [agreed, setAgreed] = React.useState(false);
-  const [tried, setTried] = React.useState(false);
-  const all = s.stakeholders;
-  const people = peopleOf(all);
-  const ubos = ubosOf(all, threshold);
-  const controllers = people.filter((p) => p.controller && !ubos.includes(p));
-  const companies = all.filter((p) => p.kind === "company");
-  const directors = people.filter((p) => p.director);
-  const signatories = people.filter((p) => p.signatory);
-  const b = s.business;
-  const by =
-    readOnly && s.declaration
-      ? s.declaration
-      : { name: `${s.firstName} ${s.lastName}`.trim(), email: s.email, position: s.position, phone: s.phone, confirmedAt: new Date().toISOString() };
-  const personLine = (p: Stakeholder) =>
-    [nationalityName(p.nationality), p.kraPin && `KRA PIN ${p.kraPin}`, controlLabel(p.control, p.controlOther)].filter(Boolean).join(" · ");
+  const people = peopleOf(s.stakeholders);
+  const done = people.length > 0 && people.every((p) => p.status === "verified");
+  const by = s.declaration;
+  const confirmed = by ? `${by.name} confirmed the declaration on ${formatDate(by.confirmedAt)}.` : "The declaration is confirmed.";
 
   return (
-    <Modal
-      open
-      onOpenChange={(o) => !o && onClose()}
-      title={<DialogTitle>Director and UBO declaration</DialogTitle>}
-      description={readOnly ? undefined : "We filled this in from your details. Check it, then confirm it on behalf of the business."}
-      className="sm:max-w-[560px] sm:rounded-[32px]"
-    >
-      <div className="flex flex-col gap-6">
-        <DeclSection title="Company information">
-          <DeclRow primary={b?.name ?? ""} secondary={[b?.regType && b.regNumber ? `${b.regType}-${b.regNumber}` : b?.regNumber, countryInfo(s.country)?.name].filter(Boolean).join(" · ")} />
-        </DeclSection>
-        <DeclSection title={`Beneficial owners (${threshold}% or more)`}>
-          {ubos.length ? (
-            ubos.map((p) => {
-              const via = all.find((x) => x.id === p.parentId);
-              return (
-                <DeclRow
-                  key={p.id}
-                  primary={`${fullName(p)} · ${effectiveOwnership(p, all)}%${via ? ` through ${fullName(via)}` : ""}`}
-                  secondary={personLine(p)}
-                />
-              );
-            })
+    <SetupColumn>
+      <SetupHeader
+        back="/get-started"
+        center
+        media={<Image src={asset("/onboarding/envelope.png")} alt="" width={150} height={150} priority className="size-[120px] sm:size-[150px]" />}
+        title={done ? "Everyone’s verified" : "Invitations sent"}
+        description={
+          done ? (
+            <>
+              {confirmed} All {people.length} stakeholders have verified their identity.
+            </>
           ) : (
-            <p className="text-[13px] leading-[19px] font-medium text-fg-2">No individual owns {threshold}% or more.</p>
-          )}
-        </DeclSection>
-        {controllers.length > 0 && (
-          <DeclSection title="Significant management control">
-            {controllers.map((p) => (
-              <DeclRow key={p.id} primary={`${fullName(p)} · ${p.position}`} secondary={personLine(p)} />
-            ))}
-          </DeclSection>
-        )}
-        {companies.length > 0 && (
-          <DeclSection title="Companies that own shares">
-            {companies.map((c) => (
-              <DeclRow key={c.id} primary={`${fullName(c)} · ${c.ownership}%`} secondary={[c.regNumber, nationalityName(c.regCountry)].filter(Boolean).join(" · ")} />
-            ))}
-          </DeclSection>
-        )}
-        <DeclSection title="Directors">
-          {directors.map((p) => (
-            <DeclRow key={p.id} primary={fullName(p)} secondary={`${p.position} · ${p.email}`} />
-          ))}
-        </DeclSection>
-        <DeclSection title="Authorised signatories">
-          {signatories.map((p) => (
-            <DeclRow key={p.id} primary={fullName(p)} secondary={`${p.position} · ${p.email}`} />
-          ))}
-        </DeclSection>
-        <DeclSection title="Statement of accuracy and compliance">
-          <div className="flex flex-col gap-2 rounded-[12px] bg-subtle px-3 py-3 text-[13px] leading-[19px] font-medium text-fg-2">
-            <p>
-              I hereby declare that the information provided above is accurate, complete, and up-to-date to the best of my knowledge. I understand that failure to
-              disclose accurate Director and UBO details may result in regulatory and/or operational consequences.
-            </p>
-            <p>
-              Furthermore, I confirm that the Company complies with all applicable Anti-Money Laundering (AML) and Counter-Terrorist Financing (CTF) regulations.
-              Any changes to the UBO structure will be communicated to Foren promptly.
-            </p>
-          </div>
-        </DeclSection>
-        <DeclSection title="Authorised representative">
-          <DeclRow
-            primary={[by.name, by.position].filter(Boolean).join(" · ")}
-            secondary={[by.email, by.phone, formatDate(by.confirmedAt)].filter(Boolean).join(" · ")}
-          />
-        </DeclSection>
+            <>
+              {confirmed} We’ve emailed {people.length === 1 ? "1 person" : `${people.length} people`} a link to verify their identity.
+            </>
+          )
+        }
+      />
 
-        {readOnly ? (
-          <Note intent="success">
-            Confirmed by {by.name} on {formatDate(by.confirmedAt)}.
-          </Note>
-        ) : (
-          <>
-            <div>
-              <ForenCheckbox
-                checked={agreed}
-                onCheckedChange={(c) => setAgreed(c === true)}
-                label={`I confirm this declaration on behalf of ${b?.name ?? "the business"}`}
-                description="Ticking this box takes the place of a signature."
-              />
-              {tried && !agreed && (
-                <p role="alert" className="mt-2 pl-8 text-[12px] leading-[18px] font-medium text-error">
-                  Tick the box to confirm the declaration
+      {!done && (
+        <section aria-labelledby="next-steps" className="mb-6 rounded-[20px] border-[0.7px] border-line bg-surface px-4 py-5 sm:px-5">
+          <h2 id="next-steps" className="mb-4 text-[14px] leading-[21px] font-semibold tracking-[0.0125em] text-fg">
+            What happens next
+          </h2>
+          <ol className="flex flex-col gap-4">
+            {NEXT_STEPS.map((step, i) => (
+              <li key={step.title} className="flex gap-3">
+                <span
+                  aria-hidden
+                  className="grid size-6 shrink-0 place-items-center rounded-full bg-subtle text-[12px] leading-none font-semibold text-fg tabular-nums"
+                >
+                  {i + 1}
+                </span>
+                <div className="flex min-w-0 flex-col gap-0.5">
+                  <p className="text-[14px] leading-[21px] font-medium tracking-[0.01em] text-fg">{step.title}</p>
+                  <p className="text-[12px] leading-[18px] font-medium tracking-[0.01em] text-fg-2">{step.body}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
+      <section aria-labelledby="emailed" className="mb-8">
+        <GroupLabel>
+          <span id="emailed">Emailed ({people.length})</span>
+        </GroupLabel>
+        <ul className="flex flex-col gap-3">
+          {people.map((p) => (
+            <li key={p.id} className={cn(cardCls, "flex flex-wrap items-center gap-3")}>
+              <PersonAvatar person={p} />
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <p className="flex flex-wrap items-center gap-1 text-[14px] leading-[21px] font-semibold tracking-[0.0125em] text-fg">
+                  <span className="truncate">{fullName(p)}</span>
+                  <StatusBadge status={p.status} />
                 </p>
-              )}
-            </div>
-            <div className="-mx-6 grid grid-cols-2 gap-3 border-t border-line px-6 pt-4">
-              <ForenButton type="button" variant="outline" size="md" className="text-fg-2" onClick={onClose}>
-                Back to edit
-              </ForenButton>
-              <ForenButton
-                type="button"
-                size="md"
-                onClick={() => {
-                  setTried(true);
-                  if (agreed) onConfirm();
-                }}
-              >
-                Confirm and send invitations
-              </ForenButton>
-            </div>
-          </>
-        )}
+                <p className="truncate text-[12px] leading-[18px] font-medium tracking-[0.01em] text-fg-2">{p.email || roleLine(p)}</p>
+              </div>
+              {p.status !== "verified" && p.status !== "rejected" && <CopyLink person={p} />}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <div className="flex flex-col gap-3">
+        <LinkButton href="/get-started/verification" size="md" className="w-full">
+          Track verification
+        </LinkButton>
+        <LinkButton href={DECLARATION_HREF} variant="outline" size="md" className="w-full text-fg-2">
+          View declaration
+        </LinkButton>
+        <LinkButton href="/get-started" variant="ghost" size="md" className="w-full text-fg-2">
+          Back to setup
+        </LinkButton>
       </div>
-    </Modal>
+    </SetupColumn>
   );
 }
 
-function DeclSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section>
-      <GroupLabel className="mb-2">{title}</GroupLabel>
-      <div className="flex flex-col gap-2">{children}</div>
-    </section>
-  );
-}
+const NEXT_STEPS = [
+  { title: "Each person gets an email link", body: "It’s unique to them and expires in 72 hours. Copy it below to share it privately too." },
+  { title: "They verify their ID and proof of address", body: "Plus a quick selfie. It takes about 5 minutes on their phone." },
+  { title: "You track their progress", body: "See who’s done, and resend a link if someone needs to retry." },
+];
 
-function DeclRow({ primary, secondary }: { primary: string; secondary: string }) {
+function StatusBadge({ status }: { status: Stakeholder["status"] }) {
+  const [color, label] = (
+    {
+      pending: ["orange", "Pending"],
+      not_sent: ["gray", "Not sent"],
+      verified: ["success", "Verified"],
+      action_required: ["error", "Action required"],
+      rejected: ["error", "Action required"],
+    } as const
+  )[status];
   return (
-    <div className="rounded-[16px] border-[0.7px] border-line px-3 py-2.5">
-      <p className="text-[13px] leading-[19px] font-semibold text-fg">{primary}</p>
-      {secondary && <p className="text-[12px] leading-[18px] font-medium break-words text-fg-2">{secondary}</p>}
-    </div>
-  );
-}
-
-/** Figma "Email sent": 529px dialog, 150px envelope, Megafield title, stakeholder cards and a full-width Okay. */
-export function SentDialog({ open, people, onDone }: { open: boolean; people: Stakeholder[]; onDone: () => void }) {
-  return (
-    <Modal
-      open={open}
-      onOpenChange={(o) => !o && onDone()}
-      title={
-        <span className="flex flex-col items-center gap-6 pl-10 text-center">
-          <Image src={asset("/onboarding/envelope.png")} alt="" width={150} height={150} />
-          <DialogTitle>Verification emails sent</DialogTitle>
-        </span>
-      }
-      className="sm:max-w-[529px] sm:rounded-[32px] sm:px-4"
-    >
-      <p className="mx-auto -mt-3 mb-8 max-w-[393px] text-center text-[14px] leading-[21px] font-medium tracking-[0.01em] text-fg-2">
-        We’ve emailed all stakeholders. You can also copy their verification links to share privately.
-      </p>
-      <GroupLabel>Stakeholders ({people.length})</GroupLabel>
-      <ul className="mb-8 flex flex-col gap-4">
-        {people.map((p) => (
-          <li key={p.id} className="flex items-center gap-3 rounded-[24px] border-[0.7px] border-line px-3 py-4">
-            <PersonAvatar person={p} />
-            <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <p className="truncate text-[14px] leading-[21px] font-semibold tracking-[0.0125em] text-fg">{fullName(p)}</p>
-              <p className="text-[12px] leading-[18px] font-medium tracking-[0.01em] text-fg-2">{roleLine(p)}</p>
-            </div>
-            <CopyLink person={p} />
-          </li>
-        ))}
-      </ul>
-      <div className="-mx-4 border-t border-line px-4 pt-4">
-        <ForenButton size="md" className="w-full" onClick={onDone}>
-          Okay
-        </ForenButton>
-      </div>
-    </Modal>
+    <ForenBadge size="sm" color={color}>
+      {label}
+    </ForenBadge>
   );
 }
 

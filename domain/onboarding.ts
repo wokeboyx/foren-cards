@@ -190,6 +190,8 @@ export type RequirementContext = {
   api?: boolean;
   /** Chose any non-API product too. Pure API customers skip the business banking questionnaire. */
   banking?: boolean;
+  /** Picked the "Financial services" sector at sign-up. API customers then get the Fusion forms' financial services questions. */
+  financialServices?: boolean;
 };
 
 const PROOF_OF_ADDRESS_NG = [
@@ -214,6 +216,7 @@ function proofOfAddress(country: CountryCode, entity: EntityType): Requirement {
     id: "proof_of_address",
     title: entity === "sole_trader" ? "Proof of registered address" : "Proof of business address",
     description: "Dated within the last 3 months and showing the business name. All 4 edges visible.",
+    summary: "Dated in the last 3 months, showing the business name.",
     source: "upload",
     accepted,
     maxAgeDays: 90,
@@ -232,6 +235,7 @@ const UBO_DECLARATION: Requirement = {
   id: "ubo_declaration",
   title: "Director and UBO declaration",
   description: "Filled in for you from your stakeholders. You confirm it with a tick, no signature needed.",
+  summary: "Filled in from your stakeholders. Confirm with a tick.",
   source: "stakeholders",
 };
 
@@ -240,6 +244,7 @@ const PROPRIETOR_ADDRESS: Requirement = {
   id: "proprietor_address",
   title: "Proof of your home address",
   description: "A utility bill or bank statement in your name, dated within the last 3 months. Uploaded after your identity check.",
+  summary: "A utility bill or bank statement in your name.",
   source: "identity",
 };
 
@@ -248,7 +253,7 @@ export const needsOwnerAddress = (entity: EntityType | null | undefined, categor
   entity === "sole_trader" && category !== "partnership";
 
 function proprietorId(country: CountryCode): Requirement {
-  return { id: "proprietor_id", title: "Valid ID of the owner", description: `${acceptedIds(country)}. Done with your identity check.`, source: "identity" };
+  return { id: "proprietor_id", title: "Valid ID of the owner", description: `${acceptedIds(country)}. Done with your identity check.`, summary: `${acceptedIds(country)}.`, source: "identity" };
 }
 
 function stakeholders(country: CountryCode, entity: EntityType, category: string | null): Requirement {

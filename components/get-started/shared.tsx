@@ -23,11 +23,17 @@ export function SetupHeader({
   description,
   back,
   action,
+  media,
+  center,
 }: {
   title: React.ReactNode;
   description?: React.ReactNode;
   back?: string;
   action?: React.ReactNode;
+  /** An illustration above the title, e.g. a success state. */
+  media?: React.ReactNode;
+  /** Centre the media, title and description. */
+  center?: boolean;
 }) {
   return (
     <header className="mb-8 flex flex-col gap-6">
@@ -47,7 +53,8 @@ export function SetupHeader({
           {action}
         </div>
       )}
-      <div className="flex flex-col gap-2">
+      {media && <div className={cn("flex", center && "justify-center")}>{media}</div>}
+      <div className={cn("flex flex-col gap-2", center && "items-center text-center")}>
         <h1 className="font-display text-[20px] leading-[30px] font-semibold tracking-[-0.015em] text-black [font-synthesis:none]">{title}</h1>
         {description && <p className="text-[12px] leading-[18px] font-medium tracking-[0.01em] text-fg-2">{description}</p>}
       </div>

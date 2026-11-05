@@ -5,11 +5,14 @@ import { ForenCheckbox } from "@/components/ui/foren-checkbox";
 import { ForenSelect } from "@/components/ui/foren-select";
 import { SECTORS, TURNOVER_BANDS, countryInfo, isNewBusiness, isScumlCategory } from "@/domain/onboarding";
 import { useOnboarding } from "@/lib/onboarding-store";
-import { Field, FormCard, OnboardingFrame, fieldCls } from "./frame";
+import { Field, FormCard, OnboardingFrame } from "./frame";
 import { Note } from "./shared";
 import { useSignupGuard } from "./guard";
 
-/** Step 4b "A few more things" (Figma 3035:73737–73923): turnover, sector, category, website. */
+/**
+ * Step 4b "A few more things" (Figma 3035:73737–73923): turnover, sector and category. The website moved to the
+ * onboarding questionnaires, which ask for it (or a social media link) anyway.
+ */
 export function BusinessProfile() {
   const ready = useSignupGuard("/onboarding/business/profile");
   const router = useRouter();
@@ -22,17 +25,14 @@ export function BusinessProfile() {
   const [turnover, setTurnover] = React.useState(saved?.turnover ?? "");
   const [sector, setSector] = React.useState(saved?.sector ?? "");
   const [category, setCategory] = React.useState(saved?.category ?? "");
-  const [website, setWebsite] = React.useState(saved?.website ?? "");
   const [notTrading, setNotTrading] = React.useState(saved?.notTrading ?? false);
-  const [websiteTouched, setWebsiteTouched] = React.useState(false);
 
   if (!ready || !country) return null;
   const currency = countryInfo(country)?.currency ?? "";
   const categories = SECTORS.find((s) => s.name === sector)?.categories ?? [];
-  const websiteError = website && !/^https:\/\/[^\s.]+\.[^\s]+$/.test(website.trim()) ? "Enter a full address starting with https://" : undefined;
   const scuml = country === "NG" && isScumlCategory(sector, category);
   const isNew = notTrading || isNewBusiness(business?.incorporatedOn);
-  const complete = turnover && sector && category && !websiteError;
+  const complete = turnover && sector && category;
 
   return (
     <OnboardingFrame
@@ -45,7 +45,8 @@ export function BusinessProfile() {
           label: "Continue",
           disabled: !complete,
           onClick: () => {
-            set({ profile: { turnover, sector, category, website: website.trim(), notTrading } });
+            // A website saved before it moved to the questionnaire is kept: it prefills the questionnaire.
+            set({ profile: { turnover, sector, category, notTrading, ...(saved?.website ? { website: saved.website } : {}) } });
             router.push(entity === "mto" ? "/onboarding/compliance" : "/onboarding/review");
           },
         },
@@ -77,24 +78,6 @@ export function BusinessProfile() {
               onChange={setCategory}
               placeholder="Select a category"
               options={categories.map((c) => ({ value: c.name, label: c.name }))}
-            />
-          </Field>
-          <Field label="Website/Socials (optional)" htmlFor="website" error={websiteTouched ? websiteError : undefined}>
-            <input
-              id="website"
-              type="url"
-              inputMode="url"
-              placeholder="https://"
-              value={website}
-              onFocus={() => !website && setWebsite("https://")}
-              onBlur={() => {
-                if (website === "https://") setWebsite("");
-                setWebsiteTouched(true);
-              }}
-              onChange={(e) => setWebsite(e.target.value)}
-              aria-invalid={(websiteTouched && !!websiteError) || undefined}
-              className={fieldCls}
-              autoComplete="url"
             />
           </Field>
           <ForenCheckbox

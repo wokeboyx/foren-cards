@@ -39,7 +39,7 @@ export function Welcome() {
           className="pointer-events-none absolute inset-x-0 top-0 h-[260px] bg-[radial-gradient(60%_120%_at_50%_-20%,#f9dcdc_0%,transparent_70%),radial-gradient(30%_80%_at_0%_10%,#d8f1cf_0%,transparent_70%)] opacity-90"
         />
         <header className="relative flex items-center justify-between px-5 pt-5 lg:px-6 lg:pt-6">
-          <Image src={asset("/onboarding/foren-wordmark.svg")} alt="Foren" width={100} height={24} priority />
+          <Image src={asset("/onboarding/foren-fka-leatherback.svg")} alt="Foren, formerly Leatherback" width={100} height={39} priority />
           <div className="flex items-center gap-3 text-fg">
             <span className="grid size-7 place-items-center rounded-[8px] border border-line bg-surface shadow-[var(--shadow-foren-sm)]" aria-hidden>
               <BellIcon className="size-4" />
