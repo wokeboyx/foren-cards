@@ -22,9 +22,12 @@ export type Question = {
   optional?: boolean;
   /** Only asked when this returns true. */
   showIf?: (a: Answers) => boolean;
+  /** A sample answer shown under free-text questions, so people know the level of detail we need. */
+  example?: string;
 };
 
-export type QuestionGroup = { key: string; title: string; questions: Question[] };
+/** One step of a questionnaire. `intro` says why we ask, under the step title. */
+export type QuestionGroup = { key: string; title: string; intro?: string; questions: Question[] };
 
 const YES_NO = ["Yes", "No"];
 const yes = (id: string) => (a: Answers) => a[id] === "Yes";
@@ -57,8 +60,9 @@ export function bankingQuestionnaire(country: CountryCode): QuestionGroup[] {
   const ng = country === "NG";
   return [
     {
-      key: "banking",
-      title: "Your account",
+      key: "banking_activity",
+      title: "Expected activity",
+      intro: "Your best estimate is fine. It helps us set the right limits on your account from day one.",
       questions: [
         {
           id: "volume",
@@ -75,12 +79,20 @@ export function bankingQuestionnaire(country: CountryCode): QuestionGroup[] {
           description: "How many transactions will be performed each month?",
           options: ["1–100", "101–250", "251–500", "500 and above"],
         },
+      ],
+    },
+    {
+      key: "banking_business",
+      title: "About your business",
+      intro: "Tell us what you do and how you’ll use Foren, in your own words.",
+      questions: [
         {
           id: "nature",
           type: "long",
           label: "Nature of business",
           description: "Give a brief description of the products and services you provide.",
           optional: ng,
+          example: "We run two pharmacies in Lagos, selling prescription and over-the-counter medicines to walk-in customers and local clinics.",
         },
         { id: "hasWebsite", type: "choice", label: ng ? "Do you have a business website?" : "Do you have a website?", options: YES_NO },
         { id: "website", type: "short", label: "Website link", showIf: yes("hasWebsite") },
@@ -90,15 +102,35 @@ export function bankingQuestionnaire(country: CountryCode): QuestionGroup[] {
           type: "long",
           label: "How do you intend to use your Foren account?",
           description: "For example: salaries, paying invoices, payments for goods and services.",
+          example: "Paying suppliers in the UK and China, receiving payments from distributors, and monthly staff salaries.",
         },
+      ],
+    },
+    {
+      key: "banking_tax",
+      title: ng ? "Your NIN and BVN" : "Tax registration",
+      intro: ng ? "Both are 11-digit numbers: your National Identification Number and your Bank Verification Number." : undefined,
+      questions: [
         ...(ng
           ? ([
               { id: "nin", type: "short", label: "NIN number" },
               { id: "bvn", type: "short", label: "BVN number" },
             ] satisfies Question[])
           : ([
-              { id: "vat", type: "choice", label: "Are you VAT registered?", options: YES_NO },
-              { id: "vatNumber", type: "short", label: "VAT number", optional: true, showIf: yes("vat") },
+              // Canada's sales tax is GST/HST, not VAT (same answer ids, so saved answers carry over).
+              {
+                id: "vat",
+                type: "choice",
+                label: country === "CA" ? "Are you registered for GST/HST?" : "Are you VAT registered?",
+                options: YES_NO,
+              },
+              {
+                id: "vatNumber",
+                type: "short",
+                label: country === "CA" ? "GST/HST number" : "VAT number",
+                optional: true,
+                showIf: yes("vat"),
+              },
             ] satisfies Question[])),
       ],
     },
@@ -115,8 +147,11 @@ export const MTO_QUESTIONNAIRE: QuestionGroup[] = [
     questions: [
       { id: "nature", type: "long", label: "Nature of business (description)" },
       { id: "purpose", type: "short", label: "Main purpose of the account" },
-      { id: "website", type: "short", label: "Website", optional: true },
-      { id: "app", type: "short", label: "Mobile app", optional: true },
+      // Compliance (Nov 2026): required when the business has one.
+      { id: "hasWebsite", type: "choice", label: "Do you have a website?", options: YES_NO },
+      { id: "website", type: "short", label: "Website", showIf: yes("hasWebsite") },
+      { id: "hasApp", type: "choice", label: "Do you have a mobile app?", options: YES_NO },
+      { id: "app", type: "short", label: "Mobile app", showIf: yes("hasApp") },
       { id: "products", type: "long", label: "Products / services" },
       { id: "uboWealth", type: "long", label: "UBO source of wealth" },
       { id: "incomingSources", type: "short", label: "What are the primary sources of incoming funds?" },

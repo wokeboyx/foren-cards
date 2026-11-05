@@ -1,14 +1,15 @@
 "use client";
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { RiCloseLine, RiSearchLine } from "@remixicon/react";
+import { CaretRightIcon, MagnifyingGlassIcon, XIcon } from "@/components/icons";
 import { ForenBadge } from "@/components/ui/foren-badge";
+import { ForenSelect } from "@/components/ui/foren-select";
 import { ForenSpinner } from "@/components/ui/foren-spinner";
 import { countryInfo, registrationTypes, type CountryCode } from "@/domain/onboarding";
 import { registryBusiness, useOnboarding, type Business } from "@/lib/onboarding-store";
 import { cn } from "@/lib/utils";
 import { Field, FormCard, OnboardingFrame, fieldCls } from "./frame";
-import { DetailGrid, Note, RadioCard, formatDate } from "./shared";
+import { Note, RadioCard, formatDate } from "./shared";
 import { useSignupGuard } from "./guard";
 
 /**
@@ -33,8 +34,9 @@ export function FindBusiness() {
   const ready = useSignupGuard("/onboarding/business");
   const country = useOnboarding((s) => s.country);
   const entity = useOnboarding((s) => s.entity);
+  const category = useOnboarding((s) => s.category);
   if (!ready || !country || !entity) return null;
-  return <FindBusinessForm country={country} key={`${country}-${entity}`} />;
+  return <FindBusinessForm country={country} key={`${country}-${entity}-${category}`} />;
 }
 
 function FindBusinessForm({ country }: { country: CountryCode }) {
@@ -44,7 +46,8 @@ function FindBusinessForm({ country }: { country: CountryCode }) {
   const lookupOutcome = useOnboarding((s) => s.demo.lookup);
   const set = useOnboarding((s) => s.set);
   const info = countryInfo(country)!;
-  const types = registrationTypes(country, entity);
+  const category = useOnboarding((s) => s.category);
+  const types = registrationTypes(country, entity, category);
   const searchCountry = types.length === 0;
 
   const [mode, setMode] = React.useState<"lookup" | "manual">(saved?.source === "manual" ? "manual" : "lookup");
@@ -65,7 +68,7 @@ function FindBusinessForm({ country }: { country: CountryCode }) {
     }, 1200);
   };
 
-  const manualComplete = manual.name.trim() && manual.incorporatedOn && manual.street.trim() && manual.city.trim() && manual.region;
+  const manualComplete = regNumber.trim() && manual.name.trim() && manual.incorporatedOn && manual.street.trim() && manual.city.trim() && manual.region;
   const canContinue = mode === "lookup" ? status === "found" && !!result : !!manualComplete;
 
   const onContinue = () => {
@@ -78,11 +81,12 @@ function FindBusinessForm({ country }: { country: CountryCode }) {
   };
 
   const description = searchCountry
-    ? `Enter your official company name or registration number. We’ll match your details with ${info.registry}.`
-    : `Select your registration type and enter your number. We’ll pull your official records from the ${info.registry} registry.`;
+    ? `Enter your official company name or registration number. We’ll instantly match your details with ${info.registry}.`
+    : `Select your registration type and enter your registration number. We’ll pull your official company records directly from the ${info.registry} registry.`;
 
   return (
     <OnboardingFrame
+      headerGap={24}
       step="business"
       back="/onboarding/identity"
       title="Find your business"
@@ -125,8 +129,9 @@ function FindBusinessForm({ country }: { country: CountryCode }) {
         <div className="flex flex-col gap-6">
           <RegTypePicker types={types} value={regType} onChange={(v) => { setRegType(v); setStatus("idle"); }} />
           <Field label="Registration number" htmlFor="reg-number" hint={`Enter the number exactly as it appears on your ${info.registry} certificate.`}>
-            <div className="flex gap-2">
-              <span className="grid h-12 min-w-12 shrink-0 place-items-center rounded-[16px] border border-line bg-subtle px-3 text-[14px] font-medium text-fg-2">{regType}-</span>
+            <div className="flex items-center gap-2">
+              <span className="grid h-12 min-w-12 shrink-0 place-items-center rounded-[16px] bg-subtle px-3 text-[14px] font-medium text-fg">{regType}</span>
+              <span aria-hidden className="text-[14px] font-medium text-fg-2">-</span>
               <div className="relative min-w-0 flex-1">
                 <input
                   id="reg-number"
@@ -201,24 +206,33 @@ function ManualLink({ onClick }: { onClick: () => void }) {
   );
 }
 
+/** Figma "Search result" card: name and badge, a divider, the 2×2 details, a divider, "Wrong business?". */
 export function RegistryCard({ business, registry, onSearchAgain }: { business: Business; registry: string; onSearchAgain: () => void }) {
+  const details = [
+    { label: "Reg. number", value: [business.regType, business.regNumber].filter(Boolean).join("-") },
+    { label: "Incorporated", value: formatDate(business.incorporatedOn) },
+    { label: "Type", value: business.companyType },
+    { label: "Address", value: business.address },
+  ];
   return (
-    <div className="flex flex-col gap-4 rounded-[12px] bg-surface p-4 animate-[rise-in_200ms_ease-out]" aria-live="polite">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[16px] leading-6 font-medium text-fg">{business.name}</p>
-        <ForenBadge color="success" size="sm" dot>
+    <div className="flex flex-col gap-4 rounded-[20px] bg-surface pt-5 pb-4 tracking-[0.01em] animate-[rise-in_200ms_ease-out]" aria-live="polite">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-3">
+        <p className="min-w-0 flex-1 text-[16px] leading-[26px] font-semibold tracking-[0.005em] text-fg">{business.name}</p>
+        <ForenBadge color="success" size="sm" dot className="h-[19px] gap-1.5 px-1.5 text-[11px] leading-4 tracking-[0.01em]">
           {registry} verified
         </ForenBadge>
       </div>
-      <DetailGrid
-        items={[
-          { label: "Reg. number", value: [business.regType, business.regNumber].filter(Boolean).join("-") },
-          { label: "Incorporated", value: formatDate(business.incorporatedOn) },
-          { label: "Type", value: business.companyType },
-          { label: "Address", value: business.address },
-        ]}
-      />
-      <p className="text-[12px] leading-[18px] font-medium text-fg-3">
+      <hr className="border-line" />
+      <dl className="grid grid-cols-1 gap-x-2 gap-y-6 px-3 sm:grid-cols-2">
+        {details.map((d) => (
+          <div key={d.label} className="flex min-w-0 flex-col gap-1">
+            <dt className="text-[12px] leading-[18px] font-medium text-fg-2">{d.label}</dt>
+            <dd className="text-[14px] leading-[21px] font-medium break-words text-fg">{d.value || "—"}</dd>
+          </div>
+        ))}
+      </dl>
+      <hr className="border-line" />
+      <p className="px-3 text-[12px] leading-[18px] font-medium text-fg-3">
         Wrong business?{" "}
         <button type="button" onClick={onSearchAgain} className="text-fg underline underline-offset-2 outline-none focus-visible:ring-2 focus-visible:ring-focus">
           Search again
@@ -262,12 +276,12 @@ function RegistrySearch({
   const showList = !result && query.trim().length >= 3;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-2">
       <div className="relative">
         <label htmlFor="company-search" className="sr-only">
           Company name or registration number
         </label>
-        <RiSearchLine className="pointer-events-none absolute top-1/2 left-3 size-[18px] -translate-y-1/2 text-fg-3" aria-hidden />
+        <MagnifyingGlassIcon className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2 text-fg-2" aria-hidden />
         <input
           id="company-search"
           type="search"
@@ -279,7 +293,7 @@ function RegistrySearch({
             setResults(null);
             if (result) onClear();
           }}
-          className={cn(fieldCls, "bg-surface pr-10 pl-10 [&::-webkit-search-cancel-button]:hidden")}
+          className={cn(fieldCls, "pr-10 pl-10 [&::-webkit-search-cancel-button]:hidden")}
         />
         {query && (
           <button
@@ -290,9 +304,9 @@ function RegistrySearch({
               setResults(null);
               onClear();
             }}
-            className="absolute top-1/2 right-3 grid size-6 -translate-y-1/2 place-items-center rounded-full text-fg-2 outline-none hover:bg-subtle focus-visible:ring-2 focus-visible:ring-focus"
+            className="absolute top-1/2 right-3 grid size-5 -translate-y-1/2 place-items-center rounded-full text-fg outline-none hover:bg-surface focus-visible:ring-2 focus-visible:ring-focus"
           >
-            <RiCloseLine className="size-4" aria-hidden />
+            <XIcon className="size-[14px]" aria-hidden />
           </button>
         )}
       </div>
@@ -309,21 +323,22 @@ function RegistrySearch({
             Try the exact registered name or number, or enter your details manually.
           </Note>
         ) : showList && results ? (
-          <ul className="overflow-hidden rounded-[12px] bg-surface" aria-label="Matching companies">
+          <ul className="overflow-hidden rounded-[16px] bg-surface" aria-label="Matching companies">
             {results.map((b) => (
               <li key={b.regNumber} className="border-b border-line last:border-0">
-                <button type="button" onClick={() => onPick(b)} className="flex w-full flex-col gap-0.5 px-4 py-3 text-left outline-none hover:bg-sunken focus-visible:bg-sunken focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-inset">
-                  <span className="text-[14px] leading-[21px] font-medium text-fg">{b.name}</span>
-                  <span className="text-[12px] leading-[18px] font-medium text-fg-3">
-                    {b.regNumber} · {b.companyType} · {b.address}
+                <button type="button" onClick={() => onPick(b)} className="flex w-full items-center gap-3 px-3 py-3 text-left tracking-[0.01em] outline-none hover:bg-sunken focus-visible:bg-sunken focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-inset">
+                  <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span className="text-[14px] leading-[21px] font-medium text-fg">{b.name}</span>
+                    <span className="text-[12px] leading-[18px] font-medium text-fg-2">{b.regNumber}</span>
                   </span>
+                  <CaretRightIcon className="size-4 shrink-0 text-fg-2" aria-hidden />
                 </button>
               </li>
             ))}
           </ul>
         ) : null}
       </div>
-      {!result && <ManualLink onClick={onManual} />}
+      {!result && <div className="pt-4"><ManualLink onClick={onManual} /></div>}
     </div>
   );
 }
@@ -380,10 +395,28 @@ function ManualEntry({
 
       <RegTypePicker types={types} value={regType} onChange={setRegType} />
 
-      <Field label="Registration number" htmlFor="m-reg" hint={`Enter the number exactly as it appears on your ${info.registry} certificate.`}>
-        <div className="flex gap-2">
-          {regType && <span className="grid h-12 min-w-12 shrink-0 place-items-center rounded-[16px] border border-line bg-subtle px-3 text-[14px] font-medium text-fg-2">{regType}-</span>}
-          <input id="m-reg" value={regNumber} onChange={(e) => setRegNumber(e.target.value)} className={fieldCls} autoComplete="off" />
+      <Field
+        label="Registration number"
+        htmlFor="m-reg"
+        error={touched && !regNumber.trim() ? "Required" : undefined}
+        hint={`Enter the number exactly as it appears on your ${info.registry} certificate.`}
+      >
+        <div className="flex items-center gap-2">
+          {regType && (
+            <>
+              <span className="grid h-12 min-w-12 shrink-0 place-items-center rounded-[16px] bg-subtle px-3 text-[14px] font-medium text-fg">{regType}</span>
+              <span aria-hidden className="text-[14px] font-medium text-fg-2">-</span>
+            </>
+          )}
+          <input
+            id="m-reg"
+            value={regNumber}
+            onChange={(e) => setRegNumber(e.target.value)}
+            aria-invalid={(touched && !regNumber.trim()) || undefined}
+            aria-required
+            className={fieldCls}
+            autoComplete="off"
+          />
         </div>
       </Field>
 
@@ -407,12 +440,14 @@ function ManualEntry({
               <input id="m-city" value={value.city} onChange={up("city")} aria-invalid={!!err("city") || undefined} className={fieldCls} autoComplete="address-level2" />
             </Field>
             <Field label={region.label} htmlFor="m-region" error={err("region")}>
-              <select id="m-region" value={value.region} onChange={up("region")} aria-invalid={!!err("region") || undefined} className={cn(fieldCls, !value.region && "text-fg-3")}>
-                <option value="">Select {region.label.toLowerCase()}</option>
-                {region.options.map((o) => (
-                  <option key={o}>{o}</option>
-                ))}
-              </select>
+              <ForenSelect
+                id="m-region"
+                value={value.region}
+                onChange={(v) => onChange({ ...value, region: v })}
+                invalid={!!err("region")}
+                placeholder={`Select ${region.label.toLowerCase()}`}
+                options={region.options.map((o) => ({ value: o, label: o }))}
+              />
             </Field>
             <Field label="Area" htmlFor="m-area">
               <input id="m-area" value={value.area} onChange={up("area")} className={fieldCls} />

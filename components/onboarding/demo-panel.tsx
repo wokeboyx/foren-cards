@@ -3,7 +3,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as Popover from "@radix-ui/react-popover";
-import { RiFlaskLine } from "@remixicon/react";
+import { FlaskIcon } from "@/components/icons";
 import { toast } from "sonner";
 import { ForenButton } from "@/components/ui/foren-button";
 import { ForenSegmentedControl } from "@/components/ui/foren-segmented-control";
@@ -15,6 +15,7 @@ export const SIGNUP_ROUTES: [string, string][] = [
   ["/onboarding/account", "Create your account"],
   ["/onboarding/verify-email", "Verify email"],
   ["/onboarding/identity", "Verify identity"],
+  ["/onboarding/identity/address", "Owner’s proof of address (sole traders)"],
   ["/onboarding/business", "Find your business"],
   ["/onboarding/business/profile", "A few more things"],
   ["/onboarding/compliance", "Enhanced due diligence (MTO/PSP)"],
@@ -42,7 +43,7 @@ export function OnboardingDemoPanel() {
           className="fixed top-1/2 right-0 z-40 inline-flex h-10 -translate-y-1/2 items-center rounded-l-full bg-[var(--color-foren-bg-button-primary)] pr-2 pl-3 text-[var(--color-foren-text-inverse)] opacity-80 shadow-[var(--shadow-foren-lg)] outline-none hover:opacity-100 focus-visible:ring-2 focus-visible:ring-focus"
           aria-label="Open prototype demo controls"
         >
-          <RiFlaskLine className="size-4" aria-hidden />
+          <FlaskIcon className="size-4" aria-hidden />
         </button>
       </Popover.Trigger>
       <Popover.Portal>
@@ -76,6 +77,28 @@ export function OnboardingDemoPanel() {
                 { value: "retry", label: "Needs a retry" },
               ]}
             />
+          </Section>
+          <Section label="Document check on upload">
+            <div className="grid gap-2">
+              <ForenSegmentedControl
+                size="sm"
+                value={s.demo.docDate}
+                onChange={(v) => s.setDemo({ docDate: v })} fullWidth ariaLabel="Document date"
+                options={[
+                  { value: "current", label: "Dated in time" },
+                  { value: "expired", label: "Too old" },
+                ]}
+              />
+              <ForenSegmentedControl
+                size="sm"
+                value={s.demo.docNumber}
+                onChange={(v) => s.setDemo({ docNumber: v })} fullWidth ariaLabel="Number on document"
+                options={[
+                  { value: "found", label: "Finds the number" },
+                  { value: "not_found", label: "No number found" },
+                ]}
+              />
+            </div>
           </Section>
 
           <Section label="Go to a sign-up screen">

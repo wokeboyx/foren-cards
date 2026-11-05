@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { RiErrorWarningLine } from "@remixicon/react";
+import { WarningCircleIcon } from "@/components/icons";
 import { ForenButton } from "@/components/ui/foren-button";
 import { COPY } from "@/content/copy";
 import { cn } from "@/lib/utils";
@@ -35,7 +35,7 @@ export function ErrorState({ onRetry, message = COPY.genericError, className }: 
   return (
     <div role="alert" className={cn("flex flex-col items-center px-6 py-12 text-center", className)}>
       <div className="mb-3 grid size-12 place-items-center rounded-full bg-error-subtle text-error">
-        <RiErrorWarningLine className="size-6" aria-hidden />
+        <WarningCircleIcon className="size-6" aria-hidden />
       </div>
       <p className="text-[14px] leading-[22px] font-medium text-fg">{message}</p>
       {onRetry && (

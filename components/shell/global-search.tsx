@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { RiArrowRightLine, RiSearchEyeLine } from "@remixicon/react";
+import { ArrowRightIcon, BinocularsIcon } from "@/components/icons";
 import { ForenSearch, type ForenSearchResult } from "@/components/ui/foren-search";
 import { CardArt } from "@/components/card/card-art";
 import { MerchantLogo } from "@/components/merchant-logo";
@@ -49,7 +49,7 @@ export function GlobalSearch() {
       value: `page:${p.href}`,
       label: p.label,
       description: "Go to page",
-      icon: <RiArrowRightLine className="size-5 text-fg-3" />,
+      icon: <ArrowRightIcon className="size-5 text-fg-3" />,
     }));
     const merchantHits = MERCHANTS.filter((m) => m.name.toLowerCase().includes(s))
       .slice(0, 3)
@@ -68,7 +68,7 @@ export function GlobalSearch() {
         onSearch={search}
         emptyState={
           <span className="flex items-center gap-2 text-[13px] text-fg-3">
-            <RiSearchEyeLine className="size-4" aria-hidden /> No matches
+            <BinocularsIcon className="size-4" aria-hidden /> No matches
           </span>
         }
         onSelect={(r) => {

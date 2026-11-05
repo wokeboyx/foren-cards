@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { RiAppleFill, RiGoogleFill } from "@remixicon/react";
+import { AppleLogoFillIcon, GoogleLogoBoldIcon } from "@/components/icons";
 import { toast } from "sonner";
 import { ForenButton } from "@/components/ui/foren-button";
 import { Modal } from "@/components/overlay";
@@ -18,13 +18,13 @@ const WALLET = {
   apple: {
     name: "Apple Pay",
     app: "Wallet",
-    icon: <RiAppleFill />,
+    icon: <AppleLogoFillIcon />,
     steps: ["On your iPhone, open Wallet and tap +.", "Choose Debit or Credit Card and scan the front.", "Scan the back when asked, then confirm."],
   },
   google: {
     name: "Google Pay",
     app: "Google Wallet",
-    icon: <RiGoogleFill />,
+    icon: <GoogleLogoBoldIcon />,
     steps: ["On your phone, open Google Wallet and tap Add to Wallet.", "Choose Payment card and scan the front.", "Scan the back when asked, then confirm."],
   },
 } as const;

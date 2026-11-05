@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import * as Popover from "@radix-ui/react-popover";
-import { RiArrowDownSLine, RiCheckLine, RiCloseCircleLine, RiExchangeLine, RiErrorWarningLine, RiShieldCheckLine, RiSnowflakeLine } from "@remixicon/react";
+import { ArrowsLeftRightIcon, CaretDownIcon, CheckBoldIcon, ShieldCheckIcon, SnowflakeIcon, WarningCircleIcon, XCircleIcon } from "@/components/icons";
 import { CurrencyFlag } from "@/components/currency-flag";
 import { FundingLegs } from "@/components/funding-legs";
 import { Money } from "@/components/money";
@@ -32,7 +32,7 @@ export function CountrySelect({ value, onChange, label = "Where are you going?" 
           <span className="min-w-0 flex-1 truncate">
             <span className="font-medium text-fg">{c.name}</span> <span className="text-fg-3">· pays in {c.currency}</span>
           </span>
-          <RiArrowDownSLine className={cn("absolute top-1/2 right-3.5 size-4 -translate-y-1/2 text-fg-3 transition-transform", open && "rotate-180")} aria-hidden />
+          <CaretDownIcon className={cn("absolute top-1/2 right-3.5 size-4 -translate-y-1/2 text-fg-3 transition-transform", open && "rotate-180")} aria-hidden />
         </Popover.Trigger>
         <Popover.Portal>
           <Popover.Content align="start" sideOffset={6} className="z-[90] w-[var(--radix-popover-trigger-width)] rounded-[16px] bg-surface p-1.5 shadow-[var(--shadow-foren-xl)] ring-1 ring-line outline-none">
@@ -56,7 +56,7 @@ export function CountrySelect({ value, onChange, label = "Where are you going?" 
                       {CURRENCY_NAME[x.currency]} ({x.currency})
                     </span>
                   </span>
-                  {x.code === value && <RiCheckLine className="size-[18px] text-success" aria-hidden />}
+                  {x.code === value && <CheckBoldIcon className="size-[18px] text-success" aria-hidden />}
                 </button>
               ))}
             </div>
@@ -139,7 +139,7 @@ export function WillItWork({ card, plan }: { card: Card; plan: NonNullable<Retur
     <ul className="space-y-2 text-[14px] leading-[20px]">
       {items.map((i) => (
         <li key={i.text} className="flex gap-2.5">
-          {i.good ? <RiCheckLine className="mt-0.5 size-[18px] shrink-0 text-success" aria-hidden /> : <RiErrorWarningLine className="mt-0.5 size-[18px] shrink-0 text-warning" aria-hidden />}
+          {i.good ? <CheckBoldIcon className="mt-0.5 size-[18px] shrink-0 text-success" aria-hidden /> : <WarningCircleIcon className="mt-0.5 size-[18px] shrink-0 text-warning" aria-hidden />}
           <span className="text-fg">{i.text}</span>
         </li>
       ))}
@@ -150,10 +150,10 @@ export function WillItWork({ card, plan }: { card: Card; plan: NonNullable<Retur
 /** Wise-style tips, adapted to how Foren pays. */
 export function Tips({ local, home }: { local: Currency; home: Currency }) {
   const tips = [
-    { icon: <RiExchangeLine />, title: `Always choose to pay in ${local}`, body: `Say no if offered ${home === local ? "another currency" : CURRENCY_NAME[home]}. Foren’s rate is usually better.` },
-    { icon: <RiShieldCheckLine />, title: "Spend like you’re home", body: "The cheapest balance pays automatically." },
-    { icon: <RiSnowflakeLine />, title: "Card details lost or stolen?", body: "Freeze it straight away, then replace it." },
-    { icon: <RiCloseCircleLine />, title: "Back home?", body: "Set trip dates so the card stops when you return." },
+    { icon: <ArrowsLeftRightIcon />, title: `Always choose to pay in ${local}`, body: `Say no if offered ${home === local ? "another currency" : CURRENCY_NAME[home]}. Foren’s rate is usually better.` },
+    { icon: <ShieldCheckIcon />, title: "Spend like you’re home", body: "The cheapest balance pays automatically." },
+    { icon: <SnowflakeIcon />, title: "Card details lost or stolen?", body: "Freeze it straight away, then replace it." },
+    { icon: <XCircleIcon />, title: "Back home?", body: "Set trip dates so the card stops when you return." },
   ];
   return (
     <ul className="space-y-4">

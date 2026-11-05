@@ -1,15 +1,6 @@
 "use client";
 import * as React from "react";
-import {
-  RiAlarmWarningLine,
-  RiBuilding2Line,
-  RiHistoryLine,
-  RiLockLine,
-  RiSearchEyeLine,
-  RiRepeatLine,
-  RiRouteLine,
-  RiShieldCheckLine,
-} from "@remixicon/react";
+import { BinocularsIcon, BuildingsIcon, ClockCounterClockwiseIcon, LockIcon, PathIcon, RepeatIcon, ShieldCheckIcon, SirenIcon } from "@/components/icons";
 import { CardArt } from "@/components/card/card-art";
 import { LinkButton } from "@/components/link-button";
 import { COMPANY } from "@/fixtures/seed";
@@ -18,42 +9,42 @@ import { useStore } from "@/lib/store";
 
 const FEATURES: { icon: React.ReactNode; title: string; body: string }[] = [
   {
-    icon: <RiBuilding2Line />,
+    icon: <BuildingsIcon />,
     title: "Cards for people or the company",
     body: "Give a team member a card in their name, or create a company card for shared spend like subscriptions. You can add people who aren’t on Foren yet.",
   },
   {
-    icon: <RiLockLine />,
+    icon: <LockIcon />,
     title: "Lock a card to one merchant",
     body: "The first merchant to charge it becomes the only one that can. If the details leak, nobody else can use them.",
   },
   {
-    icon: <RiShieldCheckLine />,
+    icon: <ShieldCheckIcon />,
     title: "Decide where and how much",
     body: "Set limits and allow only certain merchants or categories. Gambling, cash and crypto are blocked unless you allow them.",
   },
   {
-    icon: <RiRouteLine />,
+    icon: <PathIcon />,
     title: "Pay from the cheapest balance",
     body: "Each charge comes from the balance that costs least to convert, and one charge can be split across balances.",
   },
   {
-    icon: <RiHistoryLine />,
+    icon: <ClockCounterClockwiseIcon />,
     title: "Freeze, cancel and see history",
     body: "Stop a card in one click. Every change is kept, with who made it and when.",
   },
   {
-    icon: <RiRepeatLine />,
+    icon: <RepeatIcon />,
     title: "See subscriptions coming",
     body: "Spot recurring charges and when they’re likely to renew, and block a merchant on one card.",
   },
   {
-    icon: <RiSearchEyeLine />,
+    icon: <BinocularsIcon />,
     title: "Check a merchant first",
     body: "See whether a card is likely to work at a merchant before anyone pays, and fix the setting that would block it.",
   },
   {
-    icon: <RiAlarmWarningLine />,
+    icon: <SirenIcon />,
     title: "Help when a payment fails",
     body: "Your team sees why a payment was declined and can ask you for a one-time approval or an emergency card.",
   },

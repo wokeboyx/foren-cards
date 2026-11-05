@@ -5,28 +5,7 @@ import Image from "next/image";
 import { asset } from "@/lib/base-path";
 import { usePathname, useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
-import {
-  RiArrowDownLine,
-  RiArrowLeftRightFill,
-  RiArrowRightSLine,
-  RiBankCardLine,
-  RiCoinLine,
-  RiDashboardLine,
-  RiEarthLine,
-  RiExpandUpDownLine,
-  RiHomeLine,
-  RiKeyLine,
-  RiLineChartLine,
-  RiCloseLine,
-  RiMenuLine,
-  RiSendPlaneLine,
-  RiSettings4Line,
-  RiSettings5Line,
-  RiSparkling2Line,
-  RiStarSLine,
-  RiTeamLine,
-  RiUserSettingsLine,
-} from "@remixicon/react";
+import { ArrowDownIcon, ArrowsLeftRightBoldIcon, CaretRightIcon, CaretUpDownIcon, ChartLineIcon, CoinIcon, CreditCardIcon, GearFineIcon, GearSixIcon, GlobeIcon, HouseIcon, KeyIcon, ListIcon, PaperPlaneTiltIcon, SparkleIcon, SquaresFourIcon, StarIcon, UserGearIcon, UsersThreeIcon, XIcon, LockIcon } from "@/components/icons";
 import { toast, Toaster } from "sonner";
 import { ForenAvatar } from "@/components/ui/foren-avatar";
 import { Skeleton } from "@/components/states";
@@ -75,6 +54,15 @@ function Shell({ children }: { children: React.ReactNode }) {
   // Marketing-site mock-ups (foren.co sections) have no app chrome at all.
   if (isWebsiteRoute(pathname)) return <>{children}</>;
 
+  // Login and password reset have their own split layout (brand panel + form) from the login Figma.
+  if (isLoginRoute(pathname))
+    return (
+      <>
+        {children}
+        <Toaster position="top-center" toastOptions={{ className: "!rounded-[16px] !font-sans" }} />
+      </>
+    );
+
   // Sign-up has its own layout (rail + inset panel) from the onboarding Figma.
   if (isOnboardingRoute(pathname))
     return (
@@ -114,7 +102,7 @@ function Shell({ children }: { children: React.ReactNode }) {
                 aria-label="Close menu"
                 className="grid size-10 place-items-center rounded-full border border-[rgba(0,0,0,0.07)] text-fg outline-none hover:bg-subtle focus-visible:ring-2 focus-visible:ring-focus"
               >
-                <RiCloseLine className="size-[22px]" aria-hidden />
+                <XIcon className="size-[22px]" aria-hidden />
               </Dialog.Close>
             </div>
             <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3">
@@ -145,7 +133,7 @@ function Shell({ children }: { children: React.ReactNode }) {
               onClick={() => setNavOpen(true)}
               className="inline-flex h-9 shrink-0 items-center gap-2 rounded-full border-[1.2px] border-line-2 px-3 text-[12px] font-medium text-fg-2 outline-none hover:bg-subtle focus-visible:ring-2 focus-visible:ring-focus"
             >
-              <RiMenuLine className="size-4" aria-hidden />
+              <ListIcon className="size-4" aria-hidden />
               Menu
             </button>
           </div>
@@ -175,6 +163,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 export const isWebsiteRoute = (p: string) => p === "/website" || p.startsWith("/website/");
+export const isLoginRoute = (p: string) => p === "/login" || p.startsWith("/login/");
 export const isOnboardingRoute = (p: string) => p === "/onboarding" || p.startsWith("/onboarding/");
 
 export function isFocusRoute(p: string) {
@@ -183,7 +172,11 @@ export function isFocusRoute(p: string) {
 
 // ---------------------------------------------------------------- sidebar
 
-type Item = { label: string; icon?: React.ReactNode; href?: string; badge?: number; match?: (p: string) => boolean; children?: Item[] };
+type Item = { label: string; icon?: React.ReactNode; href?: string; badge?: number; match?: (p: string) => boolean; children?: Item[]; disabled?: boolean };
+
+/** While the account is being activated, only "Get started" works; everything else unlocks on approval. */
+const lockForActivation = (items: Item[]): Item[] =>
+  items.map((it) => (it.href === "/get-started" ? it : { ...it, disabled: true, badge: undefined, children: it.children && lockForActivation(it.children) }));
 
 const CARD_ROUTES = /^\/(cards|subscriptions|requests|travel)(\/|$)/;
 
@@ -196,7 +189,7 @@ function Sidebar({ pathname, onNavigate }: { pathname: string; onNavigate: () =>
 
   const cards: Item = {
     label: "Cards",
-    icon: <RiBankCardLine />,
+    icon: <CreditCardIcon />,
     match: (p) => CARD_ROUTES.test(p),
     badge: pendingCount,
     children: [
@@ -210,48 +203,59 @@ function Sidebar({ pathname, onNavigate }: { pathname: string; onNavigate: () =>
     {
       items: [
         // Until compliance approves the account, setup tasks live here (Figma "Verify your business").
-        ...(onboarding && role === "owner" ? [{ label: "Get started", icon: <RiSparkling2Line />, href: "/get-started" }] : []),
-        { label: "Home", icon: <RiStarSLine /> },
-        { label: "Dashboard", icon: <RiDashboardLine /> },
-        { label: "Global accounts", icon: <RiEarthLine />, href: can(role, "autofx") ? "/global-account" : undefined },
+        ...(onboarding && role === "owner" ? [{ label: "Get started", icon: <SparkleIcon />, href: "/get-started" }] : []),
+        { label: "Home", icon: <StarIcon /> },
+        { label: "Dashboard", icon: <SquaresFourIcon /> },
+        { label: "Global accounts", icon: <GlobeIcon />, href: can(role, "autofx") ? "/global-account" : undefined },
       ],
     },
     {
       title: "Move money",
       items: [
-        { label: "Send", icon: <RiSendPlaneLine /> },
-        { label: "Receive", icon: <RiArrowDownLine />, children: [] },
-        { label: "Swap", icon: <RiArrowLeftRightFill /> },
+        { label: "Send", icon: <PaperPlaneTiltIcon /> },
+        { label: "Receive", icon: <ArrowDownIcon />, children: [] },
+        { label: "Swap", icon: <ArrowsLeftRightBoldIcon /> },
         cards,
       ],
     },
-    { title: "Records", items: [{ label: "Transactions", icon: <RiCoinLine /> }, { label: "Analytics", icon: <RiLineChartLine /> }] },
+    { title: "Records", items: [{ label: "Transactions", icon: <CoinIcon /> }, { label: "Analytics", icon: <ChartLineIcon /> }] },
     {
       title: "Manage",
       items: [
-        { label: "Recipients", icon: <RiTeamLine /> },
-        { label: "Team & approvals", icon: <RiUserSettingsLine /> },
-        { label: "Settings", icon: <RiSettings4Line /> },
+        { label: "Recipients", icon: <UsersThreeIcon /> },
+        { label: "Team & approvals", icon: <UserGearIcon /> },
+        { label: "Settings", icon: <GearSixIcon /> },
       ],
     },
   ];
+
+  const developers: Item[] = [
+    { label: "API Payouts", icon: <GlobeIcon /> },
+    { label: "Keys & Web-hooks", icon: <KeyIcon /> },
+    { label: "Configuration", icon: <GearFineIcon /> },
+  ];
+  const lock = (items: Item[]) => (onboarding ? lockForActivation(items) : items);
 
   return (
     <nav aria-label="Main" className="flex h-full flex-col overflow-y-auto px-3 pt-5 pb-8">
       <Workspace />
       <div className="mt-8 space-y-6">
         {groups.map((g, i) => (
-          <NavGroup key={i} title={g.title} items={g.items} pathname={pathname} onNavigate={onNavigate} />
+          <React.Fragment key={i}>
+            <NavGroup title={g.title} items={lock(g.items)} pathname={pathname} onNavigate={onNavigate} />
+            {i === 0 && onboarding && (
+              <p className="flex items-start gap-2 px-3 text-[12px] leading-[18px] font-medium tracking-[0.01em] text-fg-3">
+                <LockIcon className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+                The rest of Foren unlocks once your account is activated.
+              </p>
+            )}
+          </React.Fragment>
         ))}
       </div>
       <div className="mt-auto pt-8">
         <NavGroup
           title="Developers"
-          items={[
-            { label: "API Payouts", icon: <RiEarthLine /> },
-            { label: "Keys & Web-hooks", icon: <RiKeyLine /> },
-            { label: "Configuration", icon: <RiSettings5Line /> },
-          ]}
+          items={lock(developers)}
           pathname={pathname}
           onNavigate={onNavigate}
         />
@@ -269,7 +273,7 @@ function Workspace() {
         <Image src={asset("/foren-logo.svg")} alt="" width={12} height={12} />
       </span>
       <span className="min-w-0 flex-1 truncate text-[14px] font-medium tracking-[0.01em] text-fg-2">{name}</span>
-      <RiExpandUpDownLine className="size-4 shrink-0 text-fg-3" aria-hidden />
+      <CaretUpDownIcon className="size-4 shrink-0 text-fg-3" aria-hidden />
     </div>
   );
 }
@@ -291,6 +295,25 @@ function NavGroup({ title, items, pathname, onNavigate }: { title?: string; item
 }
 
 function NavEntry({ item, pathname, onNavigate }: { item: Item; pathname: string; onNavigate: () => void }) {
+  if (item.disabled)
+    return (
+      <li>
+        <span
+          role="link"
+          aria-disabled="true"
+          title="Available once your account is activated"
+          className={cn(itemCls, "cursor-not-allowed text-fg-disabled select-none")}
+        >
+          {item.icon ?? <span className="size-[14px] shrink-0" aria-hidden />}
+          <span className="flex-1">{item.label}</span>
+          {item.children && <CaretRightIcon className="!size-4" aria-hidden />}
+        </span>
+      </li>
+    );
+  return <EnabledNavEntry item={item} pathname={pathname} onNavigate={onNavigate} />;
+}
+
+function EnabledNavEntry({ item, pathname, onNavigate }: { item: Item; pathname: string; onNavigate: () => void }) {
   const active = item.match ? item.match(pathname) : !!item.href && pathname.startsWith(item.href);
   const expandable = !!item.children;
   // Open while you're in this section, unless you've closed it yourself.
@@ -317,7 +340,7 @@ function NavEntry({ item, pathname, onNavigate }: { item: Item; pathname: string
           {item.icon}
           <span className="flex-1">{item.label}</span>
           {badge}
-          <RiArrowRightSLine className={cn("!size-4 text-fg-3 transition-transform", open && hasChildren && "rotate-90")} aria-hidden />
+          <CaretRightIcon className={cn("!size-4 text-fg-3 transition-transform", open && hasChildren && "rotate-90")} aria-hidden />
         </button>
         {open && hasChildren && (
           <ul className="mt-1 space-y-1">
@@ -376,7 +399,7 @@ function Breadcrumb({ pathname }: { pathname: string }) {
     <nav aria-label="Breadcrumb" className="min-w-0">
       <ol className="flex min-w-0 items-center gap-2 text-[14px]">
         <li className="shrink-0">
-          <RiHomeLine className="size-[14px] text-fg" aria-hidden />
+          <HouseIcon className="size-[14px] text-fg" aria-hidden />
         </li>
         {crumbs.map((c, i) => {
           const last = i === crumbs.length - 1;

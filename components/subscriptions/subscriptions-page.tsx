@@ -9,12 +9,7 @@ import {
 } from "@/components/ui/foren-table";
 import * as React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import {
-  RiAlertLine,
-  RiBankCardLine,
-  RiCloseLine,
-  RiRepeatLine,
-} from "@remixicon/react";
+import { CreditCardIcon, RepeatIcon, WarningIcon, XIcon } from "@/components/icons";
 import { CardsHeader } from "@/components/cards/cards-header";
 import { toast } from "sonner";
 import { ForenBadge } from "@/components/ui/foren-badge";
@@ -174,7 +169,7 @@ export function SubscriptionsPage() {
 
       {status === "loading" && <LoadingRows />}
       {status === "error" && <ErrorState onRetry={retry} />}
-      {status === "ready" && rows.length === 0 && <EmptyState icon={<RiRepeatLine />} title={COPY.subscriptionsEmpty.title} body={COPY.subscriptionsEmpty.body} />}
+      {status === "ready" && rows.length === 0 && <EmptyState icon={<RepeatIcon />} title={COPY.subscriptionsEmpty.title} body={COPY.subscriptionsEmpty.body} />}
       {status === "ready" && rows.length > 0 && (
         <div className={cn("grid items-start gap-6", split && "grid-cols-[minmax(0,1fr)_420px]")}>
           <div className="min-w-0 space-y-4">
@@ -204,9 +199,9 @@ export function SubscriptionsPage() {
 
             {showTip && (
               <ForenInfoNote
-                icon={<RiBankCardLine />}
+                icon={<CreditCardIcon />}
                 className="bg-surface"
-                action={<ForenButton variant="ghost" size="xxs" aria-label="Dismiss tip" className="px-2" leadingIcon={<RiCloseLine />} onClick={dismissTip} />}
+                action={<ForenButton variant="ghost" size="xxs" aria-label="Dismiss tip" className="px-2" leadingIcon={<XIcon />} onClick={dismissTip} />}
               >
                 Give each subscription its own card to stop one without affecting the rest.
               </ForenInfoNote>
@@ -215,7 +210,7 @@ export function SubscriptionsPage() {
             {attention.length > 0 && (
               <section aria-label="Needs attention" aria-live="polite" className="overflow-hidden rounded-[20px]">
                 <div className="flex items-center gap-2 bg-warning-subtle px-4 py-2 text-[12px] font-semibold text-warning">
-                  <RiAlertLine className="size-4" aria-hidden /> Needs attention · {attention.length}
+                  <WarningIcon className="size-4" aria-hidden /> Needs attention · {attention.length}
                 </div>
                 <ul className="divide-y divide-line bg-surface">
                   {attention.map((r) => (
@@ -379,7 +374,7 @@ export function SubStatusBadge({ st }: { st: SubStatus }) {
       );
     case "at_risk":
       return (
-        <ForenBadge color="orange" leadingIcon={<RiAlertLine aria-hidden />}>
+        <ForenBadge color="orange" leadingIcon={<WarningIcon aria-hidden />}>
           At risk
         </ForenBadge>
       );

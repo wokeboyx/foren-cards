@@ -2,7 +2,7 @@
 import { PageHeader } from "@/components/page-header";
 import * as React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { RiDownloadLine, RiFileList3Line, RiForbidLine, RiReceiptLine, RiUploadLine } from "@remixicon/react";
+import { ClipboardTextIcon, DownloadSimpleIcon, ProhibitIcon, ReceiptIcon, UploadSimpleIcon } from "@/components/icons";
 import { toast } from "sonner";
 import { ForenBadge, type BadgeColor } from "@/components/ui/foren-badge";
 import { ForenTable, ForenTableBody, ForenTableCell, ForenTableHead, ForenTableHeaderCell, ForenTableRow } from "@/components/ui/foren-table";
@@ -68,8 +68,8 @@ export function TransactionsPage({ cardId }: { cardId: string }) {
       <Panel className="px-6 py-4">
         {status === "loading" && <LoadingRows rows={6} />}
         {status === "error" && <ErrorState onRetry={retry} />}
-        {status === "ready" && txns.length === 0 && <EmptyState icon={<RiFileList3Line />} title={COPY.transactionsEmpty.title} body={COPY.transactionsEmpty.body} />}
-        {status === "ready" && txns.length > 0 && shown.length === 0 && <EmptyState icon={<RiFileList3Line />} title="Nothing missing" body="Every approved charge on this card has a receipt." />}
+        {status === "ready" && txns.length === 0 && <EmptyState icon={<ClipboardTextIcon />} title={COPY.transactionsEmpty.title} body={COPY.transactionsEmpty.body} />}
+        {status === "ready" && txns.length > 0 && shown.length === 0 && <EmptyState icon={<ClipboardTextIcon />} title="Nothing missing" body="Every approved charge on this card has a receipt." />}
         {status === "ready" && shown.length > 0 && (
           <ForenTable className="table-flush" caption={`Transactions on ${card.nickname}`} minWidth={0}>
             <ForenTableHead>
@@ -189,7 +189,7 @@ export function TransactionDetail({ t, card }: { t: Transaction; card: Card }) {
         <section className="rounded-[16px] border border-line p-4">
           <div className="text-[14px] font-semibold text-fg">Don’t recognise this merchant?</div>
           <p className="mt-1 text-[13px] text-fg-2">Block {m?.name} on this card to decline its future charges. Other merchants aren’t affected.</p>
-          <ForenButton variant="outline" size="xs" destructive className="mt-3" leadingIcon={<RiForbidLine />} disabled={alreadyBlocked} onClick={() => setConfirm(true)}>
+          <ForenButton variant="outline" size="xs" destructive className="mt-3" leadingIcon={<ProhibitIcon />} disabled={alreadyBlocked} onClick={() => setConfirm(true)}>
             {alreadyBlocked ? "Blocked on this card" : "Block merchant"}
           </ForenButton>
         </section>
@@ -267,7 +267,7 @@ function ExpenseDetails({ t, card }: { t: Transaction; card: Card }) {
       <div className="space-y-3 rounded-[16px] bg-subtle p-4">
         <div className="flex items-center gap-3">
           <span className={cn("grid size-10 shrink-0 place-items-center rounded-[10px]", t.receipt ? "bg-success-subtle text-success" : "bg-warning-subtle text-warning")} aria-hidden>
-            <RiReceiptLine className="size-5" />
+            <ReceiptIcon className="size-5" />
           </span>
           <div className="min-w-0 flex-1 text-[13px]">
             {t.receipt ? (
@@ -298,7 +298,7 @@ function ExpenseDetails({ t, card }: { t: Transaction; card: Card }) {
                   e.target.value = "";
                 }}
               />
-              <ForenButton size="xs" variant={t.receipt ? "ghost" : "secondary"} className="bg-surface" leadingIcon={<RiUploadLine />} onClick={() => fileRef.current?.click()}>
+              <ForenButton size="xs" variant={t.receipt ? "ghost" : "secondary"} className="bg-surface" leadingIcon={<UploadSimpleIcon />} onClick={() => fileRef.current?.click()}>
                 {t.receipt ? "Replace" : "Add receipt"}
               </ForenButton>
             </>
@@ -395,7 +395,7 @@ function MonthlyStatement({ card, txns }: { card: Card; txns: Transaction[] }) {
             {missing ? ` · ${missing} missing ${missing === 1 ? "receipt" : "receipts"}` : ""}
           </p>
         </div>
-        <ForenButton size="xxs" variant="secondary" leadingIcon={<RiDownloadLine />} onClick={exportCsv}>
+        <ForenButton size="xxs" variant="secondary" leadingIcon={<DownloadSimpleIcon />} onClick={exportCsv}>
           Export CSV
         </ForenButton>
       </div>

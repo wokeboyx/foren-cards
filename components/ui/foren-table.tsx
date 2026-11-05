@@ -14,15 +14,7 @@
 // through the same paddings, heights and tokens.
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import {
-  RiArrowLeftSLine,
-  RiArrowRightDownLine,
-  RiArrowRightSLine,
-  RiArrowRightUpLine,
-  RiCalendarLine,
-  RiExpandUpDownLine,
-  RiSubtractLine,
-} from "@remixicon/react";
+import { ArrowDownRightIcon, ArrowUpRightIcon, CalendarBlankIcon, CaretLeftIcon, CaretRightIcon, CaretUpDownIcon, MinusIcon } from "@/components/icons";
 import { ForenBadge, type BadgeColor } from "./foren-badge";
 import { ForenTag, tagVariants } from "./foren-tag";
 import { ForenProgress } from "./foren-progress";
@@ -192,7 +184,7 @@ export function ForenTableHeaderCell({
             className="group/sort inline-flex cursor-pointer items-center gap-1 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-foren-border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-foren-bg-default)]"
           >
             {text}
-            <RiExpandUpDownLine
+            <CaretUpDownIcon
               aria-hidden
               className={cn(
                 "size-3 shrink-0 transition-colors",
@@ -488,7 +480,7 @@ export function ForenTableCell(props: ForenTableCellProps) {
       const { value, direction } = props as TrendCell;
       const dir = direction ?? inferDirection(value);
       const Icon =
-        dir === "up" ? RiArrowRightUpLine : dir === "down" ? RiArrowRightDownLine : RiSubtractLine;
+        dir === "up" ? ArrowUpRightIcon : dir === "down" ? ArrowDownRightIcon : MinusIcon;
       const tint =
         dir === "up"
           ? "text-[var(--color-foren-success)]"
@@ -531,7 +523,7 @@ export function ForenTableCell(props: ForenTableCellProps) {
         <>
           {showIcon && (
             <IconSlot>
-              <RiCalendarLine aria-hidden />
+              <CalendarBlankIcon aria-hidden />
             </IconSlot>
           )}
           <span className="flex min-w-0 flex-col gap-0.5">
@@ -922,7 +914,7 @@ function NavButton({
   onClick: () => void;
 }) {
   const s = PAGINATION_SIZES[size];
-  const Icon = direction === "prev" ? RiArrowLeftSLine : RiArrowRightSLine;
+  const Icon = direction === "prev" ? CaretLeftIcon : CaretRightIcon;
   return (
     <button
       type="button"

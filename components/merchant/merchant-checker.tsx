@@ -1,12 +1,6 @@
 "use client";
 import * as React from "react";
-import {
-  RiCheckboxCircleFill,
-  RiCloseCircleFill,
-  RiQuestionFill,
-  RiSettings3Fill,
-  RiStore2Line,
-} from "@remixicon/react";
+import { CheckCircleFillIcon, GearFillIcon, QuestionFillIcon, StorefrontIcon, XCircleFillIcon } from "@/components/icons";
 import { ForenButton } from "@/components/ui/foren-button";
 import { ForenSearch, type ForenSearchResult } from "@/components/ui/foren-search";
 import { ForenSpinner } from "@/components/ui/foren-spinner";
@@ -21,11 +15,11 @@ import { call } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 export const VERDICT_STYLE: Record<Verdict, { icon: React.ReactNode; cls: string }> = {
-  works: { icon: <RiCheckboxCircleFill />, cls: "bg-success-subtle text-success" },
-  likely: { icon: <RiCheckboxCircleFill />, cls: "bg-info-subtle text-info" },
-  setup_needed: { icon: <RiSettings3Fill />, cls: "bg-warning-subtle text-warning" },
-  wont_work: { icon: <RiCloseCircleFill />, cls: "bg-error-subtle text-error" },
-  no_history: { icon: <RiQuestionFill />, cls: "bg-subtle text-fg-2" },
+  works: { icon: <CheckCircleFillIcon />, cls: "bg-success-subtle text-success" },
+  likely: { icon: <CheckCircleFillIcon />, cls: "bg-info-subtle text-info" },
+  setup_needed: { icon: <GearFillIcon />, cls: "bg-warning-subtle text-warning" },
+  wont_work: { icon: <XCircleFillIcon />, cls: "bg-error-subtle text-error" },
+  no_history: { icon: <QuestionFillIcon />, cls: "bg-subtle text-fg-2" },
 };
 
 /** An unknown merchant typed by the user — we have no history for it. */
@@ -75,7 +69,7 @@ export function MerchantChecker({
       icon: <MerchantLogo merchant={m} size={28} />,
     }));
     if (!hits.some((m) => m.name.toLowerCase() === q))
-      list.push({ value: `unknown:${raw.trim()}`, label: `Check “${raw.trim()}”`, description: "Not in our merchant list", icon: <RiStore2Line className="size-5 text-fg-3" /> });
+      list.push({ value: `unknown:${raw.trim()}`, label: `Check “${raw.trim()}”`, description: "Not in our merchant list", icon: <StorefrontIcon className="size-5 text-fg-3" /> });
     return list;
   }, []);
 

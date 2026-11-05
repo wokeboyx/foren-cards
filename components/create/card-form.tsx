@@ -5,7 +5,7 @@ import { asset } from "@/lib/base-path";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
-import { RiAddLine, RiArrowLeftLine, RiArrowRightLine, RiCloseLine, RiDeleteBinLine, RiSave3Line, RiNotification3Line, RiSearchEyeLine } from "@remixicon/react";
+import { ArrowLeftIcon, ArrowRightIcon, BellIcon, BinocularsIcon, FloppyDiskIcon, PlusIcon, TrashIcon, XIcon } from "@/components/icons";
 import { toast } from "sonner";
 import { ForenButton } from "@/components/ui/foren-button";
 import { LinkButton } from "@/components/link-button";
@@ -193,7 +193,7 @@ export function CardForm({ mode, initial, prefill, fromDraft }: { mode: "create"
             {COMPANY.name}
           </div>
           <Link href={closeHref} aria-label="Close" className="grid size-9 place-items-center rounded-full text-fg-2 outline-none hover:bg-subtle focus-visible:ring-2 focus-visible:ring-focus lg:hidden">
-            <RiCloseLine className="size-5" aria-hidden />
+            <XIcon className="size-5" aria-hidden />
           </Link>
         </header>
         {/* Phones/tablets: switch between the form and the live preview (desktop shows both side by side). */}
@@ -260,12 +260,12 @@ export function CardForm({ mode, initial, prefill, fromDraft }: { mode: "create"
                       autoFocus={!n}
                       onChange={(e) => setExtraNames((xs) => xs.map((x, j) => (j === i ? e.target.value : x)))}
                     />
-                    <ForenButton type="button" variant="ghost" size="sm" aria-label={`Remove card ${i + 2}`} leadingIcon={<RiDeleteBinLine />} className="mb-0.5 px-3" onClick={() => setExtraNames((xs) => xs.filter((_, j) => j !== i))} />
+                    <ForenButton type="button" variant="ghost" size="sm" aria-label={`Remove card ${i + 2}`} leadingIcon={<TrashIcon />} className="mb-0.5 px-3" onClick={() => setExtraNames((xs) => xs.filter((_, j) => j !== i))} />
                   </div>
                 ))}
                 {extraNames.length < 9 && (
                   <button type="button" onClick={() => setExtraNames((xs) => [...xs, ""])} className="inline-flex items-center gap-1.5 rounded-full px-1 py-1 text-[13px] font-semibold text-fg outline-none hover:underline focus-visible:ring-2 focus-visible:ring-focus">
-                    <RiAddLine className="size-4" aria-hidden />
+                    <PlusIcon className="size-4" aria-hidden />
                     Add another card with the same settings
                   </button>
                 )}
@@ -278,7 +278,7 @@ export function CardForm({ mode, initial, prefill, fromDraft }: { mode: "create"
             <PermissionsEditor value={draft.permissions} onChange={(permissions) => set({ permissions })} error={errors.permissions} />
             <div className="rounded-[16px] bg-subtle p-4">
               <button type="button" aria-expanded={checkerOpen} onClick={() => setCheckerOpen((o) => !o)} className="flex w-full items-center gap-2 text-left text-[14px] font-semibold text-fg outline-none focus-visible:underline">
-                <RiSearchEyeLine className="size-[18px]" aria-hidden />
+                <BinocularsIcon className="size-[18px]" aria-hidden />
                 Check a merchant <span className="font-normal text-fg-3">(optional)</span>
               </button>
               {checkerOpen && (
@@ -430,7 +430,7 @@ export function CardForm({ mode, initial, prefill, fromDraft }: { mode: "create"
             )}
             <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
               {stepped && step < STEPS.length - 1 ? (
-                <ForenButton type="submit" size="sm" className="w-full sm:order-last sm:flex-1" disabled={!ready} trailingIcon={<RiArrowRightLine />}>
+                <ForenButton type="submit" size="sm" className="w-full sm:order-last sm:flex-1" disabled={!ready} trailingIcon={<ArrowRightIcon />}>
                   Continue
                 </ForenButton>
               ) : (
@@ -440,7 +440,7 @@ export function CardForm({ mode, initial, prefill, fromDraft }: { mode: "create"
               )}
               <div className="flex gap-2 sm:contents">
                 {stepped && step > 0 ? (
-                  <ForenButton type="button" variant="outline" size="sm" className="flex-1" leadingIcon={<RiArrowLeftLine />} onClick={() => { setErrors({}); setStep(step - 1); top(); }}>
+                  <ForenButton type="button" variant="outline" size="sm" className="flex-1" leadingIcon={<ArrowLeftIcon />} onClick={() => { setErrors({}); setStep(step - 1); top(); }}>
                     Back
                   </ForenButton>
                 ) : (
@@ -454,7 +454,7 @@ export function CardForm({ mode, initial, prefill, fromDraft }: { mode: "create"
                     variant="outline"
                     size="sm"
                     className="flex-1"
-                    leadingIcon={<RiSave3Line />}
+                    leadingIcon={<FloppyDiskIcon />}
                     disabled={saveDraft.pending}
                     onClick={async () => {
                       const r = await saveDraft.run({ id: draftId, savedAt: new Date().toISOString(), step, card: draft, names: extraNames, amountText, years });
@@ -477,7 +477,7 @@ export function CardForm({ mode, initial, prefill, fromDraft }: { mode: "create"
       <aside aria-label="Card summary" className={cn("mx-5 mt-2 mb-5 flex-1 rounded-[20px] bg-subtle sm:mx-8 lg:sticky lg:top-2 lg:m-2 lg:block lg:h-[calc(100dvh-16px)] lg:w-[44%] lg:max-w-[600px] lg:flex-none lg:overflow-y-auto", pane === "preview" ? "block" : "hidden")}>
         <div className="hidden h-16 items-center justify-end px-6 lg:flex">
           <Link href={closeHref} aria-label="Close" className="grid size-9 place-items-center rounded-full text-fg-2 outline-none hover:bg-surface focus-visible:ring-2 focus-visible:ring-focus">
-            <RiCloseLine className="size-5" aria-hidden />
+            <XIcon className="size-5" aria-hidden />
           </Link>
         </div>
         <div className="mx-auto flex max-w-[380px] flex-col items-center gap-5 px-6 py-8 lg:py-6">
@@ -566,7 +566,7 @@ function Success({ cards, onAnother }: { cards: Card[]; onAnother: () => void })
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-subtle px-5 py-16 text-center">
       <Link href="/cards" aria-label="Close" className="fixed top-5 right-5 grid size-9 place-items-center rounded-full text-fg-2 outline-none hover:bg-surface focus-visible:ring-2 focus-visible:ring-focus">
-        <RiCloseLine className="size-5" aria-hidden />
+        <XIcon className="size-5" aria-hidden />
       </Link>
       <motion.div initial={reduce ? false : { opacity: 0, y: 24, rotate: -6, scale: 0.92 }} animate={{ opacity: 1, y: 0, rotate: 0, scale: 1 }} transition={{ type: "spring", stiffness: 220, damping: 18 }}>
         <CardArt card={card} size="md" holderName={nameOnCard(card)} />
@@ -593,7 +593,7 @@ function Success({ cards, onAnother }: { cards: Card[]; onAnother: () => void })
           className="w-full justify-between"
           label={
             <span className="inline-flex items-center gap-2">
-              <RiNotification3Line className="size-4 text-fg-2" aria-hidden /> Remind me before subscriptions renew
+              <BellIcon className="size-4 text-fg-2" aria-hidden /> Remind me before subscriptions renew
             </span>
           }
           checked={!!live.renewalReminders}

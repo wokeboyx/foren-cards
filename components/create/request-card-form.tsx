@@ -4,7 +4,7 @@ import Image from "next/image";
 import { asset } from "@/lib/base-path";
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
-import { RiArrowLeftLine, RiArrowRightLine, RiCloseLine, RiTimeLine } from "@remixicon/react";
+import { ArrowLeftIcon, ArrowRightIcon, ClockIcon, XIcon } from "@/components/icons";
 import { ForenBadge } from "@/components/ui/foren-badge";
 import { ForenButton } from "@/components/ui/foren-button";
 import { cn } from "@/lib/utils";
@@ -100,12 +100,12 @@ export function RequestCardForm() {
     return (
       <div className="flex min-h-dvh flex-col items-center justify-center bg-subtle px-5 py-16 text-center">
         <Link href="/cards" aria-label="Close" className="fixed top-5 right-5 grid size-9 place-items-center rounded-full text-fg-2 outline-none hover:bg-surface focus-visible:ring-2 focus-visible:ring-focus">
-          <RiCloseLine className="size-5" aria-hidden />
+          <XIcon className="size-5" aria-hidden />
         </Link>
         <motion.div initial={reduce ? false : { opacity: 0, y: 24, scale: 0.94 }} animate={{ opacity: 1, y: 0, scale: 1 }} className="relative">
           <CardArt card={preview} size="md" holderName={me?.name} className="opacity-70" />
           <span className="absolute -top-2.5 -left-2">
-            <ForenBadge color="orange" leadingIcon={<RiTimeLine aria-hidden />}>
+            <ForenBadge color="orange" leadingIcon={<ClockIcon aria-hidden />}>
               Pending request
             </ForenBadge>
           </span>
@@ -129,7 +129,7 @@ export function RequestCardForm() {
             {COMPANY.name}
           </div>
           <Link href="/cards" aria-label="Close" className="grid size-9 place-items-center rounded-full text-fg-2 outline-none hover:bg-subtle focus-visible:ring-2 focus-visible:ring-focus lg:hidden">
-            <RiCloseLine className="size-5" aria-hidden />
+            <XIcon className="size-5" aria-hidden />
           </Link>
         </header>
         {/* Phones/tablets: switch between the form and the live preview (desktop shows both side by side). */}
@@ -216,7 +216,7 @@ export function RequestCardForm() {
             {send.error && <p role="alert" className="mb-3 rounded-[14px] bg-error-subtle px-4 py-2.5 text-[13px] text-error">We couldn’t send your request. Nothing was sent. Try again.</p>}
             <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
               {step < STEPS.length - 1 ? (
-                <ForenButton type="submit" size="sm" className="w-full sm:order-last sm:flex-1" disabled={!ready} trailingIcon={<RiArrowRightLine />}>
+                <ForenButton type="submit" size="sm" className="w-full sm:order-last sm:flex-1" disabled={!ready} trailingIcon={<ArrowRightIcon />}>
                   Continue
                 </ForenButton>
               ) : (
@@ -225,7 +225,7 @@ export function RequestCardForm() {
                 </ForenButton>
               )}
               {step > 0 ? (
-                <ForenButton type="button" variant="outline" size="sm" className="w-full sm:flex-1" leadingIcon={<RiArrowLeftLine />} onClick={() => { setErrors({}); setStep(step - 1); }}>
+                <ForenButton type="button" variant="outline" size="sm" className="w-full sm:flex-1" leadingIcon={<ArrowLeftIcon />} onClick={() => { setErrors({}); setStep(step - 1); }}>
                   Back
                 </ForenButton>
               ) : (
@@ -241,7 +241,7 @@ export function RequestCardForm() {
       <aside aria-label="Request summary" className={cn("mx-5 mt-2 mb-5 flex-1 rounded-[20px] bg-subtle sm:mx-8 lg:sticky lg:top-2 lg:m-2 lg:block lg:h-[calc(100dvh-16px)] lg:w-[44%] lg:max-w-[600px] lg:flex-none lg:overflow-y-auto", pane === "preview" ? "block" : "hidden")}>
         <div className="hidden h-16 items-center justify-end px-6 lg:flex">
           <Link href="/cards" aria-label="Close" className="grid size-9 place-items-center rounded-full text-fg-2 outline-none hover:bg-surface focus-visible:ring-2 focus-visible:ring-focus">
-            <RiCloseLine className="size-5" aria-hidden />
+            <XIcon className="size-5" aria-hidden />
           </Link>
         </div>
         <div className="mx-auto flex max-w-[380px] flex-col items-center gap-5 px-6 py-8 lg:py-6">

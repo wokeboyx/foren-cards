@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { MTO_QUESTIONNAIRE, unanswered, visible, type Answers } from "@/domain/questionnaires";
 import { useOnboarding } from "@/lib/onboarding-store";
+import { CheckBoldIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { FormCard, OnboardingFrame } from "./frame";
 import { FormQuestions } from "./form-questions";
@@ -65,27 +66,23 @@ export function ComplianceDetails() {
         },
       }}
     >
-      <nav aria-label="Questionnaire sections" className="mb-6">
-        <ol className="grid grid-cols-3 gap-2">
-          {TABS.map((t, i) => {
-            const reachable = i <= index || TABS.slice(0, i).every((x) => valid(x.key));
-            return (
-              <li key={t.key}>
-                <button
-                  type="button"
-                  disabled={!reachable}
-                  aria-current={t.key === tab ? "step" : undefined}
-                  onClick={() => go(t.key)}
-                  className="flex w-full flex-col gap-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed"
-                >
-                  <span className={cn("h-[3px] w-full rounded-full", i <= index ? "bg-fg" : "bg-line-2")} aria-hidden />
-                  <span className={cn("text-[12px] leading-[18px] font-medium sm:text-[13px]", t.key === tab ? "text-fg" : i < index ? "text-fg-2" : "text-fg-3")}>{t.title}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ol>
-      </nav>
+      <SectionStepper
+        sections={TABS.map((t, i) => {
+          const shown = visible([t], a)[0].questions;
+          const required = shown.filter((q) => !q.optional);
+          const answered = required.filter((q) => a[q.id]?.trim()).length;
+          return {
+            key: t.key,
+            title: t.title,
+            done: i !== index && valid(t.key),
+            answered,
+            total: required.length,
+            reachable: i <= index || TABS.slice(0, i).every((x) => valid(x.key)),
+          };
+        })}
+        current={index}
+        onSelect={(i) => go(TABS[i].key)}
+      />
 
       <FormCard>
         <h2 ref={headingRef} tabIndex={-1} className="text-[16px] leading-6 font-semibold text-fg outline-none">
@@ -94,5 +91,64 @@ export function ComplianceDetails() {
         <FormQuestions questions={current.questions} answers={a} onChange={(patch) => setA((p) => ({ ...p, ...patch }))} errorFor={() => undefined} />
       </FormCard>
     </OnboardingFrame>
+  );
+}
+
+type Section = { key: string; title: string; done: boolean; answered: number; total: number; reachable: boolean };
+
+/**
+ * Section progress for the questionnaire: numbered steps joined by a line, in the sidebar's visual language
+ * (green tick done, dark current, outlined upcoming), with each section's status underneath.
+ * Finished and current sections are clickable; later ones unlock as the earlier ones are completed.
+ */
+function SectionStepper({ sections, current, onSelect }: { sections: Section[]; current: number; onSelect: (i: number) => void }) {
+  return (
+    <nav aria-label="Questionnaire sections" className="mb-6 rounded-[20px] bg-surface px-4 py-4">
+      <p className="mb-3 text-[12px] leading-[18px] font-semibold tracking-[0.01em] text-fg-3 uppercase">
+        Section {current + 1} of {sections.length}
+      </p>
+      <ol className="flex items-start">
+        {sections.map((s, i) => {
+          const active = i === current;
+          const status = s.done ? "Done" : active ? `${s.answered} of ${s.total} answered` : "Up next";
+          return (
+            <li key={s.key} className="relative flex min-w-0 flex-1 flex-col">
+              {/* Connector to the next step, drawn from this circle's centre. */}
+              {i < sections.length - 1 && (
+                <span aria-hidden className={cn("absolute top-3 right-0 left-6 h-0.5 rounded-full sm:left-7", s.done ? "bg-[var(--color-foren-brand-green)]" : "bg-line")} />
+              )}
+              <button
+                type="button"
+                disabled={!s.reachable}
+                aria-current={active ? "step" : undefined}
+                aria-label={`${s.title}: ${status}`}
+                onClick={() => onSelect(i)}
+                className="group relative flex min-w-0 flex-col items-start gap-2 pr-3 text-left outline-none disabled:cursor-not-allowed"
+              >
+                <span
+                  className={cn(
+                    "relative z-[1] grid size-6 shrink-0 place-items-center rounded-full text-[12px] leading-4 font-bold ring-4 ring-surface transition-colors group-focus-visible:shadow-[0_0_0_2px_var(--color-foren-bg-default),0_0_0_4px_var(--color-foren-border-focused-primary)]",
+                    s.done
+                      ? "bg-[var(--color-foren-brand-green)] text-white"
+                      : active
+                        ? "bg-[var(--color-foren-bg-button-primary)] text-[var(--color-foren-text-inverse)]"
+                        : "border-[1.5px] border-line-2 bg-surface text-fg-2"
+                  )}
+                  aria-hidden
+                >
+                  {s.done ? <CheckBoldIcon className="size-[14px]" /> : i + 1}
+                </span>
+                <span className={cn("flex min-w-0 flex-col gap-0.5", !active && "max-sm:hidden")}>
+                  <span className={cn("text-[13px] leading-[18px] font-medium tracking-[0.01em]", active ? "text-fg" : s.done ? "text-success" : "text-fg-2", s.reachable && !active && "group-hover:underline")}>
+                    {s.title}
+                  </span>
+                  <span className={cn("text-[12px] leading-[16px] font-medium tracking-[0.01em]", active ? "text-fg-2" : "text-fg-3")}>{status}</span>
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
   );
 }

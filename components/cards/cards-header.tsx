@@ -1,7 +1,7 @@
 "use client";
 import { PageHeader } from "@/components/page-header";
 import { useRouter } from "next/navigation";
-import { RiAddLine } from "@remixicon/react";
+import { PlusIcon } from "@/components/icons";
 import { ForenSegmentedControl } from "@/components/ui/foren-segmented-control";
 import { LinkButton } from "@/components/link-button";
 import { COPY } from "@/content/copy";
@@ -27,11 +27,11 @@ export function CardsHeader({ tab, description }: { tab: CardsTab; description?:
       description={description}
       actions={
         can(role, "issue") ? (
-          <LinkButton href="/cards/new" variant="primary" size="sm" leadingIcon={<RiAddLine />}>
+          <LinkButton href="/cards/new" variant="primary" size="sm" leadingIcon={<PlusIcon />}>
             {COPY.createCard}
           </LinkButton>
         ) : (
-          <LinkButton href="/cards/request" variant="primary" size="sm" leadingIcon={<RiAddLine />}>
+          <LinkButton href="/cards/request" variant="primary" size="sm" leadingIcon={<PlusIcon />}>
             Request card
           </LinkButton>
         )

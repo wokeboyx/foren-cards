@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { RiCheckLine, RiFileCopyLine, RiLockLine, RiStore2Line } from "@remixicon/react";
+import { CheckBoldIcon, CopyIcon, LockIcon, StorefrontIcon } from "@/components/icons";
 import { toast } from "sonner";
 import { ForenButton } from "@/components/ui/foren-button";
 import { ForenToggle } from "@/components/ui/foren-toggle";
@@ -38,8 +38,8 @@ export function GiveOwnCardModal({ card, merchant, onClose }: { card: Card; merc
             <CardArt card={preview} size="md" merchantName={merchant.name} holderName={holder?.name} />
           </div>
           <ul className="space-y-2 text-[14px] leading-[20px] text-fg">
-            <Li icon={<RiLockLine />}>Only {merchant.name} can charge it. Every other merchant is declined.</Li>
-            <Li icon={<RiStore2Line />}>
+            <Li icon={<LockIcon />}>Only {merchant.name} can charge it. Every other merchant is declined.</Li>
+            <Li icon={<StorefrontIcon />}>
               Same cardholder, funding and limit as {card.nickname}
               {card.limit.amount.minor < 1_000_000_000 ? ` (${format(card.limit.amount)} ${card.limit.period === "per_txn" ? "per charge" : card.limit.period})` : ""}. You can change them later.
             </Li>
@@ -114,7 +114,7 @@ function UpdateAtMerchant({ card, merchant, oldCard, blockOld, onDone }: { card:
               aria-label={`Copy ${label.toLowerCase()}`}
               className={cn("grid size-8 place-items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-focus", copied === label ? "bg-success-subtle text-success" : "text-fg-2 hover:bg-subtle")}
             >
-              {copied === label ? <RiCheckLine className="size-4" aria-hidden /> : <RiFileCopyLine className="size-4" aria-hidden />}
+              {copied === label ? <CheckBoldIcon className="size-4" aria-hidden /> : <CopyIcon className="size-4" aria-hidden />}
             </button>
           </li>
         ))}
@@ -144,7 +144,7 @@ function Steps({ step }: { step: 1 | 2 }) {
       {["Create the card", "Update it at the merchant"].map((label, i) => (
         <li key={label} className={cn("flex items-center gap-2", i + 1 === step ? "text-fg" : "text-fg-3")} aria-current={i + 1 === step ? "step" : undefined}>
           <span className={cn("tnum grid size-5 place-items-center rounded-full text-[11px]", i + 1 < step ? "bg-success text-white" : i + 1 === step ? "bg-[var(--color-foren-bg-button-primary)] text-[var(--color-foren-text-inverse)]" : "bg-subtle")}>
-            {i + 1 < step ? <RiCheckLine className="size-3" aria-hidden /> : i + 1}
+            {i + 1 < step ? <CheckBoldIcon className="size-3" aria-hidden /> : i + 1}
           </span>
           {label}
           {i === 0 && <span className="h-px w-6 bg-line-2" aria-hidden />}

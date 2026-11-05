@@ -1,17 +1,23 @@
 "use client";
 import * as React from "react";
 import Link from "next/link";
-import { RiArrowLeftSLine, RiCheckboxCircleFill, RiErrorWarningFill, RiInformationFill } from "@remixicon/react";
+import Image from "next/image";
+import { CaretLeftIcon, CheckCircleFillIcon, InfoFillIcon, WarningCircleFillIcon } from "@/components/icons";
 import { ForenBadge, type BadgeColor } from "@/components/ui/foren-badge";
+import { asset } from "@/lib/base-path";
 import type { Stakeholder, TaskStatus } from "@/lib/onboarding-store";
 import { cn } from "@/lib/utils";
 
-/** The Figma "Verify your business" screens sit in a centred 558px column inside the app panel. */
-export function SetupColumn({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("mx-auto w-full max-w-[558px]", className)}>{children}</div>;
+/**
+ * The Figma "Verify your business" screens sit in a centred column inside the app panel: 470px for the
+ * overview and stakeholders, 550px for documents, 600px for stakeholder verification.
+ */
+export function SetupColumn({ children, className, size = "sm" }: { children: React.ReactNode; className?: string; size?: "sm" | "md" | "lg" }) {
+  const width = { sm: "max-w-[470px]", md: "max-w-[550px]", lg: "max-w-[600px]" }[size];
+  return <div className={cn("mx-auto w-full", width, className)}>{children}</div>;
 }
 
-/** Megafield title + one-line description, with the round back button above (Figma). */
+/** Megafield title + description, with the round back button (and an optional action) above (Figma). */
 export function SetupHeader({
   title,
   description,
@@ -24,16 +30,16 @@ export function SetupHeader({
   action?: React.ReactNode;
 }) {
   return (
-    <header className="mb-8 flex flex-col gap-4">
+    <header className="mb-8 flex flex-col gap-6">
       {(back || action) && (
         <div className="flex items-center justify-between">
           {back ? (
             <Link
               href={back}
               aria-label="Back"
-              className="grid size-8 place-items-center rounded-full border border-[rgba(0,0,0,0.07)] bg-surface text-fg outline-none hover:bg-subtle focus-visible:ring-2 focus-visible:ring-focus"
+              className="grid size-10 place-items-center rounded-full border border-[rgba(0,0,0,0.07)] bg-white/10 text-fg outline-none hover:bg-subtle focus-visible:ring-2 focus-visible:ring-focus"
             >
-              <RiArrowLeftSLine className="size-[18px]" aria-hidden />
+              <CaretLeftIcon className="size-[22px]" aria-hidden />
             </Link>
           ) : (
             <span />
@@ -42,8 +48,8 @@ export function SetupHeader({
         </div>
       )}
       <div className="flex flex-col gap-2">
-        <h1 className="font-display text-[24px] leading-[32px] font-semibold tracking-[-0.015em] text-black [font-synthesis:none]">{title}</h1>
-        {description && <p className="text-[14px] leading-[21px] font-medium text-fg-2">{description}</p>}
+        <h1 className="font-display text-[20px] leading-[30px] font-semibold tracking-[-0.015em] text-black [font-synthesis:none]">{title}</h1>
+        {description && <p className="text-[12px] leading-[18px] font-medium tracking-[0.01em] text-fg-2">{description}</p>}
       </div>
     </header>
   );
@@ -51,8 +57,14 @@ export function SetupHeader({
 
 /** Uppercase group label (Figma "TODO", "FROM COMPANY HOUSE", "REQUIRES ACTION"). */
 export function GroupLabel({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <h2 className={cn("mb-3 text-[12px] leading-[18px] font-semibold tracking-[0.04em] text-fg-3 uppercase", className)}>{children}</h2>;
+  return <h2 className={cn("mb-2 text-[12px] leading-[18px] font-semibold tracking-[0.01em] text-fg-3 uppercase", className)}>{children}</h2>;
 }
+
+/** White list card used for stakeholder and task rows (Figma "card"). */
+export const cardCls = "rounded-[24px] border-[0.7px] border-line bg-surface px-3 py-4";
+
+/** The small outlined row buttons (Copy link, Resend link): DS outline xxs with the Figma label style. */
+export const rowButtonCls = "font-medium tracking-[0.01em] text-fg-2";
 
 const TASK_BADGE: Record<TaskStatus, [BadgeColor, string]> = {
   not_started: ["gray", "Not started"],
@@ -62,18 +74,27 @@ const TASK_BADGE: Record<TaskStatus, [BadgeColor, string]> = {
   verified: ["success", "Verified"],
 };
 
-export function TaskBadge({ status, label }: { status: TaskStatus; label?: string }) {
-  const [color, text] = TASK_BADGE[status];
+export function TaskBadge({ status, label, color }: { status: TaskStatus; label?: string; color?: BadgeColor }) {
+  const [c, text] = TASK_BADGE[status];
   return (
-    <ForenBadge size="sm" color={color}>
+    <ForenBadge size="sm" color={color ?? c}>
       {label ?? text}
     </ForenBadge>
   );
 }
 
+/** The orange-to-pink "information-2-fill" glyph Figma uses on delegate and verification status lines. */
+export function InfoGlyph({ size = 16, className }: { size?: number; className?: string }) {
+  return (
+    <span aria-hidden className={cn("grid shrink-0 place-items-center", className)} style={{ width: size, height: size }}>
+      <Image src={asset("/onboarding/info-gradient.png")} alt="" width={Math.round(size * 0.834)} height={Math.round(size * 0.834)} />
+    </span>
+  );
+}
+
 /**
- * Multi-line note. The DS Info note is a one-line pill, which truncates the longer explanations these
- * screens need, so this keeps its colours but lets text wrap.
+ * Multi-line note in the Figma "Info Note" style. The DS Info note is a one-line pill, which truncates the
+ * longer explanations these screens need, so this keeps its colours and spacing but lets text wrap.
  */
 export function Note({
   intent = "info",
@@ -81,12 +102,14 @@ export function Note({
   children,
   className,
   action,
+  icon,
 }: {
   intent?: "info" | "success" | "warning" | "error";
   title?: React.ReactNode;
   children?: React.ReactNode;
   className?: string;
   action?: React.ReactNode;
+  icon?: React.ReactNode;
 }) {
   const tone = {
     info: "bg-info-subtle text-info",
@@ -94,12 +117,15 @@ export function Note({
     warning: "bg-warning-subtle text-warning",
     error: "bg-error-subtle text-error",
   }[intent];
-  const Icon = intent === "success" ? RiCheckboxCircleFill : intent === "info" ? RiInformationFill : RiErrorWarningFill;
+  const Icon = intent === "success" ? CheckCircleFillIcon : intent === "info" ? InfoFillIcon : WarningCircleFillIcon;
   return (
-    <div role={intent === "error" ? "alert" : "status"} className={cn("flex items-start gap-2.5 rounded-[12px] px-3 py-2.5 text-[13px] leading-[19px] font-medium", tone, className)}>
-      <Icon className="mt-px size-4 shrink-0" aria-hidden />
-      <div className="min-w-0 flex-1">
-        {title && <p className="font-semibold">{title}</p>}
+    <div
+      role={intent === "error" ? "alert" : "status"}
+      className={cn("flex items-center gap-2 rounded-[16px] py-2 pr-3.5 pl-2.5 text-[12px] leading-[18px] font-medium tracking-[0.01em]", tone, className)}
+    >
+      {icon ?? <Icon className="size-4 shrink-0" aria-hidden />}
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        {title && <p className="text-[14px] leading-[21px] font-semibold tracking-[0.0125em]">{title}</p>}
         {children && <div>{children}</div>}
       </div>
       {action}
@@ -107,16 +133,20 @@ export function Note({
   );
 }
 
-const AVATAR_TONES = ["bg-[#3a3633]", "bg-[#5d4fc9]", "bg-[#c9a227]", "bg-[#4c9a4e]", "bg-[#b45309]", "bg-[#3d6fb6]"];
+/** Figma avatar fills, in the order the stakeholder rows use them. */
+const AVATAR_TONES = ["bg-[#3c3c3c]", "bg-[#5d4fc9]", "bg-[#d1bd4f]", "bg-[#4c9a4e]", "bg-[#b45309]", "bg-[#3d6fb6]"];
 
-/** Coloured initial avatar like the Figma stakeholder rows. */
-export function PersonAvatar({ person, size = 36 }: { person: Pick<Stakeholder, "id" | "firstName">; size?: number }) {
+/** Coloured initial avatar like the Figma stakeholder rows (40px, 20px initial). */
+export function PersonAvatar({ person, size = 40 }: { person: Pick<Stakeholder, "id" | "firstName">; size?: number }) {
   const n = [...person.id].reduce((a, c) => a + c.charCodeAt(0), 0);
   return (
     <span
       aria-hidden
-      className={cn("grid shrink-0 place-items-center rounded-full font-medium text-white", AVATAR_TONES[n % AVATAR_TONES.length])}
-      style={{ width: size, height: size, fontSize: size * 0.42 }}
+      className={cn(
+        "grid shrink-0 place-items-center rounded-full border-2 border-[rgba(0,0,0,0.03)] font-semibold text-[var(--color-foren-text-inverse)]",
+        AVATAR_TONES[n % AVATAR_TONES.length]
+      )}
+      style={{ width: size, height: size, fontSize: size / 2 }}
     >
       {person.firstName.charAt(0).toUpperCase() || "?"}
     </span>
@@ -125,7 +155,7 @@ export function PersonAvatar({ person, size = 36 }: { person: Pick<Stakeholder, 
 
 export const fullName = (p: Pick<Stakeholder, "firstName" | "lastName">) => `${p.firstName} ${p.lastName}`.trim();
 
-/** "Director & shareholder · 25% ownership" */
+/** "Director & shareholder · 25% Ownership" */
 export function roleLine(p: Stakeholder) {
   const roles = [
     p.director && "Director",
@@ -136,7 +166,7 @@ export function roleLine(p: Stakeholder) {
   let text = roles.join(" & ");
   text = text.charAt(0).toUpperCase() + text.slice(1);
   if (!text) text = p.position || "Stakeholder";
-  if (p.shareholder && p.ownership > 0) text += ` · ${p.ownership}% ownership`;
+  if (p.shareholder && p.ownership > 0) text += ` · ${p.ownership}% Ownership`;
   if ((p.director || p.shareholder) && p.signatory) text += " · Signatory";
   return text;
 }

@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { RiCheckLine } from "@remixicon/react";
+import { CheckBoldIcon } from "@/components/icons";
 import { asset } from "@/lib/base-path";
 import { cn } from "@/lib/utils";
 import { CURRENCIES, DIAL_CODES, dialFor } from "./data";
@@ -138,7 +138,7 @@ export function StepList({ steps, current }: { steps: string[]; current: number 
                 !done && !active && "border border-[#e6e4e2] text-[#95908b]"
               )}
             >
-              {done ? <RiCheckLine className="size-5" aria-hidden /> : i + 1}
+              {done ? <CheckBoldIcon className="size-5" aria-hidden /> : i + 1}
             </span>
             <span className={cn("text-[17px] font-medium transition-colors", done || active ? ink : muted)}>
               {s}

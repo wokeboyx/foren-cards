@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { RiCloseLine } from "@remixicon/react";
+import { XIcon } from "@/components/icons";
 import { ForenButton } from "@/components/ui/foren-button";
 import { cn } from "@/lib/utils";
 
@@ -47,7 +47,7 @@ export function Sheet({
               aria-label="Close"
               className="grid size-10 shrink-0 place-items-center rounded-full border border-[rgba(0,0,0,0.07)] text-fg outline-none hover:bg-subtle focus-visible:ring-2 focus-visible:ring-focus"
             >
-              <RiCloseLine className="size-[22px]" aria-hidden />
+              <XIcon className="size-[22px]" aria-hidden />
             </Dialog.Close>
           </div>
           <div className="flex-1 overflow-y-auto">{children}</div>
@@ -90,7 +90,7 @@ export function Modal({
             aria-label="Close"
             className="absolute top-5 right-5 grid size-8 place-items-center rounded-full border border-[rgba(0,0,0,0.07)] text-fg outline-none hover:bg-subtle focus-visible:ring-2 focus-visible:ring-focus"
           >
-            <RiCloseLine className="size-[18px]" aria-hidden />
+            <XIcon className="size-[18px]" aria-hidden />
           </Dialog.Close>
           <Dialog.Title className="pr-10 text-[18px] leading-[28px] font-semibold tracking-[-0.01em] text-fg">{title}</Dialog.Title>
           {description ? (
@@ -181,7 +181,7 @@ export function BottomSheet({
               )}
             </div>
             <Dialog.Close asChild>
-              <ForenButton variant="ghost" size="xs" aria-label="Close" className="-mr-2 px-2.5" leadingIcon={<RiCloseLine />} />
+              <ForenButton variant="ghost" size="xs" aria-label="Close" className="-mr-2 px-2.5" leadingIcon={<XIcon />} />
             </Dialog.Close>
           </div>
           <div className="flex-1 overflow-y-auto px-5 pt-2 pb-[max(20px,env(safe-area-inset-bottom))]">{children}</div>

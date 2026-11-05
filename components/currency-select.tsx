@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import * as Popover from "@radix-ui/react-popover";
-import { RiArrowDownSLine, RiCheckLine } from "@remixicon/react";
+import { CaretDownIcon, CheckBoldIcon } from "@/components/icons";
 import { CurrencyFlag } from "@/components/currency-flag";
 import { Money } from "@/components/money";
 import { CURRENCY_NAME } from "@/domain/money";
@@ -52,7 +52,7 @@ export function CurrencySelect({
           ) : (
             <span className="text-fg-3">Choose a currency</span>
           )}
-          <RiArrowDownSLine className={cn("absolute top-1/2 right-3.5 size-4 -translate-y-1/2 text-fg-3 transition-transform", open && "rotate-180")} aria-hidden />
+          <CaretDownIcon className={cn("absolute top-1/2 right-3.5 size-4 -translate-y-1/2 text-fg-3 transition-transform", open && "rotate-180")} aria-hidden />
         </Popover.Trigger>
         <Popover.Portal>
           <Popover.Content align="start" sideOffset={6} className="z-50 w-[var(--radix-popover-trigger-width)] rounded-[16px] bg-surface p-1.5 shadow-[var(--shadow-foren-xl)] ring-1 ring-line outline-none">
@@ -80,7 +80,7 @@ export function CurrencySelect({
                         </span>
                       )}
                     </span>
-                    {on && <RiCheckLine className="size-[18px] shrink-0 text-success" aria-hidden />}
+                    {on && <CheckBoldIcon className="size-[18px] shrink-0 text-success" aria-hidden />}
                   </button>
                 );
               })}

@@ -1,15 +1,6 @@
 "use client";
 import * as React from "react";
-import {
-  RiArchiveLine,
-  RiFileCopyLine,
-  RiAppleFill,
-  RiGoogleFill,
-  RiLockLine,
-  RiLockUnlockLine,
-  RiUserForbidLine,
-  RiSnowflakeLine,
-} from "@remixicon/react";
+import { AppleLogoFillIcon, ArchiveIcon, CopyIcon, GoogleLogoBoldIcon, LockIcon, LockOpenIcon, SnowflakeIcon, UserMinusIcon } from "@/components/icons";
 import { toast } from "sonner";
 import { ForenButton } from "@/components/ui/foren-button";
 import { ForenCheckbox } from "@/components/ui/foren-checkbox";
@@ -85,7 +76,7 @@ function CardConfirm({
           Go back
         </ForenButton>
         {alternative && (
-          <ForenButton variant="outline" size="sm" leadingIcon={<RiSnowflakeLine />} onClick={alternative.onClick} disabled={a.pending}>
+          <ForenButton variant="outline" size="sm" leadingIcon={<SnowflakeIcon />} onClick={alternative.onClick} disabled={a.pending}>
             {alternative.label}
           </ForenButton>
         )}
@@ -124,7 +115,7 @@ export function CardDialogs({ card, dialog, setDialog }: { card: Card; dialog: D
         title="Are you sure you want to freeze this card?"
         body="New charges and subscriptions on this card will fail while it’s frozen. Nothing is canceled, and it can be unfrozen later."
         confirmLabel="Freeze card"
-        icon={<RiSnowflakeLine />}
+        icon={<SnowflakeIcon />}
         action={freezeCard}
         okToast="Card frozen"
       />
@@ -165,7 +156,7 @@ export function CardDialogs({ card, dialog, setDialog }: { card: Card; dialog: D
         title="Archive this card?"
         body="Archiving moves this canceled card out of your main list and into Archived. It doesn’t change anything else — the card is already canceled, and its history is kept."
         confirmLabel="Archive"
-        icon={<RiArchiveLine />}
+        icon={<ArchiveIcon />}
         action={archiveCard}
         okToast="Card archived. Find it under Archived."
       />
@@ -211,7 +202,7 @@ export function CardDialogs({ card, dialog, setDialog }: { card: Card; dialog: D
         title="Unlock this card?"
         body="Payments and subscriptions can go through again, within the card’s limits and permissions."
         confirmLabel="Unlock card"
-        icon={<RiLockUnlockLine />}
+        icon={<LockOpenIcon />}
         action={unlockCard}
         okToast="Card unlocked"
       />
@@ -390,7 +381,7 @@ function DetailCopy({ label, value, onCopy, canCopy }: { label: string; value: s
         <div className="text-[12px] text-fg-3">{label}</div>
         <div className="tnum truncate text-[15px] font-semibold tracking-[0.04em] text-fg">{value}</div>
       </div>
-      <ForenButton variant="ghost" size="xxs" aria-label={`Copy ${label.toLowerCase()}`} disabled={!canCopy} onClick={onCopy} leadingIcon={<RiFileCopyLine />} className="px-2" />
+      <ForenButton variant="ghost" size="xxs" aria-label={`Copy ${label.toLowerCase()}`} disabled={!canCopy} onClick={onCopy} leadingIcon={<CopyIcon />} className="px-2" />
     </div>
   );
 }
@@ -468,11 +459,11 @@ function LockModal({ card, onClose }: { card: Card; onClose: () => void }) {
       <div className="space-y-4">
         <ul className="space-y-2.5 rounded-[16px] bg-subtle px-4 py-3 text-[14px] leading-[20px] text-fg">
           <li className="flex gap-2.5">
-            <RiLockLine className="mt-0.5 size-[18px] shrink-0 text-fg-2" aria-hidden />
+            <LockIcon className="mt-0.5 size-[18px] shrink-0 text-fg-2" aria-hidden />
             No payments or subscriptions will go through.
           </li>
           <li className="flex gap-2.5">
-            <RiUserForbidLine className="mt-0.5 size-[18px] shrink-0 text-fg-2" aria-hidden />
+            <UserMinusIcon className="mt-0.5 size-[18px] shrink-0 text-fg-2" aria-hidden />
             Unlike freezing, the cardholder can’t ask to unfreeze it. Only an account admin can unlock it.
           </li>
         </ul>
@@ -484,7 +475,7 @@ function LockModal({ card, onClose }: { card: Card; onClose: () => void }) {
           </ForenButton>
           <ForenButton
             size="sm"
-            leadingIcon={<RiLockLine />}
+            leadingIcon={<LockIcon />}
             disabled={lock.pending}
             onClick={async () => {
               if ((await lock.run(card.id, reason.trim() || undefined)).ok) {
@@ -572,7 +563,7 @@ export function WalletButtons({ card }: { card: Card }) {
         onClick={() => setOpen("apple")}
         className="inline-flex h-10 items-center gap-2 rounded-full bg-[#0b0b0b] px-4 text-[13px] font-semibold text-white outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:opacity-60"
       >
-        <RiAppleFill className="size-4" aria-hidden />
+        <AppleLogoFillIcon className="size-4" aria-hidden />
         {has("apple") ? "In Apple Pay" : "Add to Apple Pay"}
       </button>
       <button
@@ -581,7 +572,7 @@ export function WalletButtons({ card }: { card: Card }) {
         onClick={() => setOpen("google")}
         className="inline-flex h-10 items-center gap-2 rounded-full bg-surface px-4 text-[13px] font-semibold text-fg ring-1 ring-line outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:opacity-60"
       >
-        <RiGoogleFill className="size-4" aria-hidden />
+        <GoogleLogoBoldIcon className="size-4" aria-hidden />
         {has("google") ? "In Google Pay" : "Add to Google Pay"}
       </button>
       {open && <WalletModal card={card} wallet={open} open onOpenChange={(o) => !o && setOpen(null)} />}

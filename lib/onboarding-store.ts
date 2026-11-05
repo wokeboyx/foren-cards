@@ -5,6 +5,7 @@ import * as React from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {
+  hasStakeholders,
   isNewBusiness,
   isScumlCategory,
   requirementsFor,
@@ -29,7 +30,8 @@ export type Business = {
 
 export type Profile = { turnover: string; sector: string; category: string; website: string; notTrading: boolean };
 
-export type StakeholderStatus = "not_sent" | "pending" | "action_required" | "verified";
+/** `action_required`: their check failed and they can retry with a new link. `rejected`: it failed and only support can resolve it. */
+export type StakeholderStatus = "not_sent" | "pending" | "action_required" | "rejected" | "verified";
 export type Stakeholder = {
   id: string;
   /** A person, or a company that holds shares (indirect ownership). Companies aren't sent a verification link. */
@@ -45,8 +47,8 @@ export type Stakeholder = {
   regCountry: string;
   email: string;
   position: string;
-  /** ISO date. Asked in the app; their ID is the proof. Empty until added (registry records don't carry it). */
-  dob: string;
+  /** ISO date. No longer asked: it comes from their ID check. Optional so saved data from earlier versions still loads. */
+  dob?: string;
   /** ISO country code. */
   nationality: string;
   director: boolean;
@@ -54,6 +56,8 @@ export type Stakeholder = {
   /** Percent, 0–100. */
   ownership: number;
   signatory: boolean;
+  /** Kenya: their KRA PIN. It isn't on Kenyan IDs, so it's entered with their details. */
+  kraPin?: string;
   /** Has significant control without owning enough to be a UBO (named when no one owns 10% or more). */
   controller: boolean;
   /** Nature of control, required for UBOs and controllers. */
@@ -67,7 +71,16 @@ export type Stakeholder = {
 };
 
 export type DocStatus = "uploaded" | "in_review" | "needs_attention" | "accepted";
-export type UploadedDoc = { fileName: string; sizeKb: number; status: DocStatus; note?: string };
+export type UploadedDoc = {
+  fileName: string;
+  sizeKb: number;
+  status: DocStatus;
+  note?: string;
+  /** The number a requirement `reads` off the document: found by the upload check, or entered when it wasn't. */
+  number?: string;
+  numberSource?: "document" | "entered";
+};
+
 
 export type TaskStatus = "not_started" | "in_progress" | "submitted" | "action_required" | "verified";
 
@@ -80,12 +93,18 @@ export type Declaration = { confirmedAt: string; name: string; email: string; po
 export type OnboardingDemo = {
   lookup: "found" | "not_found";
   identity: "approved" | "retry";
+  /** Upload check: the document's date is current, or too old. */
+  docDate: "current" | "expired";
+  /** Upload check: it finds the number it reads (such as the NEPZA number), or doesn't. */
+  docNumber: "found" | "not_found";
 };
 
 export type OnboardingState = State;
 type State = {
   country: CountryCode | null;
   entity: EntityType | null;
+  /** Business category (Nigerian and Kenyan sub-types), from `businessCategories`. */
+  category: string | null;
   useCases: UseCaseId[];
   waitlist: { country: string; email: string } | null;
 
@@ -97,6 +116,10 @@ type State = {
   phone: string;
   emailVerified: boolean;
   identityVerified: boolean;
+  /** Sole proprietors: their own proof of address, uploaded after the ID check. */
+  ownerAddress: UploadedDoc | null;
+  /** Kenya: the KRA PIN of the person signing up, entered after their ID check (it isn't on Kenyan IDs). */
+  kraPin: string | null;
 
   business: Business | null;
   profile: Profile | null;
@@ -128,6 +151,8 @@ type Actions = {
   removeStakeholder: (id: string) => void;
   patchStakeholder: (id: string, patch: Partial<Stakeholder>) => void;
   setDocument: (reqId: string, doc: UploadedDoc | null) => void;
+  /** Create a new account: keep the welcome answers, clear everything from an earlier sign-up on this device. */
+  startAccount: (patch: Partial<State>) => void;
   reset: () => void;
   /** Jump to a ready-made point in the journey (demo panel). */
   loadPreset: (preset: OnboardingPreset) => void;
@@ -138,6 +163,7 @@ export type OnboardingPreset = "signed_up" | "in_review" | "changes_requested" |
 const INITIAL: State = {
   country: null,
   entity: null,
+  category: null,
   useCases: [],
   waitlist: null,
   email: "",
@@ -147,6 +173,8 @@ const INITIAL: State = {
   phone: "",
   emailVerified: false,
   identityVerified: false,
+  ownerAddress: null,
+  kraPin: null,
   business: null,
   profile: null,
   edd: {},
@@ -162,7 +190,7 @@ const INITIAL: State = {
   questionnaire: {},
   questionnaireSubmitted: false,
   review: "none",
-  demo: { lookup: "found", identity: "approved" },
+  demo: { lookup: "found", identity: "approved", docDate: "current", docNumber: "found" },
 };
 
 /** Sample business returned by the registry lookup, per country. */
@@ -181,7 +209,6 @@ export const PERSON: Omit<Stakeholder, "id" | "firstName" | "lastName" | "email"
   kind: "person",
   regNumber: "",
   regCountry: "",
-  dob: "",
   nationality: "",
   director: false,
   shareholder: false,
@@ -192,11 +219,11 @@ export const PERSON: Omit<Stakeholder, "id" | "firstName" | "lastName" | "email"
   controlOther: "",
 };
 
-/** Directors on the registry record, offered as stakeholders. Ownership, date of birth and nationality are missing until the user adds them. */
+/** Directors on the registry record, offered as stakeholders. Ownership and nationality are missing until the user adds them. */
 export function registryStakeholders(): Stakeholder[] {
   return [
-    { ...PERSON, id: "sh_david", firstName: "David", lastName: "Oyelowo", email: "david@karayapharma.com", position: "Director", dob: "", nationality: "", director: true, shareholder: true, ownership: 0, signatory: true, source: "registry", status: "not_sent" },
-    { ...PERSON, id: "sh_mariam", firstName: "Mariam", lastName: "Odunwale", email: "mariam@karayapharma.com", position: "Director", dob: "", nationality: "", director: true, shareholder: true, ownership: 0, signatory: false, source: "registry", status: "not_sent" },
+    { ...PERSON, id: "sh_david", firstName: "David", lastName: "Oyelowo", email: "david@karayapharma.com", position: "Director", nationality: "", director: true, shareholder: true, ownership: 0, signatory: true, source: "registry", status: "not_sent" },
+    { ...PERSON, id: "sh_mariam", firstName: "Mariam", lastName: "Odunwale", email: "mariam@karayapharma.com", position: "Director", nationality: "", director: true, shareholder: true, ownership: 0, signatory: false, source: "registry", status: "not_sent" },
   ];
 }
 
@@ -218,11 +245,23 @@ export const useOnboarding = create<State & Actions>()(
           else delete documents[reqId];
           return { documents };
         }),
+      startAccount: (patch) =>
+        set((st) => ({
+          ...INITIAL,
+          country: st.country,
+          entity: st.entity,
+          category: st.category,
+          useCases: st.useCases,
+          waitlist: st.waitlist,
+          demo: st.demo,
+          ...patch,
+        })),
       reset: () => set({ ...INITIAL, demo: get().demo }),
       loadPreset: (preset) => {
         const base: Partial<State> = {
           country: "NG",
           entity: "company",
+          category: "private",
           useCases: ["global_accounts", "payouts", "cards"],
           email: "ayodele@karayapharma.com",
           firstName: "Ayodele",
@@ -241,9 +280,9 @@ export const useOnboarding = create<State & Actions>()(
         for (const r of requirementsFor(ctx).filter((r) => r.source === "upload" && !r.optional))
           docs[r.id] = { fileName: `${r.id.replace(/_/g, "-")}.pdf`, sizeKb: 420, status: preset === "approved" ? "accepted" : "in_review" };
         const people: Stakeholder[] = [
-          { ...registryStakeholders()[0], dob: "1978-06-14", nationality: "NG", ownership: 30, control: ["shares", "voting"], status: "verified" },
-          { ...registryStakeholders()[1], dob: "1985-02-03", nationality: "NG", ownership: 20, control: ["shares", "voting"], status: preset === "changes_requested" ? "action_required" : "verified", note: preset === "changes_requested" ? "The ID photo was too blurry to read. Ask Mariam to retake it in good light." : undefined },
-          { ...PERSON, id: "sh_ryan", firstName: "Ryan", lastName: "Adeyemi", email: "ryan@karayapharma.com", position: "Investor", dob: "1990-11-21", nationality: "GB", shareholder: true, ownership: 50, control: ["shares"], source: "added", status: "verified" },
+          { ...registryStakeholders()[0], nationality: "NG", ownership: 30, control: ["shares", "voting"], status: "verified" },
+          { ...registryStakeholders()[1], nationality: "NG", ownership: 20, control: ["shares", "voting"], status: preset === "changes_requested" ? "action_required" : "verified", note: preset === "changes_requested" ? "The ID photo was too blurry to read. Ask Mariam to retake it in good light." : undefined },
+          { ...PERSON, id: "sh_ryan", firstName: "Ryan", lastName: "Adeyemi", email: "ryan@karayapharma.com", position: "Investor", nationality: "GB", shareholder: true, ownership: 50, control: ["shares"], source: "added", status: "verified" },
         ];
         if (preset === "changes_requested")
           docs.cac_certificate = { fileName: "cac-certificate.pdf", sizeKb: 380, status: "needs_attention", note: "This certificate is no longer valid. Upload a current, certified true copy." };
@@ -268,7 +307,7 @@ export const useOnboarding = create<State & Actions>()(
       // Saved sign-ups from before newer stakeholder fields existed: fill the gaps so they show as missing, not crash.
       merge: (saved, current) => {
         const s = saved as Partial<State> | undefined;
-        return { ...current, ...s, stakeholders: (s?.stakeholders ?? []).map((p) => ({ ...PERSON, ...p })) };
+        return { ...current, ...s, demo: { ...current.demo, ...s?.demo }, stakeholders: (s?.stakeholders ?? []).map((p) => ({ ...PERSON, ...p })) };
       },
     }
   )
@@ -291,12 +330,13 @@ export const ubosOf = (all: Stakeholder[], threshold: number) => all.filter((p) 
 /** People who get a verification link (companies don't). */
 export const peopleOf = (all: Stakeholder[]) => all.filter((p) => p.kind === "person");
 
-export function contextOf(s: Pick<State, "country" | "entity" | "business" | "profile" | "useCases">): RequirementContext | null {
+export function contextOf(s: Pick<State, "country" | "entity" | "category" | "business" | "profile" | "useCases">): RequirementContext | null {
   if (!s.country || !s.entity) return null;
   const api = s.useCases.includes("api");
   return {
     country: s.country,
     entity: s.entity,
+    category: s.category,
     newBusiness: isNewBusiness(s.business?.incorporatedOn) || !!s.profile?.notTrading,
     scuml: s.country === "NG" && isScumlCategory(s.profile?.sector, s.profile?.category),
     api,
@@ -307,10 +347,14 @@ export function contextOf(s: Pick<State, "country" | "entity" | "business" | "pr
 export function useRequirementContext() {
   const country = useOnboarding((s) => s.country);
   const entity = useOnboarding((s) => s.entity);
+  const category = useOnboarding((s) => s.category);
   const business = useOnboarding((s) => s.business);
   const profile = useOnboarding((s) => s.profile);
   const useCases = useOnboarding((s) => s.useCases);
-  return React.useMemo(() => contextOf({ country, entity, business, profile, useCases }), [country, entity, business, profile, useCases]);
+  return React.useMemo(
+    () => contextOf({ country, entity, category, business, profile, useCases }),
+    [country, entity, category, business, profile, useCases]
+  );
 }
 
 export type ChecklistItem = {
@@ -321,12 +365,12 @@ export type ChecklistItem = {
   status: TaskStatus;
 };
 
-/** The "Complete your account setup" list. Sole traders have no stakeholders: they verified themselves at sign-up. */
+/** The "Complete your account setup" list. Sole traders have no stakeholders (they verified themselves at sign-up); partnerships list their partners. */
 export function checklist(s: State): ChecklistItem[] {
   const ctx = contextOf(s);
   if (!ctx) return [];
   const items: ChecklistItem[] = [];
-  if (ctx.entity !== "sole_trader") {
+  if (hasStakeholders(ctx.entity, ctx.category)) {
     items.push({
       id: "stakeholders",
       title: "Stakeholders and structure",
@@ -342,7 +386,7 @@ export function checklist(s: State): ChecklistItem[] {
       href: "/get-started/verification",
       status: !s.invitesSentAt
         ? "not_started"
-        : people.some((p) => p.status === "action_required")
+        : people.some((p) => p.status === "action_required" || p.status === "rejected")
           ? "action_required"
           : people.length && people.every((p) => p.status === "verified")
             ? "verified"

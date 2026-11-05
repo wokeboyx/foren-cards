@@ -2,7 +2,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { ForenButton } from "./foren-button";
-import { RiUploadCloud2Line } from "@remixicon/react";
+import { CloudArrowUpIcon } from "@/components/icons";
 export interface ForenFileUploadProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "onError"> {
   /** Layout: full drag-and-drop zone, or a compact inline field. */
@@ -157,7 +157,7 @@ export const ForenFileUpload = React.forwardRef<HTMLDivElement, ForenFileUploadP
           )}
         >
           <span className="size-12 rounded-full bg-[var(--color-foren-bg-subtle)] flex items-center justify-center text-[var(--color-foren-text-secondary)]">
-            <RiUploadCloud2Line size={20} />
+            <CloudArrowUpIcon size={20} />
           </span>
           <div className="flex flex-col gap-2 items-center">
             <p className="text-[14px] leading-[21px] font-semibold tracking-[0.0125em] text-[var(--color-foren-text-primary)]">

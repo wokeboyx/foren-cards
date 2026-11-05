@@ -11,7 +11,7 @@ import {
 import { ForenSegmentedControl } from "@/components/ui/foren-segmented-control";
 import * as React from "react";
 import Link from "next/link";
-import { RiAlarmWarningLine, RiCheckLine, RiCloseLine, RiInboxLine } from "@remixicon/react";
+import { CheckBoldIcon, SirenIcon, TrayIcon, XIcon } from "@/components/icons";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -79,7 +79,7 @@ export function RequestsPage() {
         description={approver ? "Approve or decline what your team asks for." : "What you’ve asked the account owner for."}
         actions={
           role === "cardholder" && (
-            <ForenButton size="xxs" variant="outline" leadingIcon={<RiAlarmWarningLine />} onClick={() => setEmergencyOpen(true)}>
+            <ForenButton size="xxs" variant="outline" leadingIcon={<SirenIcon />} onClick={() => setEmergencyOpen(true)}>
               Request emergency card
             </ForenButton>
           )
@@ -105,7 +105,7 @@ export function RequestsPage() {
           <div className="min-w-0">
             {list.length === 0 ? (
               <EmptyState
-                icon={<RiInboxLine />}
+                icon={<TrayIcon />}
                 title={tab === "pending" ? "Nothing waiting" : "No past requests"}
                 body={tab === "pending" ? (approver ? "When a cardholder asks for an approval, unfreeze or emergency card, it’ll appear here." : "Requests you send from a declined payment or a frozen card appear here.") : "Decided requests appear here."}
               />
@@ -263,10 +263,10 @@ export function RequestDetail({ r, canDecide }: { r: CardRequest; canDecide: boo
       {canDecide && state === "pending" && (
         <div>
           <div className="flex gap-2">
-            <ForenButton size="sm" leadingIcon={<RiCheckLine />} disabled={decide.pending} onClick={() => setPinOpen(true)}>
+            <ForenButton size="sm" leadingIcon={<CheckBoldIcon />} disabled={decide.pending} onClick={() => setPinOpen(true)}>
               {approveLabel}
             </ForenButton>
-            <ForenButton size="sm" variant="secondary" leadingIcon={<RiCloseLine />} disabled={decide.pending} onClick={() => setDenying(true)}>
+            <ForenButton size="sm" variant="secondary" leadingIcon={<XIcon />} disabled={decide.pending} onClick={() => setDenying(true)}>
               Decline
             </ForenButton>
           </div>

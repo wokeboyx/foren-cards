@@ -2,9 +2,9 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { ForenCheckbox } from "@/components/ui/foren-checkbox";
+import { ForenSelect } from "@/components/ui/foren-select";
 import { SECTORS, TURNOVER_BANDS, countryInfo, isNewBusiness, isScumlCategory } from "@/domain/onboarding";
 import { useOnboarding } from "@/lib/onboarding-store";
-import { cn } from "@/lib/utils";
 import { Field, FormCard, OnboardingFrame, fieldCls } from "./frame";
 import { Note } from "./shared";
 import { useSignupGuard } from "./guard";
@@ -52,40 +52,32 @@ export function BusinessProfile() {
       }}
     >
       <div className="flex flex-col gap-4">
-        <FormCard>
+        {/* Figma "A few more things": 24px between fields. */}
+        <FormCard className="gap-6">
           <Field label="Annual turnover" htmlFor="turnover">
-            <select id="turnover" value={turnover} onChange={(e) => setTurnover(e.target.value)} className={cn(fieldCls, !turnover && "text-fg-3")}>
-              <option value="">Select a range</option>
-              {TURNOVER_BANDS.map((b) => (
-                <option key={b} value={b}>
-                  {currency} {b}
-                </option>
-              ))}
-            </select>
+            <ForenSelect id="turnover" value={turnover} onChange={setTurnover} placeholder="Select a range" options={TURNOVER_BANDS.map((b) => ({ value: b, label: `${currency} ${b}` }))} />
           </Field>
           <Field label="Business sector" htmlFor="sector">
-            <select
+            <ForenSelect
               id="sector"
               value={sector}
-              onChange={(e) => {
-                setSector(e.target.value);
+              onChange={(v) => {
+                setSector(v);
                 setCategory("");
               }}
-              className={cn(fieldCls, !sector && "text-fg-3")}
-            >
-              <option value="">Select a sector</option>
-              {SECTORS.map((s) => (
-                <option key={s.name}>{s.name}</option>
-              ))}
-            </select>
+              placeholder="Select a sector"
+              options={SECTORS.map((s) => ({ value: s.name, label: s.name }))}
+            />
           </Field>
           <Field label="Business category" htmlFor="category" hint={!sector ? "Choose a sector first." : undefined}>
-            <select id="category" value={category} disabled={!sector} onChange={(e) => setCategory(e.target.value)} className={cn(fieldCls, !category && "text-fg-3")}>
-              <option value="">Select a category</option>
-              {categories.map((c) => (
-                <option key={c.name}>{c.name}</option>
-              ))}
-            </select>
+            <ForenSelect
+              id="category"
+              value={category}
+              disabled={!sector}
+              onChange={setCategory}
+              placeholder="Select a category"
+              options={categories.map((c) => ({ value: c.name, label: c.name }))}
+            />
           </Field>
           <Field label="Website/Socials (optional)" htmlFor="website" error={websiteTouched ? websiteError : undefined}>
             <input

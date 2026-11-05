@@ -1,18 +1,22 @@
 "use client";
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { countryInfo } from "@/domain/onboarding";
+import { categoryChosen, countryInfo, needsOwnerAddress } from "@/domain/onboarding";
 import { useOnboarding, type OnboardingState } from "@/lib/onboarding-store";
 
 /** Sign-up screens in order, with what each needs before it can be shown. */
 const ORDER: { href: string; ready: (s: OnboardingState) => boolean }[] = [
   { href: "/onboarding", ready: () => true },
-  { href: "/onboarding/use", ready: (s) => !!s.country && !!s.entity && !!countryInfo(s.country)?.entities.includes(s.entity) },
+  {
+    href: "/onboarding/use",
+    ready: (s) => !!s.country && !!s.entity && !!countryInfo(s.country)?.entities.includes(s.entity) && categoryChosen(s.country, s.entity, s.category),
+  },
   { href: "/onboarding/account", ready: (s) => s.useCases.length > 0 },
   { href: "/onboarding/verify-email", ready: (s) => !!s.email && !!s.firstName && !!s.lastName },
   { href: "/onboarding/identity", ready: (s) => s.emailVerified },
-  { href: "/onboarding/identity/confirmed", ready: (s) => s.identityVerified },
-  { href: "/onboarding/business", ready: (s) => s.identityVerified },
+  { href: "/onboarding/identity/address", ready: (s) => s.identityVerified },
+  { href: "/onboarding/identity/confirmed", ready: (s) => s.identityVerified && (!needsOwnerAddress(s.entity, s.category) || !!s.ownerAddress) },
+  { href: "/onboarding/business", ready: (s) => s.identityVerified && (!needsOwnerAddress(s.entity, s.category) || !!s.ownerAddress) },
   { href: "/onboarding/business/profile", ready: (s) => !!s.business },
   // Enhanced due diligence is MTO/PSP only; the page itself sends everyone else on to review.
   { href: "/onboarding/compliance", ready: (s) => !!s.profile },

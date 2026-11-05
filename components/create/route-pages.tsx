@@ -1,6 +1,6 @@
 "use client";
 import { useSearchParams } from "next/navigation";
-import { RiLockLine } from "@remixicon/react";
+import { LockIcon } from "@/components/icons";
 import { LinkButton } from "@/components/link-button";
 import { EmptyState, Panel } from "@/components/states";
 import { can } from "@/lib/permissions";
@@ -10,7 +10,7 @@ import { CardForm } from "./card-form";
 export function NotAllowed({ body }: { body: string }) {
   return (
     <Panel>
-      <EmptyState icon={<RiLockLine />} title="You can’t do this here" body={body} action={<LinkButton href="/cards" variant="outline" size="sm">Back to cards</LinkButton>} />
+      <EmptyState icon={<LockIcon />} title="You can’t do this here" body={body} action={<LinkButton href="/cards" variant="outline" size="sm">Back to cards</LinkButton>} />
     </Panel>
   );
 }

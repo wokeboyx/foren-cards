@@ -3,21 +3,12 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { ForenProgress } from "./foren-progress";
-import {
-  RiFileLine,
-  RiFilePdf2Fill,
-  RiFileImageFill,
-  RiCloseLine,
-  RiCheckboxCircleLine,
-  RiErrorWarningLine,
-  RiRefreshLine,
-  type RemixiconComponentType,
-} from "@remixicon/react";
+import { ArrowClockwiseIcon, CheckCircleIcon, FileIcon, FileImageFillIcon, FilePdfFillIcon, WarningCircleIcon, XIcon, type IconComponent } from "@/components/icons";
 // File-type logos from Remix Icon, keyed off the extension. Remix has no
 // SVG-specific glyph, so SVG maps to the image-file logo.
-const FILE_TYPE_ICON: Record<string, { Icon: RemixiconComponentType; fg: string }> = {
-  PDF: { Icon: RiFilePdf2Fill, fg: "text-[var(--color-foren-error)]" },
-  SVG: { Icon: RiFileImageFill, fg: "text-[var(--color-foren-indigo)]" },
+const FILE_TYPE_ICON: Record<string, { Icon: IconComponent; fg: string }> = {
+  PDF: { Icon: FilePdfFillIcon, fg: "text-[var(--color-foren-error)]" },
+  SVG: { Icon: FileImageFillIcon, fg: "text-[var(--color-foren-indigo)]" },
 };
 function extensionOf(fileName: string): string {
   const dot = fileName.lastIndexOf(".");
@@ -30,7 +21,7 @@ function FileTypeIcon({ fileName, override }: { fileName: string; override?: Rea
   ) : entry ? (
     <entry.Icon size={20} className={entry.fg} />
   ) : (
-    <RiFileLine size={20} className="text-[var(--color-foren-text-secondary)]" />
+    <FileIcon size={20} className="text-[var(--color-foren-text-secondary)]" />
   );
   return (
     <span className="shrink-0 size-9 rounded-xl bg-[var(--color-foren-bg-default)] flex items-center justify-center" aria-hidden>
@@ -113,12 +104,12 @@ export const ForenFileItem = React.forwardRef<HTMLDivElement, ForenFileItemProps
         <div className="shrink-0 flex items-center gap-1.5">
           {state === "success" && (
             <span className="text-[var(--color-foren-success)]" aria-hidden>
-              <RiCheckboxCircleLine size={18} />
+              <CheckCircleIcon size={18} />
             </span>
           )}
           {state === "error" && (
             <span className="text-[var(--color-foren-error)]" aria-hidden>
-              <RiErrorWarningLine size={18} />
+              <WarningCircleIcon size={18} />
             </span>
           )}
           {state === "error" && onRetry && (
@@ -128,7 +119,7 @@ export const ForenFileItem = React.forwardRef<HTMLDivElement, ForenFileItemProps
               aria-label={`Retry upload of ${fileName}`}
               className="size-5 flex items-center justify-center rounded-[10px] text-[var(--color-foren-text-secondary)] hover:bg-[var(--color-foren-bg-button-secondary-active)] transition-colors"
             >
-              <RiRefreshLine size={14} />
+              <ArrowClockwiseIcon size={14} />
             </button>
           )}
           {onRemove && (
@@ -138,7 +129,7 @@ export const ForenFileItem = React.forwardRef<HTMLDivElement, ForenFileItemProps
               aria-label={`Remove ${fileName}`}
               className="size-5 flex items-center justify-center rounded-[10px] text-[var(--color-foren-text-tertiary)] hover:bg-[var(--color-foren-bg-button-secondary-active)] hover:text-[var(--color-foren-text-primary)] transition-colors"
             >
-              <RiCloseLine size={14} />
+              <XIcon size={14} />
             </button>
           )}
         </div>

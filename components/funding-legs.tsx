@@ -1,4 +1,4 @@
-import { RiExchangeLine, RiWallet3Line } from "@remixicon/react";
+import { ArrowsLeftRightIcon, WalletIcon } from "@/components/icons";
 import { Money } from "@/components/money";
 import { formatRate } from "@/domain/money";
 import type { FeeAvoided, FundingLeg } from "@/domain/types";
@@ -16,7 +16,7 @@ export function FundingLegs({ legs, feeAvoided }: { legs: FundingLeg[]; feeAvoid
             <li key={i} className="rounded-[16px] border border-line p-3.5">
               <div className="flex items-start gap-3">
                 <span className="grid size-8 shrink-0 place-items-center rounded-full bg-subtle text-fg-2 [&_svg]:size-4" aria-hidden>
-                  {l.fx ? <RiExchangeLine /> : <RiWallet3Line />}
+                  {l.fx ? <ArrowsLeftRightIcon /> : <WalletIcon />}
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-baseline justify-between gap-x-3">

@@ -1,4 +1,4 @@
-import { RiSnowflakeLine } from "@remixicon/react";
+import { SnowflakeIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import type { Card } from "@/domain/types";
 import { DESIGNS, EMERGENCY } from "./designs";
@@ -49,7 +49,7 @@ export function CardArt({ card, holderName, merchantName, size = "md", className
       {frozenOverlay && card.status === "frozen" && !small && (
         <div className="absolute inset-0 z-20 grid place-items-center bg-white/55 text-[#241c15] backdrop-blur-[2px]">
           <div className="flex flex-col items-center gap-1">
-            <RiSnowflakeLine className="size-8" aria-hidden />
+            <SnowflakeIcon className="size-8" aria-hidden />
             <span className="text-[14px] font-semibold">Frozen</span>
           </div>
         </div>

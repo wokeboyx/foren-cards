@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import * as Popover from "@radix-ui/react-popover";
-import { RiAddLine, RiArrowDownSLine, RiBuilding2Line, RiCheckLine, RiMailSendLine, RiSearchLine, RiUser3Line } from "@remixicon/react";
+import { BuildingsIcon, CaretDownIcon, CheckBoldIcon, EnvelopeSimpleIcon, MagnifyingGlassIcon, PlusIcon, UserIcon } from "@/components/icons";
 import { toast } from "sonner";
 import { ForenAvatar } from "@/components/ui/foren-avatar";
 import { ForenButton } from "@/components/ui/foren-button";
@@ -57,7 +57,7 @@ export function HolderPicker({
             value="member"
             checked={!company}
             onChange={() => onChange({ companyCard: false, contactIds: undefined, holderId: contacts[0] ?? "" })}
-            icon={<RiUser3Line />}
+            icon={<UserIcon />}
             title="A team member"
             description="Issued in their name. Best for travel and day-to-day spending."
             disabled={disabled}
@@ -67,7 +67,7 @@ export function HolderPicker({
             value="company"
             checked={company}
             onChange={() => onChange({ companyCard: true, contactIds: card.holderId ? [card.holderId] : [], holderId: card.holderId })}
-            icon={<RiBuilding2Line />}
+            icon={<BuildingsIcon />}
             title="The company"
             description={`Issued in ${COMPANY.name}’s name. Best for subscriptions and suppliers.`}
             disabled={disabled}
@@ -121,7 +121,7 @@ function InviteSomeone({ onAdded, onClose }: { onAdded: (p: Person) => void; onC
   return (
     <div className="mt-3 space-y-3 rounded-[16px] bg-subtle p-4">
       <div className="flex items-start gap-2.5 text-[13px] leading-[18px] text-fg-2">
-        <RiMailSendLine className="mt-0.5 size-4 shrink-0 text-fg" aria-hidden />
+        <EnvelopeSimpleIcon className="mt-0.5 size-4 shrink-0 text-fg" aria-hidden />
         We’ll email them an invite to join {COMPANY.name} on Foren. Their card is created now and they can use it once they’ve joined.
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -233,12 +233,12 @@ function PersonSelect({
             </span>
           </>
         )}
-        <RiArrowDownSLine className={cn("absolute top-1/2 right-3.5 size-4 -translate-y-1/2 text-fg-3 transition-transform", open && "rotate-180")} aria-hidden />
+        <CaretDownIcon className={cn("absolute top-1/2 right-3.5 size-4 -translate-y-1/2 text-fg-3 transition-transform", open && "rotate-180")} aria-hidden />
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content align="start" sideOffset={6} className="z-50 w-[var(--radix-popover-trigger-width)] rounded-[16px] bg-surface p-1.5 shadow-[var(--shadow-foren-xl)] ring-1 ring-line outline-none">
           <div className="relative p-1">
-            <RiSearchLine className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-fg-3" aria-hidden />
+            <MagnifyingGlassIcon className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-fg-3" aria-hidden />
             <input
               autoFocus
               value={q}
@@ -277,7 +277,7 @@ function PersonSelect({
                       {ROLE[p.role]} · {p.email}
                     </span>
                   </span>
-                  {isOn && <RiCheckLine className="size-[18px] shrink-0 text-success" aria-hidden />}
+                  {isOn && <CheckBoldIcon className="size-[18px] shrink-0 text-success" aria-hidden />}
                 </button>
               );
             })}
@@ -292,7 +292,7 @@ function PersonSelect({
               }}
               className="flex w-full items-center gap-2 rounded-[10px] px-2.5 py-2 text-left text-[14px] font-semibold text-fg outline-none hover:bg-subtle focus-visible:bg-subtle"
             >
-              <RiAddLine className="size-4" aria-hidden />
+              <PlusIcon className="size-4" aria-hidden />
               Add someone who isn’t on Foren
             </button>
           </div>

@@ -3,17 +3,7 @@ import { PageHeader } from "@/components/page-header";
 import * as React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  RiEyeLine,
-  RiEyeOffLine,
-  RiFileCopyLine,
-  RiFileList3Line,
-  RiLockLine,
-  RiLockUnlockLine,
-  RiPlaneLine,
-  RiSnowflakeLine,
-  RiTimeLine,
-} from "@remixicon/react";
+import { AirplaneIcon, ClipboardTextIcon, ClockIcon, CopyIcon, EyeIcon, EyeSlashIcon, LockIcon, LockOpenIcon, SnowflakeIcon } from "@/components/icons";
 import { toast } from "sonner";
 import type { BadgeColor } from "@/components/ui/foren-badge";
 import { ForenButton } from "@/components/ui/foren-button";
@@ -142,20 +132,20 @@ function SpendCard({ card, onPick }: { card: Card; onPick: (d: DialogKind) => vo
 
         <div className="mt-4 space-y-2 empty:hidden">
           {frozen && card.adminLock && (
-            <Note tone="warning" icon={<RiLockLine />}>
+            <Note tone="warning" icon={<LockIcon />}>
               <span className="font-semibold">Locked by {card.adminLock.by}.</span> {card.adminLock.reason ? `“${card.adminLock.reason}” ` : ""}
               No payments will go through, and only an account admin can unlock it.
             </Note>
           )}
           {frozen && !card.adminLock && (
-            <Note tone="info" icon={<RiSnowflakeLine />}>
+            <Note tone="info" icon={<SnowflakeIcon />}>
               {COPY.cardFrozen}
               {pendingUnfreeze && <span className="block text-fg-2">Unfreeze requested {timeAgo(pendingUnfreeze.createdAt, now)}. Waiting for the account owner.</span>}
             </Note>
           )}
           {canceled && <Note tone="error">This card has been canceled. It can’t be used or reactivated.{card.archived && " It’s in Archived."}</Note>}
           {card.kind === "emergency" && (
-            <Note tone={emergencyDead ? "error" : "warning"} icon={<RiTimeLine />}>
+            <Note tone={emergencyDead ? "error" : "warning"} icon={<ClockIcon />}>
               {emergencyDead ? "This emergency card is no longer usable." : `Single use at ${locked?.name}. Valid for ${countdown(emergencyLeft!)} more.`}
             </Note>
           )}
@@ -172,18 +162,18 @@ function SpendCard({ card, onPick }: { card: Card; onPick: (d: DialogKind) => vo
           <ForenButton
             size="xxs"
             variant={frozen ? "primary" : "outline"}
-            leadingIcon={frozen ? (card.adminLock ? <RiLockUnlockLine /> : undefined) : <RiSnowflakeLine />}
+            leadingIcon={frozen ? (card.adminLock ? <LockOpenIcon /> : undefined) : <SnowflakeIcon />}
             disabled={freeze.pending || unfreeze.pending || emergencyDead || (!frozen && !can(role, "freeze", card)) || (frozen && !!card.adminLock && !can(role, "unfreeze", card)) || (frozen && !!pendingUnfreeze)}
             onClick={toggleFreeze}
           >
             {!frozen ? "Freeze" : card.adminLock ? (can(role, "unfreeze", card) ? "Unlock" : "Locked by an admin") : can(role, "unfreeze", card) ? "Unfreeze" : pendingUnfreeze ? "Unfreeze requested" : "Request unfreeze"}
           </ForenButton>
         )}
-        <LinkButton href={`/cards/${card.id}/transactions`} variant="outline" size="xxs" leadingIcon={<RiFileList3Line />}>
+        <LinkButton href={`/cards/${card.id}/transactions`} variant="outline" size="xxs" leadingIcon={<ClipboardTextIcon />}>
           Transactions
         </LinkButton>
         {!canceled && (
-          <LinkButton href={`/travel?card=${card.id}`} variant="outline" size="xxs" leadingIcon={<RiPlaneLine />}>
+          <LinkButton href={`/travel?card=${card.id}`} variant="outline" size="xxs" leadingIcon={<AirplaneIcon />}>
             Spending abroad
           </LinkButton>
         )}
@@ -500,7 +490,7 @@ function CardDetails({ card }: { card: Card }) {
           Card details
         </h2>
         {allowed && (
-          <ForenButton size="xxs" variant={shown ? "secondary" : "primary"} leadingIcon={shown ? <RiEyeOffLine /> : <RiEyeLine />} onClick={() => setShown((v) => !v)}>
+          <ForenButton size="xxs" variant={shown ? "secondary" : "primary"} leadingIcon={shown ? <EyeSlashIcon /> : <EyeIcon />} onClick={() => setShown((v) => !v)}>
             {shown ? "Hide details" : "Show details"}
           </ForenButton>
         )}
@@ -538,7 +528,7 @@ function DetailRow({ label, value, onCopy }: { label: string; value: string; onC
         aria-label={`Copy ${label.toLowerCase()}`}
         disabled={!onCopy}
         onClick={onCopy}
-        leadingIcon={<RiFileCopyLine />}
+        leadingIcon={<CopyIcon />}
         className={cn("px-2", !onCopy && "invisible")}
       />
     </div>

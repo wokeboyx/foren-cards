@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import Link from "next/link";
-import { RiArrowUpDownLine, RiCheckLine, RiWhatsappLine } from "@remixicon/react";
+import { ArrowsDownUpIcon, CheckBoldIcon, WhatsappLogoIcon } from "@/components/icons";
 import { asset } from "@/lib/base-path";
 import { cn } from "@/lib/utils";
 import { CALCULATOR, DIAL_CODES, defaultDialIso, dialFor, formatAmount, rate } from "./data";
@@ -65,7 +65,7 @@ export function ExchangePanel() {
               aria-label="Swap currencies"
               className="absolute top-[76px] left-1/2 z-10 grid size-10 -translate-x-1/2 place-items-center rounded-full border border-[rgba(198,178,187,0.3)] bg-white text-[#2f2d2b] shadow-sm outline-none hover:bg-[#fafaf9] focus-visible:ring-2 focus-visible:ring-[#2f2d2b]/30"
             >
-              <RiArrowUpDownLine className="size-5" aria-hidden />
+              <ArrowsDownUpIcon className="size-5" aria-hidden />
             </button>
             <AmountRow label="They receive" currency={to} onCurrency={(v) => pick("to", v)}>
               <p className={cn("text-right text-[30px] leading-[36px] font-semibold tracking-[-0.75px]", ink)} aria-live="polite">
@@ -110,7 +110,7 @@ function DailyRate() {
   if (done)
     return (
       <p className={cn("flex max-w-[440px] items-center gap-2 text-[14px]", muted)} role="status">
-        <RiCheckLine className="size-4 shrink-0 text-[#1da851]" aria-hidden />
+        <CheckBoldIcon className="size-4 shrink-0 text-[#1da851]" aria-hidden />
         <span>
           Daily rates go to {done} every morning.{" "}
           <button type="button" onClick={() => setDone(null)} className={linkBtn}>
@@ -132,7 +132,7 @@ function DailyRate() {
       }}
     >
       <label htmlFor="daily-phone" className={cn("flex items-center gap-2 text-[14px] font-medium", ink)}>
-        <RiWhatsappLine className="size-4 text-[#1da851]" aria-hidden /> Get daily rates on WhatsApp
+        <WhatsappLogoIcon className="size-4 text-[#1da851]" aria-hidden /> Get daily rates on WhatsApp
       </label>
       <div
         className={cn(

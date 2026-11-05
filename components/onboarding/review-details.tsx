@@ -2,7 +2,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ENTITY_LABEL, USE_CASES, countryInfo } from "@/domain/onboarding";
+import { ENTITY_LABEL, USE_CASES, categoryLabel, countryInfo } from "@/domain/onboarding";
 import { useOnboarding } from "@/lib/onboarding-store";
 import { OnboardingFrame } from "./frame";
 import { DetailGrid, Note, formatDate } from "./shared";
@@ -29,6 +29,7 @@ export function ReviewDetails() {
 
   return (
     <OnboardingFrame
+      headerGap={40}
       step={s.entity === "mto" ? "edd" : "business"}
       completed
       back={s.entity === "mto" ? "/onboarding/compliance" : "/onboarding/business/profile"}
@@ -48,12 +49,13 @@ export function ReviewDetails() {
         },
       }}
     >
-      <div className="flex flex-col gap-3">
-        <Section title="Business and entity" edit="/onboarding">
+      <div className="flex flex-col gap-4">
+        <Section title="Business and entity">
           <DetailGrid
             items={[
               { label: "Country", value: countryInfo(s.country)?.name },
               { label: "Entity type", value: ENTITY_LABEL[s.entity] },
+              ...(categoryLabel(s.country, s.entity, s.category) ? [{ label: "Business type", value: categoryLabel(s.country, s.entity, s.category)! }] : []),
               { label: "Type", value: b.companyType },
               { label: "Incorporated", value: formatDate(b.incorporatedOn) },
               { label: "Address", value: b.address, wide: true },
@@ -79,7 +81,7 @@ export function ReviewDetails() {
             ]}
           />
         </Section>
-        <Section title="Primary contact" edit="/onboarding/account">
+        <Section title="Primary contact">
           <DetailGrid
             items={[
               { label: "First name", value: s.firstName },
@@ -87,6 +89,7 @@ export function ReviewDetails() {
               { label: "Job title", value: s.position },
               { label: "Phone number", value: s.phone },
               { label: "Email address", value: s.email, wide: true },
+              ...(s.ownerAddress ? [{ label: "Proof of address", value: s.ownerAddress.fileName, wide: true }] : []),
             ]}
           />
         </Section>
@@ -95,20 +98,25 @@ export function ReviewDetails() {
             <DetailGrid items={[{ label: "Questionnaire", value: "Completed" }]} />
           </Section>
         )}
-        <Note intent="info">Check everything is right before you submit. You can update business details later in Settings.</Note>
+        <Note intent="info" className="items-center rounded-[16px] py-2 pr-3.5 pl-2.5">
+          Verify that your information is correct before submitting. You can update your business details anytime from your settings.
+        </Note>
       </div>
     </OnboardingFrame>
   );
 }
 
-function Section({ title, edit, children }: { title: string; edit: string; children: React.ReactNode }) {
+/** No `edit` link on sections that can't be changed from here: country and entity type set the whole flow, and the primary contact owns the verified email and ID check. */
+function Section({ title, edit, children }: { title: string; edit?: string; children: React.ReactNode }) {
   return (
-    <section className="flex flex-col gap-4 rounded-[12px] bg-surface p-4" aria-label={title}>
+    <section className="flex flex-col gap-4 rounded-[20px] bg-surface px-3 pt-4 pb-5" aria-label={title}>
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-[16px] leading-6 font-medium text-fg">{title}</h2>
-        <Link href={edit} className="text-[12px] font-medium text-fg underline underline-offset-2 outline-none hover:text-fg-2 focus-visible:ring-2 focus-visible:ring-focus">
-          Edit<span className="sr-only"> {title.toLowerCase()}</span>
-        </Link>
+        <h2 className="text-[16px] leading-[26px] font-semibold tracking-[0.005em] text-fg">{title}</h2>
+        {edit && (
+          <Link href={edit} className="text-[12px] font-medium text-fg underline underline-offset-2 outline-none hover:text-fg-2 focus-visible:ring-2 focus-visible:ring-focus">
+            Edit<span className="sr-only"> {title.toLowerCase()}</span>
+          </Link>
+        )}
       </div>
       {children}
     </section>

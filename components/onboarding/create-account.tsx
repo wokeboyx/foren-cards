@@ -1,28 +1,18 @@
 "use client";
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { RiCheckLine, RiCloseLine, RiEyeLine, RiEyeOffLine } from "@remixicon/react";
 import { DIAL_CODE } from "@/domain/onboarding";
 import { useOnboarding } from "@/lib/onboarding-store";
 import { cn } from "@/lib/utils";
 import { Field, FormCard, OnboardingFrame, fieldCls } from "./frame";
 import { useSignupGuard } from "./guard";
+import { PasswordInput, PasswordStrength, isStrongPassword } from "./password";
 import { EMAIL_RE } from "./welcome-requirements";
-
-const CRITERIA: [string, (p: string) => boolean][] = [
-  ["Minimum 8 characters", (p) => p.length >= 8],
-  ["Uppercase", (p) => /[A-Z]/.test(p)],
-  ["Lowercase", (p) => /[a-z]/.test(p)],
-  ["Number", (p) => /\d/.test(p)],
-  ["Special character", (p) => /[^A-Za-z0-9]/.test(p)],
-];
-
-const STRENGTH = ["Weak", "Weak", "Weak", "Fair", "Good", "Strong"];
 
 export function CreateAccount() {
   const router = useRouter();
   const ok = useSignupGuard("/onboarding/account");
-  const set = useOnboarding((s) => s.set);
+  const startAccount = useOnboarding((s) => s.startAccount);
   const [email, setEmail] = React.useState(() => useOnboarding.getState().email);
   const [firstName, setFirst] = React.useState(() => useOnboarding.getState().firstName);
   const [lastName, setLast] = React.useState(() => useOnboarding.getState().lastName);
@@ -33,16 +23,11 @@ export function CreateAccount() {
   const [phone, setPhone] = React.useState(() => useOnboarding.getState().phone.replace(/^\+\d+\s*/, ""));
   const [phoneTouched, setPhoneTouched] = React.useState(false);
   const [password, setPassword] = React.useState("");
-  const [show, setShow] = React.useState(false);
   const [emailTouched, setEmailTouched] = React.useState(false);
-  const pwRef = React.useRef<HTMLInputElement>(null);
 
   if (!ok) return null;
 
-  const met = CRITERIA.map(([, test]) => test(password));
-  const score = met.filter(Boolean).length; // 0–5
-  const segments = password ? Math.max(1, score - 1) : 0;
-  const strong = met.every(Boolean);
+  const strong = isStrongPassword(password);
   const emailOk = EMAIL_RE.test(email.trim());
   const emailError = emailTouched && email && !emailOk ? "Enter a valid email, like name@company.com" : undefined;
   const digits = phone.replace(/\D/g, "");
@@ -51,7 +36,8 @@ export function CreateAccount() {
   const valid = emailOk && firstName.trim() && lastName.trim() && position.trim() && phoneOk && strong;
 
   const submit = () => {
-    set({
+    // A new account starts clean, so an earlier sign-up's review or documents can't carry over.
+    startAccount({
       email: email.trim(),
       firstName: firstName.trim(),
       lastName: lastName.trim(),
@@ -122,71 +108,8 @@ export function CreateAccount() {
             </Field>
           </div>
           <Field label="Password" htmlFor="ob-password">
-            <div className="relative">
-              <input
-                ref={pwRef}
-                id="ob-password"
-                type={show ? "text" : "password"}
-                autoComplete="new-password"
-                value={password}
-                aria-describedby="ob-password-rules"
-                onChange={(e) => setPassword(e.target.value)}
-                className={cn(fieldCls, "pr-20", !show && password && "text-[20px] tracking-[0.15em]")}
-              />
-              <div className="absolute top-1/2 right-2 flex -translate-y-1/2 items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => setShow((x) => !x)}
-                  aria-label={show ? "Hide password" : "Show password"}
-                  aria-pressed={show}
-                  className="grid size-8 place-items-center rounded-full text-fg-2 outline-none hover:bg-surface focus-visible:ring-2 focus-visible:ring-focus"
-                >
-                  {show ? <RiEyeLine className="size-[18px]" aria-hidden /> : <RiEyeOffLine className="size-[18px]" aria-hidden />}
-                </button>
-                {password && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPassword("");
-                      pwRef.current?.focus();
-                    }}
-                    aria-label="Clear password"
-                    className="grid size-8 place-items-center rounded-full text-fg outline-none hover:bg-surface focus-visible:ring-2 focus-visible:ring-focus"
-                  >
-                    <RiCloseLine className="size-5" aria-hidden />
-                  </button>
-                )}
-              </div>
-            </div>
-            {password && (
-              <div className="flex items-center gap-1 px-1" aria-hidden>
-                {[0, 1, 2, 3].map((i) => (
-                  <span
-                    key={i}
-                    className={cn(
-                      "h-1 flex-1 rounded-[4px] transition-colors",
-                      i < segments ? (strong ? "bg-[#4c9a4e]" : score >= 3 ? "bg-warning" : "bg-error") : "bg-line"
-                    )}
-                  />
-                ))}
-                <span className="w-14 text-right text-[12px] leading-[18px] font-medium text-fg-2">{STRENGTH[score]}</span>
-              </div>
-            )}
-            <ul id="ob-password-rules" className="flex flex-wrap gap-2" aria-label="Password rules">
-              {CRITERIA.map(([label], i) => (
-                <li
-                  key={label}
-                  className="inline-flex h-5 items-center gap-1.5 rounded-full bg-[var(--color-foren-bg-button-secondary)] pr-2 pl-1.5 text-[12px] leading-[18px] font-medium text-fg-2"
-                >
-                  {met[i] ? <RiCheckLine className="size-3 text-success" aria-hidden /> : <span className="size-3" aria-hidden />}
-                  {label}
-                  <span className="sr-only">{met[i] ? " (met)" : " (not met)"}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="sr-only" aria-live="polite">
-              {password ? `Password strength: ${STRENGTH[score]}` : ""}
-            </p>
+            <PasswordInput id="ob-password" autoComplete="new-password" clearable value={password} onValueChange={setPassword} aria-describedby="ob-password-rules" />
+            <PasswordStrength password={password} id="ob-password-rules" />
           </Field>
         </FormCard>
       </form>

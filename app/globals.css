@@ -4,7 +4,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --color-foren-text-primary: #383633;
+  --color-foren-text-primary: #2f2d2b;
   --color-foren-text-secondary: #5e5c5a;
   --color-foren-text-tertiary: #95908b;
   --color-foren-text-disabled: #d8d6d5;
@@ -12,7 +12,7 @@
   --color-foren-bg-canvas: #f8f8f8;
   --color-foren-bg-default: #fff;
   --color-foren-bg-elevated: #fff;
-  --color-foren-bg-subtle: #f1f1f1;
+  --color-foren-bg-subtle: #f3f3f3;
   --color-foren-bg-sunken: #f8f8f8;
   --color-foren-bg-brand: #d8edff;
   --color-foren-border-muted: #eee;
@@ -20,6 +20,9 @@
   --color-foren-border-strong: #b2b0ad;
   --color-foren-border-focus: #5f6870;
   --color-foren-border-disabled: #d3d2d0;
+  /* DS Dropdown/Input focused & open: primary/solar-yellow/900 border + 6px halo. */
+  --color-foren-border-active: #424035;
+  --color-foren-ring-active: rgba(237, 237, 237, 0.5);
   --color-foren-success: #166534;
   --color-foren-warning: #b45309;
   --color-foren-error: #c62828;
@@ -32,6 +35,9 @@
   --color-foren-bg-button-secondary-hover: #e3e3e3;
   --color-foren-bg-button-secondary-active: #ededed;
   --color-foren-bg-button-disabled: #efeeee;
+  /* DS Button: label on Primary (border/muted) and the focused-primary ring. */
+  --color-foren-text-on-primary: #eeeeee;
+  --color-foren-border-focused-primary: #747678;
   --color-foren-disabled-strong: #b2b0ad;
   --color-foren-brand-green: #519949;
   --color-foren-brand-green-hover: #3f7a39;
@@ -76,6 +82,8 @@
   --color-foren-border-strong: #585350;
   --color-foren-border-focus: #9b9695;
   --color-foren-border-disabled: #353331;
+  --color-foren-border-active: #b8b3ad;
+  --color-foren-ring-active: rgba(255, 255, 255, 0.06);
   --color-foren-success: #5cbf73;
   --color-foren-warning: #d68f3e;
   --color-foren-error: #ef5350;
@@ -88,6 +96,8 @@
   --color-foren-bg-button-secondary-hover: #3a3633;
   --color-foren-bg-button-secondary-active: #45403d;
   --color-foren-bg-button-disabled: #221f1c;
+  --color-foren-text-on-primary: #1e1711;
+  --color-foren-border-focused-primary: #9b9695;
   --color-foren-disabled-strong: #585350;
   --color-foren-brand-green: #66b958;
   --color-foren-brand-green-hover: #76c968;
@@ -221,4 +231,18 @@ tbody > tr:last-child {
 }
 .table-flush :is(th, td):last-child:not([scope="colgroup"]) {
   padding-right: 0;
+}
+
+/* Sign-up screens: no visible scrollbar (the page still scrolls with wheel, trackpad, touch and keyboard). */
+html:has([data-hide-scrollbar]) {
+  scrollbar-width: none;
+}
+html:has([data-hide-scrollbar])::-webkit-scrollbar {
+  display: none;
+}
+[data-hide-scrollbar] *::-webkit-scrollbar {
+  display: none;
+}
+[data-hide-scrollbar] * {
+  scrollbar-width: none;
 }

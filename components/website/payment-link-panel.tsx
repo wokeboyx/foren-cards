@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { RiImageAddLine, RiLockLine, RiShoppingBag3Line } from "@remixicon/react";
+import { ImageSquareIcon, LockIcon, ShoppingBagIcon } from "@/components/icons";
 import { asset } from "@/lib/base-path";
 import { useOnboarding } from "@/lib/onboarding-store";
 import { cn } from "@/lib/utils";
@@ -196,7 +196,7 @@ export function PaymentLinkPanel() {
             {!ready ? (
               <Panel className="flex min-h-[420px] flex-col items-center justify-center px-6 py-12 text-center">
                 <span className="grid size-14 place-items-center rounded-full bg-white shadow-[0_1px_3px_rgba(23,18,13,0.08)]">
-                  <RiShoppingBag3Line className="size-6 text-[#95908b]" aria-hidden />
+                  <ShoppingBagIcon className="size-6 text-[#95908b]" aria-hidden />
                 </span>
                 <p className={cn("mt-5 text-[18px] font-semibold tracking-[-0.2px]", ink)}>Your checkout appears here</p>
                 <p className={cn("mt-1.5 max-w-[300px] text-[14px] leading-[21px]", muted)}>Add your company name, a payment title and an amount to see what customers will see.</p>
@@ -239,7 +239,7 @@ export function PaymentLinkPanel() {
                       {formatAmount(value)}
                     </div>
                     <p className={cn("mt-3 flex items-center justify-center gap-1 text-[12px]", muted)}>
-                      <RiLockLine className="size-3.5" aria-hidden /> Secured by Foren
+                      <LockIcon className="size-3.5" aria-hidden /> Secured by Foren
                     </p>
                   </div>
                 </div>
@@ -325,7 +325,7 @@ function ImagePick({
             // eslint-disable-next-line @next/next/no-img-element
             <img src={value} alt="" className="size-full object-cover" />
           ) : (
-            <RiImageAddLine className="size-5 text-[#95908b]" aria-hidden />
+            <ImageSquareIcon className="size-5 text-[#95908b]" aria-hidden />
           )}
         </span>
         <span className="min-w-0">

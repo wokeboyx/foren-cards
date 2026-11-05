@@ -3,7 +3,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as Popover from "@radix-ui/react-popover";
-import { RiFlaskLine, RiRefreshLine } from "@remixicon/react";
+import { ArrowClockwiseIcon, FlaskIcon } from "@/components/icons";
 import { toast } from "sonner";
 import { ForenButton } from "@/components/ui/foren-button";
 import { ForenSegmentedControl } from "@/components/ui/foren-segmented-control";
@@ -36,7 +36,7 @@ export function DemoPanel({ placement = "right" }: { placement?: "left" | "right
           }
           aria-label="Open prototype demo controls"
         >
-          <RiFlaskLine className="size-4" aria-hidden />
+          <FlaskIcon className="size-4" aria-hidden />
           {placement !== "edge" && "Demo"}
         </button>
       </Popover.Trigger>
@@ -171,7 +171,7 @@ export function DemoPanel({ placement = "right" }: { placement?: "left" | "right
             variant="outline"
             size="sm"
             className="mt-2 w-full"
-            leadingIcon={<RiRefreshLine />}
+            leadingIcon={<ArrowClockwiseIcon />}
             onClick={() => {
               s.resetDemo();
               toast("Demo data reset");

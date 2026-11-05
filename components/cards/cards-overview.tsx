@@ -2,15 +2,7 @@
 import * as React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as Popover from "@radix-ui/react-popover";
-import {
-  RiArchiveLine,
-  RiBankCardLine,
-  RiBuilding2Line,
-  RiArrowUpCircleLine,
-  RiDraftLine,
-  RiFilter3Line,
-  RiTimeLine,
-} from "@remixicon/react";
+import { ArchiveIcon, ArrowCircleUpIcon, BuildingsIcon, ClockIcon, CreditCardIcon, FunnelSimpleIcon, NotePencilIcon } from "@/components/icons";
 import { ForenAvatar } from "@/components/ui/foren-avatar";
 import { ForenBadge } from "@/components/ui/foren-badge";
 import { ForenButton } from "@/components/ui/foren-button";
@@ -209,13 +201,13 @@ export function CardsOverview() {
             {filtered.length === 0 && pendingCards.length === 0 ? (
               view === "archived" ? (
                 <EmptyState
-                  icon={<RiArchiveLine />}
+                  icon={<ArchiveIcon />}
                   title="No archived cards"
                   body="When you archive a canceled card, it moves here."
                 />
               ) : (
                 <EmptyState
-                  icon={<RiBankCardLine />}
+                  icon={<CreditCardIcon />}
                   title={
                     filters.length
                       ? "No cards match these filters"
@@ -349,7 +341,7 @@ function CardTable({
                         className="grid size-6 shrink-0 place-items-center rounded-full bg-subtle text-fg-2 ring-1 ring-line"
                         aria-hidden
                       >
-                        <RiBuilding2Line className="size-3.5" />
+                        <BuildingsIcon className="size-3.5" />
                       </span>
                     ) : (
                       <ForenAvatar
@@ -413,7 +405,7 @@ function CardTable({
                       <ForenBadge
                         size="sm"
                         color="orange"
-                        leadingIcon={<RiArrowUpCircleLine aria-hidden />}
+                        leadingIcon={<ArrowCircleUpIcon aria-hidden />}
                       >
                         Limit request
                       </ForenBadge>
@@ -557,7 +549,7 @@ function FilterMenu({
         <ForenButton
           variant="secondary"
           size="xxs"
-          leadingIcon={<RiFilter3Line />}
+          leadingIcon={<FunnelSimpleIcon />}
         >
           Add filter
         </ForenButton>
@@ -614,7 +606,7 @@ function PendingBadge() {
     <ForenBadge
       size="sm"
       color="orange"
-      leadingIcon={<RiTimeLine aria-hidden />}
+      leadingIcon={<ClockIcon aria-hidden />}
     >
       Pending request
     </ForenBadge>
@@ -749,7 +741,7 @@ function DraftList({ drafts }: { drafts: CardDraft[] }) {
               <ForenBadge
                 size="sm"
                 color="gray"
-                leadingIcon={<RiDraftLine aria-hidden />}
+                leadingIcon={<NotePencilIcon aria-hidden />}
               >
                 Draft
               </ForenBadge>

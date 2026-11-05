@@ -2,7 +2,7 @@
 import * as React from "react";
 import Link from "next/link";
 import * as Popover from "@radix-ui/react-popover";
-import { RiNotification3Line } from "@remixicon/react";
+import { BellIcon } from "@/components/icons";
 import { useStore } from "@/lib/store";
 
 export function NotificationBell() {
@@ -18,7 +18,7 @@ export function NotificationBell() {
         className="relative grid size-7 place-items-center rounded-[8px] border border-line bg-surface text-fg shadow-[0_2px_4px_-1px_rgba(36,28,21,0.08)] outline-none hover:bg-subtle focus-visible:ring-2 focus-visible:ring-focus"
         aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"}
       >
-        <RiNotification3Line className="size-4" aria-hidden />
+        <BellIcon className="size-4" aria-hidden />
         {unread > 0 ? (
           <span className="tnum absolute -top-1.5 -right-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-error px-1 text-[10px] font-bold text-white" aria-hidden>
             {unread}

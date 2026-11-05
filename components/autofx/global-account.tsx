@@ -2,20 +2,7 @@
 import { PageHeader } from "@/components/page-header";
 import * as React from "react";
 import { LinkButton } from "@/components/link-button";
-import {
-  RiAddLine,
-  RiArrowUpDownLine,
-  RiCheckboxCircleLine,
-  RiCloseCircleLine,
-  RiDeleteBinLine,
-  RiExchangeDollarLine,
-  RiFlashlightLine,
-  RiPlaneLine,
-  RiPlayLine,
-  RiScales3Line,
-  RiShieldCheckLine,
-  RiTimeLine,
-} from "@remixicon/react";
+import { AirplaneIcon, ArrowsDownUpIcon, CheckCircleIcon, ClockIcon, CurrencyCircleDollarIcon, LightningIcon, PlayIcon, PlusIcon, ScalesIcon, ShieldCheckIcon, TrashIcon, XCircleIcon } from "@/components/icons";
 import { toast } from "sonner";
 import { ForenAccountWallet } from "@/components/ui/foren-account-wallet";
 import { ForenBadge, type BadgeColor } from "@/components/ui/foren-badge";
@@ -39,16 +26,16 @@ import { cn } from "@/lib/utils";
 import { asset } from "@/lib/base-path";
 
 const GOAL_TYPES: Record<GoalType, { title: string; line: string; icon: React.ReactNode }> = {
-  keep_min: { title: "Keep a minimum balance", line: "Top a currency up from another balance when it drops below a floor.", icon: <RiShieldCheckLine /> },
-  target_rate: { title: "Convert at a target rate", line: "Convert an amount automatically once the exchange rate reaches your target.", icon: <RiArrowUpDownLine /> },
-  cap: { title: "Cap a balance", line: "Move anything above a ceiling into another currency.", icon: <RiScales3Line /> },
+  keep_min: { title: "Keep a minimum balance", line: "Top a currency up from another balance when it drops below a floor.", icon: <ShieldCheckIcon /> },
+  target_rate: { title: "Convert at a target rate", line: "Convert an amount automatically once the exchange rate reaches your target.", icon: <ArrowsDownUpIcon /> },
+  cap: { title: "Cap a balance", line: "Move anything above a ceiling into another currency.", icon: <ScalesIcon /> },
 };
 
 const STATUS: Record<GoalStatus, { label: string; color: BadgeColor; icon: React.ReactNode }> = {
-  on_track: { label: "On track", color: "success", icon: <RiCheckboxCircleLine aria-hidden /> },
-  waiting_for_rate: { label: "Waiting for rate", color: "indigo", icon: <RiTimeLine aria-hidden /> },
-  action_taken: { label: "Action taken", color: "primary", icon: <RiFlashlightLine aria-hidden /> },
-  unable_to_act: { label: "Unable to act", color: "error", icon: <RiCloseCircleLine aria-hidden /> },
+  on_track: { label: "On track", color: "success", icon: <CheckCircleIcon aria-hidden /> },
+  waiting_for_rate: { label: "Waiting for rate", color: "indigo", icon: <ClockIcon aria-hidden /> },
+  action_taken: { label: "Action taken", color: "primary", icon: <LightningIcon aria-hidden /> },
+  unable_to_act: { label: "Unable to act", color: "error", icon: <XCircleIcon aria-hidden /> },
 };
 
 const FLAGS: Partial<Record<Currency, string>> = { USD: asset("/foren/wallet/flag-usd.png"), GBP: asset("/foren/wallet/flag-gbp.png"), CAD: asset("/foren/wallet/flag-cad.png") };
@@ -74,7 +61,7 @@ export function GlobalAccount() {
         title="Global account"
         description="Balances your cards pay from."
         actions={
-          <LinkButton href="/travel" variant="outline" size="xxs" leadingIcon={<RiPlaneLine />}>
+          <LinkButton href="/travel" variant="outline" size="xxs" leadingIcon={<AirplaneIcon />}>
             Spending abroad
           </LinkButton>
         }
@@ -111,7 +98,7 @@ export function GlobalAccount() {
                     <div className="flex items-center gap-2 text-[14px] font-medium text-fg">
                       {CURRENCY_NAME[b.currency]}
                       {affected.has(b.currency) && (
-                        <ForenBadge size="sm" color="primary" leadingIcon={<RiExchangeDollarLine aria-hidden />}>
+                        <ForenBadge size="sm" color="primary" leadingIcon={<CurrencyCircleDollarIcon aria-hidden />}>
                           AutoFX
                         </ForenBadge>
                       )}
@@ -132,7 +119,7 @@ export function GlobalAccount() {
                   <ForenButton
                     size="sm"
                     variant="outline"
-                    leadingIcon={<RiPlayLine />}
+                    leadingIcon={<PlayIcon />}
                     disabled={running}
                     onClick={async () => {
                       setRunning(true);
@@ -149,7 +136,7 @@ export function GlobalAccount() {
                     {running ? "Checking…" : "Run goal check (demo)"}
                   </ForenButton>
                   {role === "owner" && (
-                    <ForenButton size="sm" leadingIcon={<RiAddLine />} onClick={() => setEditing("choose")}>
+                    <ForenButton size="sm" leadingIcon={<PlusIcon />} onClick={() => setEditing("choose")}>
                       New goal
                     </ForenButton>
                   )}
@@ -158,7 +145,7 @@ export function GlobalAccount() {
             </div>
             {goals.length === 0 ? (
               <Panel>
-                <EmptyState icon={<RiExchangeDollarLine />} title={COPY.autoFxEmpty.title} body={COPY.autoFxEmpty.body}>
+                <EmptyState icon={<CurrencyCircleDollarIcon />} title={COPY.autoFxEmpty.title} body={COPY.autoFxEmpty.body}>
                   {role === "owner" ? (
                     <div className="mt-6 grid w-full max-w-3xl gap-3 text-left sm:grid-cols-3">
                       {(Object.keys(GOAL_TYPES) as GoalType[]).map((t) => (
@@ -242,7 +229,7 @@ function GoalCard({ goal, canEdit }: { goal: AutoFxGoal; canEdit: boolean }) {
       )}
       {canEdit && (
         <div className="mt-auto pt-3">
-          <ForenButton size="xxs" variant="ghost" destructive leadingIcon={<RiDeleteBinLine />} onClick={() => setConfirm(true)}>
+          <ForenButton size="xxs" variant="ghost" destructive leadingIcon={<TrashIcon />} onClick={() => setConfirm(true)}>
             Remove goal
           </ForenButton>
         </div>

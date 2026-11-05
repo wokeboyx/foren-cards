@@ -3,7 +3,7 @@ import * as React from "react";
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { RiArrowDownLine, RiArrowUpLine, RiDraggable } from "@remixicon/react";
+import { ArrowDownIcon, ArrowUpIcon, DotsSixVerticalBoldIcon } from "@/components/icons";
 import { ForenBadge } from "@/components/ui/foren-badge";
 import { ForenButton } from "@/components/ui/foren-button";
 import { FundingPath } from "@/components/card/funding-path";
@@ -108,7 +108,7 @@ function SortableRow({ id, index, total, onMove, available }: { id: Currency; in
         {...attributes}
         {...listeners}
       >
-        <RiDraggable className="size-5" aria-hidden />
+        <DotsSixVerticalBoldIcon className="size-5" aria-hidden />
       </button>
       <span className="tnum grid size-6 place-items-center rounded-full bg-subtle text-[12px] font-semibold text-fg-2">{index + 1}</span>
       <div className="min-w-0 flex-1">
@@ -123,8 +123,8 @@ function SortableRow({ id, index, total, onMove, available }: { id: Currency; in
           )}
         </div>
       </div>
-      <ForenButton type="button" variant="ghost" size="xxs" className="px-2" aria-label={`Move ${id} up`} disabled={index === 0} onClick={() => onMove(-1)} leadingIcon={<RiArrowUpLine />} />
-      <ForenButton type="button" variant="ghost" size="xxs" className="px-2" aria-label={`Move ${id} down`} disabled={index === total - 1} onClick={() => onMove(1)} leadingIcon={<RiArrowDownLine />} />
+      <ForenButton type="button" variant="ghost" size="xxs" className="px-2" aria-label={`Move ${id} up`} disabled={index === 0} onClick={() => onMove(-1)} leadingIcon={<ArrowUpIcon />} />
+      <ForenButton type="button" variant="ghost" size="xxs" className="px-2" aria-label={`Move ${id} down`} disabled={index === total - 1} onClick={() => onMove(1)} leadingIcon={<ArrowDownIcon />} />
     </li>
   );
 }

@@ -1,27 +1,29 @@
 "use client";
 import * as React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as Popover from "@radix-ui/react-popover";
-import { RiAddLine, RiBuilding2Line, RiDeleteBinLine, RiMore2Fill, RiPencilLine, RiShieldCheckFill, RiUser3Fill } from "@remixicon/react";
+import { BuildingsIcon, DotsThreeVerticalBoldIcon, PencilSimpleIcon, PlusBoldIcon, PlusIcon, ShieldCheckFillIcon, TrashIcon, UsersThreeFillIcon, XIcon } from "@/components/icons";
 import { toast } from "sonner";
 import { ConfirmDialog, Modal } from "@/components/overlay";
 import { ForenButton } from "@/components/ui/foren-button";
 import { ForenCheckbox } from "@/components/ui/foren-checkbox";
-import { ForenInput } from "@/components/ui/foren-input";
 import { LinkButton } from "@/components/link-button";
-import { Field, fieldCls } from "@/components/onboarding/frame";
 import { formatDate } from "@/components/onboarding/shared";
-import { CONTROL_TYPES, controlLabel, countryInfo, minDirectors, nationalityName, nationalityOptions, uboThreshold, type ControlType } from "@/domain/onboarding";
+import { controlLabel, countryInfo, hasStakeholders, minDirectors, nationalityName, sumPct, uboThreshold } from "@/domain/onboarding";
 import { asset } from "@/lib/base-path";
-import { PERSON, effectiveOwnership, peopleOf, registryStakeholders, ubosOf, useOnboarding, type Stakeholder } from "@/lib/onboarding-store";
-import { uid } from "@/lib/store";
+import { effectiveOwnership, peopleOf, registryStakeholders, ubosOf, useOnboarding, type Stakeholder } from "@/lib/onboarding-store";
 import { cn } from "@/lib/utils";
-import { GroupLabel, Note, PersonAvatar, SetupColumn, SetupHeader, fullName, roleLine, verificationLink } from "./shared";
+import { stakeholderHref } from "./stakeholder-form";
+import { GroupLabel, Note, PersonAvatar, SetupColumn, SetupHeader, cardCls, fullName, roleLine, rowButtonCls, verificationLink } from "./shared";
+
+/** Past the intro in this visit, so coming back from the add/edit page doesn't show it again. */
+let startedThisVisit = false;
 
 export function StakeholdersPage() {
   const s = useOnboarding();
-  const [started, setStarted] = React.useState(false);
+  const [started, setStarted] = React.useState(startedThisVisit);
 
   if (!s.signedUpAt || !s.country || !s.entity)
     return (
@@ -29,7 +31,7 @@ export function StakeholdersPage() {
         <SetupHeader title="Stakeholders" description="Finish sign-up first." back="/get-started" />
       </SetupColumn>
     );
-  if (s.entity === "sole_trader")
+  if (!hasStakeholders(s.entity, s.category))
     return (
       <SetupColumn>
         <SetupHeader
@@ -43,9 +45,11 @@ export function StakeholdersPage() {
   if (!started && s.stakeholders.length === 0)
     return (
       <Intro
-        threshold={uboThreshold(s.country, s.entity)!}
+        threshold={uboThreshold(s.country, s.entity, s.category)!}
+        partnership={s.category === "partnership"}
         onStart={() => {
           if (s.business?.source === "registry") s.set({ stakeholders: registryStakeholders() });
+          startedThisVisit = true;
           setStarted(true);
         }}
       />
@@ -53,40 +57,44 @@ export function StakeholdersPage() {
   return <Controllers />;
 }
 
-function Intro({ threshold, onStart }: { threshold: number; onStart: () => void }) {
+function Intro({ threshold, partnership, onStart }: { threshold: number; partnership: boolean; onStart: () => void }) {
   const router = useRouter();
   return (
-    <SetupColumn className="pt-4">
+    <SetupColumn>
       <SetupHeader
-        title="Corporate structure"
-        description={`Add details for all company directors, ultimate beneficial owners (UBOs) holding ${threshold}% or more, and authorised signatories.`}
+        title={partnership ? "Partners" : "Corporate structure"}
+        description={
+          partnership
+            ? "Add every partner with their share of the business, and anyone else who can sign for it."
+            : `Add details for all company directors, ultimate beneficial owners (UBOs) holding ${threshold}% or more, and authorised signatories.`
+        }
       />
       <div className="mb-8 flex justify-center">
-        <Image src={asset("/onboarding/folder.png")} alt="" width={140} height={140} priority />
+        <Image src={asset("/onboarding/folder.png")} alt="" width={194} height={194} priority />
       </div>
       <Note intent="info" title="Why we ask this">
         Financial regulations require us to identify anyone with significant control over the business. This helps keep global transfers secure.
       </Note>
-      <ul className="mt-6 flex flex-col gap-5">
-        <li className="flex gap-3">
-          <RiUser3Fill className="mt-0.5 size-4 shrink-0 text-[#3d6fb6]" aria-hidden />
-          <div>
-            <p className="text-[14px] leading-[21px] font-medium text-fg">Add directors, owners and signatories</p>
-            <p className="text-[12px] leading-[18px] font-medium text-fg-2">
-              Include anyone who is a director, owns {threshold}% or more, or can sign for the company.
+      <ul className="mt-4 flex flex-col gap-2">
+        <li className={introItemCls}>
+          <UsersThreeFillIcon className="size-4 shrink-0 text-[#0052b4]" aria-hidden />
+          <div className="flex flex-col gap-1">
+            <p className="text-[14px] leading-[21px] font-medium tracking-[0.01em] text-fg">{partnership ? "Add your partners" : "Add directors, owners and signatories"}</p>
+            <p className="text-[12px] leading-[18px] font-medium tracking-[0.01em] text-fg-2">
+              {partnership ? "Mark each partner as a shareholder with their share." : `Include anyone who is a director, owns ${threshold}% or more, or can sign for the company.`}
             </p>
           </div>
         </li>
-        <li className="flex gap-3">
-          <RiShieldCheckFill className="mt-0.5 size-4 shrink-0 text-[#c026d3]" aria-hidden />
-          <div>
-            <p className="text-[14px] leading-[21px] font-medium text-fg">They verify their identity</p>
-            <p className="text-[12px] leading-[18px] font-medium text-fg-2">Each person gets an email link to upload their ID and proof of address, and take a quick selfie.</p>
+        <li className={introItemCls}>
+          <ShieldCheckFillIcon className="size-4 shrink-0 text-[#dc4ad8]" aria-hidden />
+          <div className="flex flex-col gap-1">
+            <p className="text-[14px] leading-[21px] font-medium tracking-[0.01em] text-fg">They verify their identity</p>
+            <p className="text-[12px] leading-[18px] font-medium tracking-[0.01em] text-fg-2">Each person gets an email link to upload their ID and proof of address, and take a quick selfie.</p>
           </div>
         </li>
       </ul>
-      <div className="mt-10 flex flex-col-reverse gap-3 sm:flex-row">
-        <ForenButton variant="outline" size="md" className="flex-1" onClick={() => router.push("/get-started")}>
+      <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row">
+        <ForenButton variant="outline" size="md" className="flex-1 text-fg-2" onClick={() => router.push("/get-started")}>
           Skip for now
         </ForenButton>
         <ForenButton size="md" className="flex-1" onClick={onStart}>
@@ -97,18 +105,18 @@ function Intro({ threshold, onStart }: { threshold: number; onStart: () => void 
   );
 }
 
-type Editing = { kind: "person" | "company"; person: Stakeholder | null; parent: Stakeholder | null };
+/** Figma intro rows: sunken cards (12px / 16px padding, 16px radius) with a 16px icon. */
+const introItemCls = "flex items-center gap-3 rounded-[16px] bg-sunken px-3 py-4";
 
 function Controllers() {
   const s = useOnboarding();
   const router = useRouter();
   const country = s.country!;
   const entity = s.entity!;
-  const threshold = uboThreshold(country, entity)!;
+  const threshold = uboThreshold(country, entity, s.category)!;
   const needDirectors = minDirectors(entity);
   const registry = countryInfo(country)?.registry ?? "registry";
 
-  const [editing, setEditing] = React.useState<Editing | null>(null);
   const [removing, setRemoving] = React.useState<Stakeholder | null>(null);
   const [sent, setSent] = React.useState(false);
   const [tried, setTried] = React.useState(false);
@@ -123,32 +131,37 @@ function Controllers() {
   const companies = all.filter((p) => p.kind === "company");
   const ubos = ubosOf(all, threshold);
   const controllers = people.filter((p) => p.controller);
-  const total = top.filter((p) => p.shareholder || p.kind === "company").reduce((a, p) => a + p.ownership, 0);
+  const total = sumPct(top.filter((p) => p.shareholder || p.kind === "company").map((p) => p.ownership));
   const directors = people.filter((p) => p.director).length;
   const signatories = people.filter((p) => p.signatory).length;
   const missingOwnership = all.filter((p) => (p.shareholder || p.kind === "company" || p.parentId) && !p.ownership);
-  const missingDetails = people.filter((p) => !p.dob || !p.nationality);
+  const kra = country === "KE";
+  const missingNationality = people.filter((p) => !p.nationality);
+  const missingKra = kra ? people.filter((p) => !p.kraPin) : [];
   const missingControl = people.filter((p) => (ubos.includes(p) || p.controller) && !p.control.length);
   const locked = s.stakeholdersSubmitted;
 
-  const problems: string[] = [];
-  if (people.length === 0) problems.push("Add at least one person.");
-  if (directors < needDirectors) problems.push(`Add at least ${needDirectors} directors. You have ${directors}.`);
-  if (people.length && signatories === 0) problems.push("Add at least one authorised signatory.");
-  if (missingOwnership.length) problems.push(`Add the ownership percentage for ${missingOwnership.map(fullName).join(" and ")}.`);
-  if (missingDetails.length) problems.push(`Add the date of birth and nationality for ${missingDetails.map(fullName).join(" and ")}.`);
-  if (missingControl.length) problems.push(`Add the nature of control for ${missingControl.map(fullName).join(" and ")}.`);
-  if (total > 100) problems.push(`Ownership adds up to ${total}%. It can’t be more than 100%.`);
+  // Each problem has a short title and an explanation, shown in the Figma "Error Stakeholder" dialog.
+  const problems: Problem[] = [];
+  const add = (title: string, body: string) => problems.push({ title, body });
+  if (people.length === 0) add("No stakeholders added", "Add at least one person.");
+  if (directors < needDirectors) add("Not enough directors", `Add at least ${needDirectors} directors. You have ${directors}.`);
+  if (people.length && signatories === 0) add("No authorised signatory", "Add at least one authorised signatory.");
+  if (missingOwnership.length) add("Ownership percentage missing", `Set an ownership percentage for ${missingOwnership.map(fullName).join(" and ")}.`);
+  if (missingNationality.length) add("Nationality missing", `Add the nationality for ${missingNationality.map(fullName).join(" and ")}.`);
+  if (missingKra.length) add("KRA PIN missing", `Add the KRA PIN for ${missingKra.map(fullName).join(" and ")}.`);
+  if (missingControl.length) add("Nature of control missing", `Add the nature of control for ${missingControl.map(fullName).join(" and ")}.`);
+  if (total > 100) add(`Total ownership is ${total}%`, `Current allocated total is ${total}%. Adjust shareholder percentages so it’s no more than 100%.`);
   for (const c of companies) {
     const owners = all.filter((p) => p.parentId === c.id);
-    const held = owners.reduce((a, p) => a + p.ownership, 0);
-    if (c.ownership >= threshold && owners.length === 0) problems.push(`Add the people who own ${fullName(c)}.`);
-    if (held > 100) problems.push(`Owners of ${fullName(c)} add up to ${held}%. It can’t be more than 100%.`);
+    const held = sumPct(owners.map((p) => p.ownership));
+    if (c.ownership >= threshold && owners.length === 0) add("Company owners missing", `Add the people who own ${fullName(c)}.`);
+    if (held > 100) add(`Owners of ${fullName(c)} add up to ${held}%`, "Adjust their percentages so they’re no more than 100%.");
   }
   if (people.length && !ubos.length && !s.noMajorOwner)
-    problems.push(`No individual owns ${threshold}% or more. Tick the box below and add the person with significant control.`);
-  if (s.noMajorOwner && ubos.length) problems.push(`${ubos.map(fullName).join(" and ")} own ${threshold}% or more. Untick “No individual owns ${threshold}% or more”.`);
-  if (s.noMajorOwner && !ubos.length && !controllers.length) problems.push("Add the person with significant control, and tick “Has significant control” for them.");
+    add(`No individual owns ${threshold}% or more`, "Tick “No individual owns " + threshold + "% or more” and add the person with significant control.");
+  if (s.noMajorOwner && ubos.length) add(`Someone owns ${threshold}% or more`, `${ubos.map(fullName).join(" and ")} own ${threshold}% or more. Untick “No individual owns ${threshold}% or more”.`);
+  if (s.noMajorOwner && !ubos.length && !controllers.length) add("Significant control missing", "Add the person with significant control, and tick “Has significant control” for them.");
 
   // Checks first, then the declaration, built from this list. Confirming it sends the invitations.
   const review = () => {
@@ -156,6 +169,7 @@ function Controllers() {
     if (problems.length) return;
     setDeclaring(true);
   };
+  const showProblems = tried && problems.length > 0;
   const confirm = () => {
     const now = new Date().toISOString();
     setDeclaring(false);
@@ -163,7 +177,7 @@ function Controllers() {
       stakeholdersSubmitted: true,
       declaration: { confirmedAt: now, name: `${s.firstName} ${s.lastName}`.trim(), email: s.email, position: s.position, phone: s.phone },
       invitesSentAt: now,
-      stakeholders: all.map((p) => (p.kind === "company" || p.status === "verified" ? p : { ...p, status: "pending" as const })),
+      stakeholders: all.map((p) => (p.kind === "company" || p.status === "verified" || p.status === "rejected" ? p : { ...p, status: "pending" as const })),
     });
     setSent(true);
   };
@@ -173,10 +187,9 @@ function Controllers() {
       items={items}
       all={all}
       threshold={threshold}
+      kra={kra}
       locked={locked}
-      onEdit={(p) => setEditing({ kind: p.kind, person: p, parent: all.find((x) => x.id === p.parentId) ?? null })}
       onRemove={setRemoving}
-      onAddOwner={(c) => setEditing({ kind: "person", person: null, parent: c })}
     />
   );
 
@@ -184,14 +197,18 @@ function Controllers() {
     <SetupColumn>
       <SetupHeader
         back="/get-started"
-        title="Add key business controllers"
-        description={`List everyone who is a director, owns ${threshold}% or more (directly or through another company), or can sign for the business.`}
+        title={s.category === "partnership" ? "Add your partners" : "Add key business controllers"}
+        description={
+          s.category === "partnership"
+            ? "List every partner as a shareholder with their share, and anyone else who can sign for the business."
+            : `List everyone who is a director, owns ${threshold}% or more (directly or through another company), or can sign for the business.`
+        }
       />
 
       {!locked && (
-        <div className="mb-8 flex flex-col gap-1 sm:flex-row sm:gap-3">
-          <AddButton onClick={() => setEditing({ kind: "person", person: null, parent: null })}>Add a person</AddButton>
-          <AddButton onClick={() => setEditing({ kind: "company", person: null, parent: null })}>Add a company that owns shares</AddButton>
+        <div className="mb-6 flex flex-col sm:flex-row sm:gap-3">
+          <AddButton href={stakeholderHref({ kind: "person" })}>Add a person</AddButton>
+          <AddButton href={stakeholderHref({ kind: "company" })}>Add a company that owns shares</AddButton>
         </div>
       )}
       {locked && (
@@ -214,7 +231,7 @@ function Controllers() {
 
       {added.length > 0 && (
         <section className="mb-6">
-          <GroupLabel>Newly added</GroupLabel>
+          <GroupLabel>Newly added stakeholders</GroupLabel>
           {list(added)}
         </section>
       )}
@@ -226,23 +243,23 @@ function Controllers() {
       )}
 
       {top.length > 0 && missingOwnership.length === 0 && (
-        <div className="mb-3" aria-live="polite">
+        <div className="mb-6" aria-live="polite">
           {total === 100 ? (
-            <Note intent="success">Total ownership: 100% — fully allocated</Note>
+            <Note intent="success">Total ownership: 100% — perfectly allocated</Note>
           ) : total > 100 ? (
             <Note intent="error">
               Total allocated: {total}% — {total - 100}% too much
             </Note>
           ) : (
             <Note intent="warning">
-              Total allocated: {total}% — {100 - total}% unassigned. That’s fine if the rest is held by people who own less than {threshold}%.
+              Total allocated: {total}% — remaining {sumPct([100, -total])}% unassigned. That’s fine if the rest is held by people who own less than {threshold}%.
             </Note>
           )}
         </div>
       )}
 
       {people.length > 0 && (
-        <div className="mb-6 rounded-[16px] bg-surface px-4 py-3.5">
+        <div className={cn(cardCls, "mb-3 rounded-[20px]")}>
           <ForenCheckbox
             checked={s.noMajorOwner}
             disabled={locked}
@@ -255,40 +272,15 @@ function Controllers() {
 
       {!locked && (
         <>
-          <Note intent="info" className="mb-6">
-            Each person gets a unique link to verify their ID, upload proof of address and take a liveness check. Links expire in 72 hours. Companies don’t get a
-            link: their owners do.
+          <Note intent="info" className="mb-10">
+            Each person gets a unique link to verify their ID, upload proof of address and take a liveness check. Links expire in 72 hours, so ask them to
+            finish before then. Companies don’t get a link: their owners do.
           </Note>
-          {tried && problems.length > 0 && (
-            <div role="alert" className="mb-4 rounded-[12px] bg-error-subtle px-3 py-2.5 text-[13px] leading-[19px] font-medium text-error">
-              <ul className="list-disc space-y-0.5 pl-4">
-                {problems.map((p) => (
-                  <li key={p}>{p}</li>
-                ))}
-              </ul>
-            </div>
-          )}
           <ForenButton size="md" className="w-full" onClick={review}>
             Review declaration
           </ForenButton>
+          <ProblemsDialog open={showProblems} problems={problems} onClose={() => setTried(false)} />
         </>
-      )}
-
-      {editing && (
-        <StakeholderDialog
-          key={editing.person?.id ?? `new-${editing.kind}-${editing.parent?.id ?? ""}`}
-          kind={editing.kind}
-          person={editing.person}
-          parent={editing.parent}
-          all={all}
-          threshold={threshold}
-          onClose={() => setEditing(null)}
-          onSave={(p) => {
-            s.upsertStakeholder(p);
-            setEditing(null);
-            toast.success(editing.person ? "Changes saved" : `${fullName(p)} added`);
-          }}
-        />
       )}
 
       <ConfirmDialog
@@ -334,26 +326,65 @@ function Controllers() {
   );
 }
 
-function AddButton({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
+/** Figma "Add new stakeholder": a 32px dashed circle with a plus, on the page background. */
+function AddButton({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex h-12 items-center gap-3 rounded-[16px] px-2 text-left text-[14px] font-medium text-fg outline-none hover:bg-surface focus-visible:ring-2 focus-visible:ring-focus"
+    <Link
+      href={href}
+      className="flex items-center gap-3 rounded-[24px] px-3 py-4 text-left text-[14px] leading-[21px] font-medium tracking-[0.01em] text-fg outline-none hover:bg-surface focus-visible:ring-2 focus-visible:ring-focus"
     >
-      <span className="grid size-7 shrink-0 place-items-center rounded-full border border-line-2 text-fg-2">
-        <RiAddLine className="size-4" aria-hidden />
+      <span className="grid size-8 shrink-0 place-items-center rounded-full border-[0.762px] border-dashed border-line-2 text-fg-2">
+        <PlusBoldIcon className="size-4" aria-hidden />
       </span>
       {children}
-    </button>
+    </Link>
+  );
+}
+
+type Problem = { title: string; body: string };
+
+/** Figma "Error Stakeholder": a red X, the problem and an Okay button. Several problems are listed together. */
+function ProblemsDialog({ open, problems, onClose }: { open: boolean; problems: Problem[]; onClose: () => void }) {
+  const one = problems.length === 1;
+  return (
+    <Modal
+      open={open}
+      onOpenChange={(o) => !o && onClose()}
+      title={
+        <span className="flex flex-col items-center gap-4 pl-10 text-center">
+          <XIcon className="size-10 text-error" aria-hidden />
+          <span className="text-[16px] leading-[24px] font-medium tracking-[0.015em]">{one ? problems[0].title : `${problems.length} things to fix`}</span>
+        </span>
+      }
+      className="sm:max-w-[373px] sm:rounded-[32px]"
+    >
+      <div className="-mt-3 flex flex-col gap-8">
+        {one ? (
+          <p className="text-center text-[12px] leading-[18px] font-medium tracking-[0.01em] text-fg-2">{problems[0].body}</p>
+        ) : (
+          <ul className="flex flex-col gap-3">
+            {problems.map((p) => (
+              <li key={p.title} className="text-[12px] leading-[18px] font-medium tracking-[0.01em] text-fg-2">
+                <span className="block text-[14px] leading-[21px] text-fg">{p.title}</span>
+                {p.body}
+              </li>
+            ))}
+          </ul>
+        )}
+        <ForenButton size="lg" className="w-full" onClick={onClose}>
+          Okay
+        </ForenButton>
+      </div>
+    </Modal>
   );
 }
 
 /** What's still missing on a row, if anything. */
-function missingOf(p: Stakeholder, all: Stakeholder[], threshold: number): string | null {
-  if ((p.shareholder || p.kind === "company" || p.parentId) && !p.ownership) return "Ownership percentage missing.";
+function missingOf(p: Stakeholder, all: Stakeholder[], threshold: number, kra: boolean): string | null {
+  if ((p.shareholder || p.kind === "company" || p.parentId) && !p.ownership) return "Ownership percentage missing and required for shareholders.";
   if (p.kind === "company") return null;
-  if (!p.dob || !p.nationality) return "Date of birth and nationality missing.";
+  if (!p.nationality) return "Nationality missing.";
+  if (kra && !p.kraPin) return "KRA PIN missing.";
   if ((effectiveOwnership(p, all) >= threshold || p.controller) && !p.control.length) return "Nature of control missing.";
   return null;
 }
@@ -362,51 +393,50 @@ function PeopleList({
   items,
   all,
   threshold,
+  kra,
   locked,
-  onEdit,
   onRemove,
-  onAddOwner,
 }: {
   items: Stakeholder[];
   all: Stakeholder[];
   threshold: number;
+  /** Kenya: everyone needs a KRA PIN. */
+  kra: boolean;
   locked: boolean;
-  onEdit: (p: Stakeholder) => void;
   onRemove: (p: Stakeholder) => void;
-  onAddOwner: (company: Stakeholder) => void;
 }) {
   const row = (p: Stakeholder, nested: boolean) => {
-    const missing = missingOf(p, all, threshold);
+    const missing = missingOf(p, all, threshold, kra);
     const parent = all.find((x) => x.id === p.parentId);
     const line =
       p.kind === "company"
-        ? `Company · ${p.ownership}% ownership`
+        ? `Company · ${p.ownership}% Ownership`
         : parent
           ? `Owns ${p.ownership}% of ${fullName(parent)} · ${effectiveOwnership(p, all)}% of this business`
           : roleLine(p);
     return (
-      <div className={cn("flex items-center gap-3 rounded-[16px] bg-surface px-4 py-3.5", nested && "ml-6 sm:ml-10")}>
+      <div className={cn(cardCls, "flex items-center gap-3", nested && "ml-6 sm:ml-10")}>
         {p.kind === "company" ? (
-          <span aria-hidden className="grid size-9 shrink-0 place-items-center rounded-full bg-subtle text-fg-2">
-            <RiBuilding2Line className="size-4" />
+          <span aria-hidden className="grid size-10 shrink-0 place-items-center rounded-full bg-subtle text-fg-2">
+            <BuildingsIcon className="size-[18px]" />
           </span>
         ) : (
           <PersonAvatar person={p} />
         )}
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-[14px] leading-[21px] font-semibold text-fg">{fullName(p)}</p>
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <p className="truncate text-[14px] leading-[21px] font-semibold tracking-[0.0125em] text-fg">{fullName(p)}</p>
           {missing ? (
-            <p className="text-[12px] leading-[18px] font-medium text-error">{missing}</p>
+            <p className="text-[12px] leading-[18px] font-medium tracking-[0.01em] text-error">{missing}</p>
           ) : (
-            <p className="text-[12px] leading-[18px] font-medium text-fg-2">{line}</p>
+            <p className="text-[12px] leading-[18px] font-medium tracking-[0.01em] text-fg-2">{line}</p>
           )}
         </div>
-        {!locked && <RowMenu person={p} onEdit={() => onEdit(p)} onRemove={() => onRemove(p)} />}
+        {!locked && <RowMenu person={p} onRemove={() => onRemove(p)} />}
       </div>
     );
   };
   return (
-    <ul className="flex flex-col gap-3">
+    <ul className="flex flex-col gap-4">
       {items.map((p) => (
         <li key={p.id} className="flex flex-col gap-2">
           {row(p, false)}
@@ -418,14 +448,13 @@ function PeopleList({
                   <React.Fragment key={o.id}>{row(o, true)}</React.Fragment>
                 ))}
               {!locked && (
-                <button
-                  type="button"
-                  onClick={() => onAddOwner(p)}
+                <Link
+                  href={stakeholderHref({ kind: "person", parent: p.id })}
                   className="ml-6 flex h-10 w-fit items-center gap-2 rounded-[12px] px-2 text-[13px] font-medium text-fg outline-none hover:bg-surface focus-visible:ring-2 focus-visible:ring-focus sm:ml-10"
                 >
-                  <RiAddLine className="size-4 text-fg-2" aria-hidden />
+                  <PlusIcon className="size-4 text-fg-2" aria-hidden />
                   Add a person who owns {fullName(p)}
-                </button>
+                </Link>
               )}
             </>
           )}
@@ -435,7 +464,7 @@ function PeopleList({
   );
 }
 
-function RowMenu({ person, onEdit, onRemove }: { person: Stakeholder; onEdit: () => void; onRemove: () => void }) {
+function RowMenu({ person, onRemove }: { person: Stakeholder; onRemove: () => void }) {
   const [open, setOpen] = React.useState(false);
   const item =
     "flex h-9 w-full items-center gap-2 rounded-[10px] px-2.5 text-left text-[13px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-focus [&_svg]:size-4";
@@ -445,9 +474,9 @@ function RowMenu({ person, onEdit, onRemove }: { person: Stakeholder; onEdit: ()
         <button
           type="button"
           aria-label={`Actions for ${fullName(person)}`}
-          className="grid size-8 shrink-0 place-items-center rounded-[10px] border border-line text-fg-2 outline-none hover:bg-subtle focus-visible:ring-2 focus-visible:ring-focus"
+          className="grid size-8 shrink-0 place-items-center rounded-[8px] border border-line bg-sunken text-fg-2 shadow-[0_2px_4px_-1px_rgba(36,28,21,0.08)] outline-none hover:bg-subtle focus-visible:ring-2 focus-visible:ring-focus"
         >
-          <RiMore2Fill className="size-4" aria-hidden />
+          <DotsThreeVerticalBoldIcon className="size-4" aria-hidden />
         </button>
       </Popover.Trigger>
       <Popover.Portal>
@@ -456,17 +485,10 @@ function RowMenu({ person, onEdit, onRemove }: { person: Stakeholder; onEdit: ()
           sideOffset={6}
           className="z-50 w-[150px] rounded-[14px] bg-surface p-1.5 shadow-[var(--shadow-foren-xl)] ring-1 ring-line outline-none"
         >
-          <button
-            type="button"
-            className={cn(item, "text-fg hover:bg-subtle")}
-            onClick={() => {
-              setOpen(false);
-              onEdit();
-            }}
-          >
-            <RiPencilLine aria-hidden />
+          <Link href={stakeholderHref({ id: person.id })} className={cn(item, "text-fg hover:bg-subtle")} onClick={() => setOpen(false)}>
+            <PencilSimpleIcon aria-hidden />
             Edit
-          </button>
+          </Link>
           <button
             type="button"
             className={cn(item, "text-error hover:bg-error-subtle")}
@@ -475,7 +497,7 @@ function RowMenu({ person, onEdit, onRemove }: { person: Stakeholder; onEdit: ()
               onRemove();
             }}
           >
-            <RiDeleteBinLine aria-hidden />
+            <TrashIcon aria-hidden />
             Delete
           </button>
         </Popover.Content>
@@ -484,263 +506,9 @@ function RowMenu({ person, onEdit, onRemove }: { person: Stakeholder; onEdit: ()
   );
 }
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const NATIONALITIES = nationalityOptions();
-
-/** ISO date 18 years ago today: anyone born after it is under 18. */
-function adultCutoff() {
-  const d = new Date();
-  d.setFullYear(d.getFullYear() - 18);
-  return d.toISOString().slice(0, 10);
-}
-
-function CountrySelect({ id, label, value, onChange, error }: { id: string; label: string; value: string; onChange: (v: string) => void; error?: string }) {
-  return (
-    <Field label={label} htmlFor={id} error={error}>
-      <select id={id} value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!error || undefined} className={cn(fieldCls, !value && "text-fg-3")}>
-        <option value="">Choose…</option>
-        {NATIONALITIES.map((n) => (
-          <option key={n.code} value={n.code}>
-            {n.name}
-          </option>
-        ))}
-      </select>
-    </Field>
-  );
-}
-
-/**
- * Add or edit a stakeholder: a person, a company that owns shares, or a person who owns the business
- * through one of those companies (`parent`).
- */
-function StakeholderDialog({
-  kind,
-  person,
-  parent,
-  all,
-  threshold,
-  onClose,
-  onSave,
-}: {
-  kind: "person" | "company";
-  person: Stakeholder | null;
-  parent: Stakeholder | null;
-  all: Stakeholder[];
-  threshold: number;
-  onClose: () => void;
-  onSave: (p: Stakeholder) => void;
-}) {
-  const base: Stakeholder = person ?? { ...PERSON, kind, id: uid("sh"), firstName: "", lastName: "", email: "", position: "", parentId: parent?.id, source: "added", status: "not_sent" };
-  const [v, setV] = React.useState({ ...base, ownershipText: base.ownership ? String(base.ownership) : "" });
-  const [tried, setTried] = React.useState(false);
-  const upd = (patch: Partial<typeof v>) => setV((x) => ({ ...x, ...patch }));
-  const company = kind === "company";
-  const nested = !!parent;
-
-  const pct = Number(v.ownershipText);
-  const siblings = all.filter((p) => p.id !== v.id && (nested ? p.parentId === parent!.id : !p.parentId && (p.shareholder || p.kind === "company")));
-  const siblingsTotal = siblings.reduce((a, p) => a + p.ownership, 0);
-  const holdsShares = company || nested || v.shareholder;
-  const effective = nested ? Math.round(((parent!.ownership * (pct || 0)) / 100) * 100) / 100 : holdsShares ? pct || 0 : 0;
-  const needsControl = !company && (effective >= threshold || v.controller);
-  const showControl = !company && (holdsShares || v.controller);
-
-  const errors: Partial<Record<string, string>> = {};
-  if (!v.firstName.trim()) errors.firstName = company ? "Enter the company name" : "Enter a first name";
-  if (company) {
-    if (!v.regNumber.trim()) errors.regNumber = "Enter the registration number";
-    if (!v.regCountry) errors.regCountry = "Choose the country of registration";
-  } else {
-    if (!v.lastName.trim()) errors.lastName = "Enter a last name";
-    if (!EMAIL.test(v.email.trim())) errors.email = "Enter a valid email address";
-    else if (all.some((p) => p.id !== v.id && p.email && p.email.toLowerCase() === v.email.trim().toLowerCase())) errors.email = "Someone else already uses this email";
-    if (!v.position.trim()) errors.position = nested ? "Enter their role, e.g. Owner" : "Enter their position, e.g. CEO";
-    const today = new Date().toISOString().slice(0, 10);
-    if (!v.dob) errors.dob = "Enter their date of birth";
-    else if (v.dob >= today) errors.dob = "Date of birth must be in the past";
-    else if ((v.director || v.signatory || v.controller) && v.dob > adultCutoff()) errors.dob = "Directors, signatories and controllers must be 18 or older";
-    if (!v.nationality) errors.nationality = "Choose their nationality";
-    if (!nested && !v.director && !v.shareholder && !v.signatory && !v.controller) errors.role = "Choose at least one role";
-    if (needsControl && !v.control.length) errors.control = "Choose at least one";
-    else if (v.control.includes("other") && !v.controlOther.trim()) errors.control = "Describe the other control";
-  }
-  if (holdsShares) {
-    if (!v.ownershipText || !Number.isFinite(pct) || pct <= 0) errors.ownership = "Enter a percentage above 0";
-    else if (pct > 100) errors.ownership = "Can’t be more than 100%";
-    else if (siblingsTotal + pct > 100) errors.ownership = `Only ${Math.max(0, 100 - siblingsTotal)}% is left to assign`;
-  }
-  const show = (k: string) => (tried ? errors[k] : undefined);
-  const toggleControl = (c: ControlType, on: boolean) => upd({ control: on ? [...v.control, c] : v.control.filter((x) => x !== c) });
-
-  const title = company
-    ? person
-      ? "Edit company details"
-      : "Add a company that owns shares"
-    : nested
-      ? `${person ? "Edit" : "Add"} an owner of ${fullName(parent!)}`
-      : person
-        ? "Edit stakeholder details"
-        : "Add stakeholder details";
-
-  return (
-    <Modal open onOpenChange={(o) => !o && onClose()} title={title} className="sm:max-w-[480px]">
-      <form
-        noValidate
-        className="flex flex-col gap-5"
-        onSubmit={(e) => {
-          e.preventDefault();
-          setTried(true);
-          if (Object.keys(errors).length) return;
-          const rest: Stakeholder & { ownershipText?: string } = { ...v };
-          delete rest.ownershipText;
-          onSave({
-            ...rest,
-            firstName: v.firstName.trim(),
-            lastName: company ? "" : v.lastName.trim(),
-            email: v.email.trim(),
-            position: v.position.trim(),
-            regNumber: v.regNumber.trim(),
-            ownership: holdsShares ? pct : 0,
-            shareholder: company || nested ? false : v.shareholder,
-            control: showControl ? v.control : [],
-            controlOther: showControl && v.control.includes("other") ? v.controlOther.trim() : "",
-          });
-        }}
-      >
-        {company ? (
-          <>
-            <p className="-mt-2 text-[13px] leading-[19px] font-medium text-fg-2">
-              A company that holds shares in your business. After adding it, add the people who own it.
-            </p>
-            <ForenInput label="Company name" value={v.firstName} onChange={(e) => upd({ firstName: e.target.value })} error={show("firstName")} autoComplete="off" />
-            <div className="grid gap-3 sm:grid-cols-2">
-              <ForenInput label="Registration number" value={v.regNumber} onChange={(e) => upd({ regNumber: e.target.value })} error={show("regNumber")} />
-              <CountrySelect id="sh-reg-country" label="Country of registration" value={v.regCountry} onChange={(c) => upd({ regCountry: c })} error={show("regCountry")} />
-            </div>
-          </>
-        ) : (
-          <>
-            {nested && (
-              <p className="-mt-2 text-[13px] leading-[19px] font-medium text-fg-2">
-                {fullName(parent!)} owns {parent!.ownership}% of your business. Add each person who owns or controls it.
-              </p>
-            )}
-            <div className="grid grid-cols-2 gap-3">
-              <ForenInput label="First name" value={v.firstName} onChange={(e) => upd({ firstName: e.target.value })} error={show("firstName")} autoComplete="off" />
-              <ForenInput label="Last name" value={v.lastName} onChange={(e) => upd({ lastName: e.target.value })} error={show("lastName")} autoComplete="off" />
-            </div>
-            <ForenInput
-              label="Email address"
-              type="email"
-              value={v.email}
-              onChange={(e) => upd({ email: e.target.value })}
-              error={show("email")}
-              description="Use an inbox they check. We’ll send their verification link here."
-              autoComplete="off"
-            />
-            <ForenInput
-              label={nested ? `Role at ${fullName(parent!)}` : "Position"}
-              placeholder={nested ? "e.g. Owner" : "e.g. CFO"}
-              value={v.position}
-              onChange={(e) => upd({ position: e.target.value })}
-              error={show("position")}
-            />
-            <div className="grid gap-3 sm:grid-cols-2">
-              <ForenInput label="Date of birth" type="date" max={new Date().toISOString().slice(0, 10)} value={v.dob} onChange={(e) => upd({ dob: e.target.value })} error={show("dob")} />
-              <CountrySelect id="sh-nationality" label="Nationality" value={v.nationality} onChange={(c) => upd({ nationality: c })} error={show("nationality")} />
-            </div>
-            <p className="-mt-3 text-[12px] leading-[18px] font-medium text-fg-3">As shown on their ID. Their ID check confirms these.</p>
-          </>
-        )}
-
-        {company || nested ? (
-          <ForenInput
-            label={nested ? `Share of ${fullName(parent!)}` : "Shareholding in your business"}
-            inputMode="decimal"
-            value={v.ownershipText}
-            onChange={(e) => upd({ ownershipText: e.target.value.replace(/[^\d.]/g, "") })}
-            error={show("ownership")}
-            description={nested && pct > 0 ? `That’s ${effective}% of your business.` : undefined}
-            trailingIcon={<span className="text-[14px] font-medium text-fg-3">%</span>}
-          />
-        ) : (
-          <fieldset className="flex flex-col gap-3" aria-describedby={show("role") ? "role-error" : undefined}>
-            <legend className="sr-only">Their role</legend>
-            <ForenCheckbox
-              checked={v.director}
-              onCheckedChange={(c) => upd({ director: c === true })}
-              label="A director"
-              description="An executive with legal authority to act for the company."
-            />
-            <ForenCheckbox
-              checked={v.shareholder}
-              onCheckedChange={(c) => upd({ shareholder: c === true, control: c === true && !v.control.length ? ["shares"] : v.control })}
-              label="A shareholder"
-              description={`Owns shares. Everyone with ${threshold}% or more must be listed.`}
-            />
-            {v.shareholder && (
-              <div className="pl-8">
-                <ForenInput
-                  label="Shareholding percentage"
-                  inputMode="decimal"
-                  value={v.ownershipText}
-                  onChange={(e) => upd({ ownershipText: e.target.value.replace(/[^\d.]/g, "") })}
-                  error={show("ownership")}
-                  trailingIcon={<span className="text-[14px] font-medium text-fg-3">%</span>}
-                />
-              </div>
-            )}
-            <ForenCheckbox
-              checked={v.signatory}
-              onCheckedChange={(c) => upd({ signatory: c === true })}
-              label="An authorised signatory"
-              description="Can sign documents and approve payments for the business."
-            />
-            <ForenCheckbox
-              checked={v.controller}
-              onCheckedChange={(c) => upd({ controller: c === true })}
-              label="Has significant control"
-              description={`Controls the business without owning ${threshold}% or more, e.g. the CEO or managing director.`}
-            />
-            {show("role") && (
-              <p id="role-error" role="alert" className="text-[12px] leading-[18px] font-medium text-error">
-                {errors.role}
-              </p>
-            )}
-          </fieldset>
-        )}
-
-        {showControl && (
-          <fieldset className="flex flex-col gap-3 rounded-[16px] border border-line p-4" aria-describedby={show("control") ? "control-error" : undefined}>
-            <legend className="px-1 text-[14px] leading-[21px] font-medium text-fg">
-              Nature of control{!needsControl && <span className="text-fg-3"> (optional)</span>}
-            </legend>
-            <p className="-mt-1 text-[12px] leading-[18px] font-medium text-fg-3">How they own or control {nested ? "it" : "the business"}. Tick all that apply.</p>
-            {CONTROL_TYPES.map((t) => (
-              <ForenCheckbox key={t.id} checked={v.control.includes(t.id)} onCheckedChange={(c) => toggleControl(t.id, c === true)} label={t.label} />
-            ))}
-            {v.control.includes("other") && (
-              <ForenInput label="Describe their control" value={v.controlOther} onChange={(e) => upd({ controlOther: e.target.value })} placeholder="e.g. Veto over major decisions" />
-            )}
-            {show("control") && (
-              <p id="control-error" role="alert" className="text-[12px] leading-[18px] font-medium text-error">
-                {errors.control}
-              </p>
-            )}
-          </fieldset>
-        )}
-
-        <div className="mt-1 grid grid-cols-2 gap-3 border-t border-line pt-5">
-          <ForenButton type="button" variant="outline" size="sm" onClick={onClose}>
-            Cancel
-          </ForenButton>
-          <ForenButton type="submit" size="sm">
-            {person ? "Save changes" : company ? "Add company" : "Add person"}
-          </ForenButton>
-        </div>
-      </form>
-    </Modal>
-  );
+/** Figma dialog titles are Megafield 20/30; the shared Modal title is Inter, so set it here. */
+function DialogTitle({ children }: { children: React.ReactNode }) {
+  return <span className="font-display text-[20px] leading-[30px] font-semibold tracking-[-0.015em] [font-synthesis:none]">{children}</span>;
 }
 
 /**
@@ -773,15 +541,16 @@ function DeclarationDialog({
     readOnly && s.declaration
       ? s.declaration
       : { name: `${s.firstName} ${s.lastName}`.trim(), email: s.email, position: s.position, phone: s.phone, confirmedAt: new Date().toISOString() };
-  const personLine = (p: Stakeholder) => [formatDate(p.dob), nationalityName(p.nationality), controlLabel(p.control, p.controlOther)].filter(Boolean).join(" · ");
+  const personLine = (p: Stakeholder) =>
+    [nationalityName(p.nationality), p.kraPin && `KRA PIN ${p.kraPin}`, controlLabel(p.control, p.controlOther)].filter(Boolean).join(" · ");
 
   return (
     <Modal
       open
       onOpenChange={(o) => !o && onClose()}
-      title="Director and UBO declaration"
+      title={<DialogTitle>Director and UBO declaration</DialogTitle>}
       description={readOnly ? undefined : "We filled this in from your details. Check it, then confirm it on behalf of the business."}
-      className="sm:max-w-[560px]"
+      className="sm:max-w-[560px] sm:rounded-[32px]"
     >
       <div className="flex flex-col gap-6">
         <DeclSection title="Company information">
@@ -865,13 +634,13 @@ function DeclarationDialog({
                 </p>
               )}
             </div>
-            <div className="grid grid-cols-2 gap-3 border-t border-line pt-5">
-              <ForenButton type="button" variant="outline" size="sm" onClick={onClose}>
+            <div className="-mx-6 grid grid-cols-2 gap-3 border-t border-line px-6 pt-4">
+              <ForenButton type="button" variant="outline" size="md" className="text-fg-2" onClick={onClose}>
                 Back to edit
               </ForenButton>
               <ForenButton
                 type="button"
-                size="sm"
+                size="md"
                 onClick={() => {
                   setTried(true);
                   if (agreed) onConfirm();
@@ -898,45 +667,48 @@ function DeclSection({ title, children }: { title: string; children: React.React
 
 function DeclRow({ primary, secondary }: { primary: string; secondary: string }) {
   return (
-    <div className="rounded-[12px] border border-line px-3 py-2.5">
+    <div className="rounded-[16px] border-[0.7px] border-line px-3 py-2.5">
       <p className="text-[13px] leading-[19px] font-semibold text-fg">{primary}</p>
       {secondary && <p className="text-[12px] leading-[18px] font-medium break-words text-fg-2">{secondary}</p>}
     </div>
   );
 }
 
+/** Figma "Email sent": 529px dialog, 150px envelope, Megafield title, stakeholder cards and a full-width Okay. */
 export function SentDialog({ open, people, onDone }: { open: boolean; people: Stakeholder[]; onDone: () => void }) {
   return (
     <Modal
       open={open}
       onOpenChange={(o) => !o && onDone()}
       title={
-        <span className="flex flex-col items-center gap-3 pl-10 text-center">
-          <Image src={asset("/onboarding/envelope.png")} alt="" width={104} height={104} />
-          <span className="font-display text-[22px] leading-[30px] [font-synthesis:none]">Verification emails sent</span>
+        <span className="flex flex-col items-center gap-6 pl-10 text-center">
+          <Image src={asset("/onboarding/envelope.png")} alt="" width={150} height={150} />
+          <DialogTitle>Verification emails sent</DialogTitle>
         </span>
       }
-      className="sm:max-w-[460px]"
+      className="sm:max-w-[529px] sm:rounded-[32px] sm:px-4"
     >
-      <p className="-mt-3 mb-5 text-center text-[13px] leading-[19px] font-medium text-fg-2">
-        We’ve emailed everyone. You can also copy their links to share privately.
+      <p className="mx-auto -mt-3 mb-8 max-w-[393px] text-center text-[14px] leading-[21px] font-medium tracking-[0.01em] text-fg-2">
+        We’ve emailed all stakeholders. You can also copy their verification links to share privately.
       </p>
       <GroupLabel>Stakeholders ({people.length})</GroupLabel>
-      <ul className="mb-6 flex flex-col gap-2">
+      <ul className="mb-8 flex flex-col gap-4">
         {people.map((p) => (
-          <li key={p.id} className="flex items-center gap-3 rounded-[14px] border border-line px-3 py-2.5">
-            <PersonAvatar person={p} size={32} />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] leading-[19px] font-semibold text-fg">{fullName(p)}</p>
-              <p className="text-[12px] leading-[18px] font-medium text-fg-2">{roleLine(p)}</p>
+          <li key={p.id} className="flex items-center gap-3 rounded-[24px] border-[0.7px] border-line px-3 py-4">
+            <PersonAvatar person={p} />
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
+              <p className="truncate text-[14px] leading-[21px] font-semibold tracking-[0.0125em] text-fg">{fullName(p)}</p>
+              <p className="text-[12px] leading-[18px] font-medium tracking-[0.01em] text-fg-2">{roleLine(p)}</p>
             </div>
             <CopyLink person={p} />
           </li>
         ))}
       </ul>
-      <ForenButton size="md" className="w-full" onClick={onDone}>
-        Done
-      </ForenButton>
+      <div className="-mx-4 border-t border-line px-4 pt-4">
+        <ForenButton size="md" className="w-full" onClick={onDone}>
+          Okay
+        </ForenButton>
+      </div>
     </Modal>
   );
 }
@@ -946,7 +718,7 @@ export function CopyLink({ person }: { person: Stakeholder }) {
     <ForenButton
       variant="outline"
       size="xxs"
-      className="shrink-0"
+      className={cn("shrink-0", rowButtonCls)}
       onClick={async () => {
         try {
           await navigator.clipboard.writeText(verificationLink(person));

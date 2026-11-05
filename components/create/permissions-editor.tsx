@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { RiAddLine, RiCheckLine, RiCloseLine, RiInformationLine, RiLockLine, RiShieldLine, RiStore2Line } from "@remixicon/react";
+import { CheckBoldIcon, InfoIcon, LockIcon, PlusIcon, ShieldIcon, StorefrontIcon, XIcon } from "@/components/icons";
 import { ForenButton } from "@/components/ui/foren-button";
 import { ForenSearch } from "@/components/ui/foren-search";
 import { ForenTag } from "@/components/ui/foren-tag";
@@ -87,7 +87,7 @@ export function PermissionsEditor({ value, onChange, error }: { value: Permissio
 
       <div className="rounded-[16px] border border-line p-4">
         <div className="flex items-center gap-2 text-[14px] font-medium text-fg">
-          <RiShieldLine className="size-[18px] text-fg-2" aria-hidden />
+          <ShieldIcon className="size-[18px] text-fg-2" aria-hidden />
           Blocked categories
         </div>
         <p className="mt-1 mb-3 text-[13px] text-fg-2">Foren suggests blocking these on every card. They apply in every mode.</p>
@@ -105,7 +105,7 @@ export function PermissionsEditor({ value, onChange, error }: { value: Permissio
                       className="grid size-6 place-items-center rounded-full outline-none hover:bg-[var(--color-foren-bg-error-subtle-hover)] focus-visible:ring-2 focus-visible:ring-focus"
                       aria-label={`Remove protection: ${CATEGORY_LABEL[c]}`}
                     >
-                      <RiCloseLine className="size-3.5" aria-hidden />
+                      <XIcon className="size-3.5" aria-hidden />
                     </button>
                   </span>
                 ) : (
@@ -114,7 +114,7 @@ export function PermissionsEditor({ value, onChange, error }: { value: Permissio
                     onClick={() => set({ blockedCategories: [...value.blockedCategories, c] })}
                     className="inline-flex h-8 items-center gap-1 rounded-full border border-dashed border-line px-3 text-[12px] font-semibold text-fg-2 outline-none hover:bg-subtle focus-visible:ring-2 focus-visible:ring-focus"
                   >
-                    <RiAddLine className="size-3.5" aria-hidden />
+                    <PlusIcon className="size-3.5" aria-hidden />
                     Block {CATEGORY_LABEL[c]} again
                   </button>
                 )}
@@ -187,7 +187,7 @@ function MerchantPicker({ selected, onAdd, onRemove, placeholder, tone = "allow"
                 <MerchantLogo merchant={m} size={26} />
                 {tone === "block" ? "Blocked · " : ""}
                 {m?.name}
-                <ForenButton type="button" variant="ghost" size="xxs" className="h-7 px-1.5" aria-label={`Remove ${m?.name}`} onClick={() => onRemove(id)} leadingIcon={<RiCloseLine />} />
+                <ForenButton type="button" variant="ghost" size="xxs" className="h-7 px-1.5" aria-label={`Remove ${m?.name}`} onClick={() => onRemove(id)} leadingIcon={<XIcon />} />
               </li>
             );
           })}
@@ -251,7 +251,7 @@ export function MerchantScope({ value, onChange }: { value: "one" | "many"; onCh
                   {checked && <span className="size-2 rounded-full bg-white" />}
                 </span>
                 <span className="flex items-center gap-1.5 text-[14px] font-semibold text-fg">
-                  {o.key === "one" ? <RiLockLine className="size-4 text-fg-2" aria-hidden /> : <RiStore2Line className="size-4 text-fg-2" aria-hidden />}
+                  {o.key === "one" ? <LockIcon className="size-4 text-fg-2" aria-hidden /> : <StorefrontIcon className="size-4 text-fg-2" aria-hidden />}
                   {o.title}
                 </span>
               </span>
@@ -260,12 +260,12 @@ export function MerchantScope({ value, onChange }: { value: "one" | "many"; onCh
               <ul className="mt-2.5 space-y-1 border-t border-line pt-2.5 text-[12px] leading-[17px]">
                 {o.pros.map((p) => (
                   <li key={p} className="flex gap-1.5 text-fg-2">
-                    <RiCheckLine className="mt-px size-3.5 shrink-0 text-success" aria-hidden />
+                    <CheckBoldIcon className="mt-px size-3.5 shrink-0 text-success" aria-hidden />
                     {p}
                   </li>
                 ))}
                 <li className="flex gap-1.5 text-fg-2">
-                  <RiInformationLine className="mt-px size-3.5 shrink-0 text-fg-3" aria-hidden />
+                  <InfoIcon className="mt-px size-3.5 shrink-0 text-fg-3" aria-hidden />
                   {o.con}
                 </li>
               </ul>

@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import Link from "next/link";
-import { RiArrowLeftLine, RiArrowRightLine, RiWhatsappLine } from "@remixicon/react";
+import { ArrowLeftIcon, ArrowRightIcon, WhatsappLogoIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { PAY_IN, RECEIVE_IN, defaultDialIso, whatsappLink } from "./data";
 import { CurrencyPill, FieldLabel, Flag, GlassCard, Intro, Panel, PhoneField, StepList, inputCls, ink, linkBtn, muted, primaryBtn, validPhone } from "./shared";
@@ -66,7 +66,7 @@ export function QuotePanel() {
                 <Flag code={to} size={56} className="ring-4 ring-[#f3f3f3]" />
               </div>
               <p className={cn("mt-4 inline-flex items-center gap-2 text-[22px] font-semibold tracking-[-0.3px]", ink)}>
-                {from} <RiArrowRightLine className="size-5 text-[#95908b]" aria-label="to" /> {to}
+                {from} <ArrowRightIcon className="size-5 text-[#95908b]" aria-label="to" /> {to}
               </p>
               <p className={cn("mt-1 text-[14px]", muted)}>
                 You pay in {from}. Your supplier gets {to}.
@@ -97,10 +97,10 @@ export function QuotePanel() {
             </Panel>
             <div className="mt-6 flex flex-wrap items-center justify-between gap-4 px-2">
               <button type="button" onClick={() => go("route")} className={cn("inline-flex items-center gap-1", linkBtn)}>
-                <RiArrowLeftLine className="size-4" aria-hidden /> Back
+                <ArrowLeftIcon className="size-4" aria-hidden /> Back
               </button>
               <button type="submit" className={primaryBtn}>
-                <RiWhatsappLine className="size-5" aria-hidden /> Continue on WhatsApp
+                <WhatsappLogoIcon className="size-5" aria-hidden /> Continue on WhatsApp
               </button>
             </div>
           </form>
@@ -109,7 +109,7 @@ export function QuotePanel() {
         {step === "sent" && (
           <div>
             <Panel className="flex flex-col items-center px-6 py-10 text-center">
-              <RiWhatsappLine className="size-10 text-[#1da851]" aria-hidden />
+              <WhatsappLogoIcon className="size-10 text-[#1da851]" aria-hidden />
               <h3 ref={headingRef} tabIndex={-1} className={cn("mt-4 text-[22px] font-semibold tracking-[-0.3px] outline-none", ink)}>
                 Check WhatsApp
               </h3>

@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { RiBankCardLine, RiForbidLine, RiNotification3Line, RiSearchEyeLine } from "@remixicon/react";
+import { BellIcon, BinocularsIcon, CreditCardIcon, ProhibitIcon } from "@/components/icons";
 import { toast } from "sonner";
 import { ForenBadge } from "@/components/ui/foren-badge";
 import { ForenButton } from "@/components/ui/foren-button";
@@ -142,7 +142,7 @@ export function SubscriptionDetail({ sub, card, status, panel }: { sub: Subscrip
         <section>
           <SectionTitle className="mb-2">
             <span className="inline-flex items-center gap-2">
-              <RiNotification3Line className="size-[18px] text-fg-2" aria-hidden /> Reminders
+              <BellIcon className="size-[18px] text-fg-2" aria-hidden /> Reminders
             </span>
           </SectionTitle>
           <div className="space-y-3 rounded-[16px] bg-subtle p-4">
@@ -174,14 +174,14 @@ export function SubscriptionDetail({ sub, card, status, panel }: { sub: Subscrip
           <SectionTitle className="mb-1">Manage</SectionTitle>
           {!sub.blocked ? (
             <ActionRow
-              icon={<RiForbidLine />}
+              icon={<ProhibitIcon />}
               title="Block merchant on this card"
               body="Declines future charges from this merchant on this card only."
               action={<ForenButton size="xs" variant="outline" destructive onClick={() => setConfirm("block")}>Block</ForenButton>}
             />
           ) : (
             <ActionRow
-              icon={<RiForbidLine />}
+              icon={<ProhibitIcon />}
               title={sub.allowNextAttempt ? "Next attempt will be allowed" : "Blocked on this card"}
               body={sub.allowNextAttempt ? "The next charge goes through once, then the block applies again." : "You can unblock it, or let only the next charge through."}
               action={
@@ -200,14 +200,14 @@ export function SubscriptionDetail({ sub, card, status, panel }: { sub: Subscrip
           )}
           {!sub.movingToCardId && !card.lockedMerchantId && !sub.blocked && (
             <ActionRow
-              icon={<RiBankCardLine />}
+              icon={<CreditCardIcon />}
               title="Give it its own card"
               body={`Creates a card locked to ${m.name}, so you can manage it without affecting ${card.nickname}.`}
               action={<ForenButton size="xs" variant="outline" onClick={() => setConfirm("own")}>Create card</ForenButton>}
             />
           )}
           <ActionRow
-            icon={<RiSearchEyeLine />}
+            icon={<BinocularsIcon />}
             title="Check compatibility"
             body="See whether this merchant is likely to accept a card."
             action={<LinkButton size="xs" variant="outline" href={`/cards/check-merchant?card=${sub.movingToCardId ?? card.id}&merchant=${m.id}`}>Check</LinkButton>}

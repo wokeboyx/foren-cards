@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { RiCheckboxCircleFill, RiErrorWarningFill, RiInformationFill } from "@remixicon/react";
+import { CheckCircleFillIcon, InfoFillIcon, WarningCircleFillIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 /** Multi-line note (Figma "Why we ask this" / review notes). The DS Info note is single-line, so it can't hold these. */
@@ -15,7 +15,7 @@ export function Note({
   children: React.ReactNode;
   className?: string;
 }) {
-  const Icon = intent === "success" ? RiCheckboxCircleFill : intent === "info" ? RiInformationFill : RiErrorWarningFill;
+  const Icon = intent === "success" ? CheckCircleFillIcon : intent === "info" ? InfoFillIcon : WarningCircleFillIcon;
   return (
     <div
       role={intent === "error" ? "alert" : "status"}
@@ -78,13 +78,13 @@ export function RadioCard({
   );
 }
 
-/** Two-column label/value grid used by the registry card and the review page. */
+/** Two-column label/value grid on the review page (Figma "Review Entry": 8px columns, 24px rows). */
 export function DetailGrid({ items }: { items: { label: string; value: React.ReactNode; wide?: boolean }[] }) {
   return (
-    <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
+    <dl className="grid grid-cols-1 gap-x-2 gap-y-6 tracking-[0.01em] sm:grid-cols-2">
       {items.map((it) => (
         <div key={it.label} className={cn("flex min-w-0 flex-col gap-1", it.wide && "sm:col-span-2")}>
-          <dt className="text-[12px] leading-[18px] font-medium text-fg-3">{it.label}</dt>
+          <dt className="text-[12px] leading-[18px] font-medium text-fg-2">{it.label}</dt>
           <dd className="text-[14px] leading-[21px] font-medium break-words text-fg">{it.value || "—"}</dd>
         </div>
       ))}
